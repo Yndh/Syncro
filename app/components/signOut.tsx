@@ -3,9 +3,8 @@ import { signOut } from "@/auth";
 const SignOutButton = () => {
   return (
     <form
-      action={async () => {
-        "use server";
-        await signOut();
+      action={() => {
+        signOut();
       }}
     >
       <button type="submit">Sign Out</button>

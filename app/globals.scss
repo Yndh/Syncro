@@ -22,18 +22,126 @@ a {
   text-decoration: none;
 }
 
-main {
+.dashboard {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 100vh;
+  padding: 2rem;
 }
 
-header {
+.sidebar {
   display: flex;
-  align-items: center;
-  justify-content: space-around;
+  flex-direction: column;
+  width: 300px;
+  padding: 1rem;
+  margin-right: 2rem;
+  gap: 20px;
 
-  padding: 2rem 1rem;
+  .user {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    img {
+      height: 100%;
+      aspect-ratio: 1/1;
+      border-radius: 50%;
+    }
+
+    .userDetails {
+      display: flex;
+      flex-direction: column;
+
+      span {
+        font-size: 12px;
+        opacity: .7;
+      }
+    }
+  }
+
+  nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    svg {
+      width: 16px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+
+      user-select: none;
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      cursor: pointer;
+
+      p {
+        font-weight: bold;
+      }
+
+      svg {
+        transition: .3s;
+
+        &.closed {
+          rotate: -180deg;
+        }
+      }
+    }
+
+    ol {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 500px;
+
+      list-style-type: none;
+      transition: .3s;
+
+      &.hidden {
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
+        height: 0;
+      }
+
+      li {
+        display: flex;
+        flex-direction: row;
+        padding: 5px 10px;
+
+        border-radius: 5px;
+
+        transition: .3s;
+
+
+        &.active {
+          background: $accent-color-secondary;
+          color: $accent-color;
+        }
+
+        &:hover {
+          opacity: .7;
+        }
+
+        svg {
+          margin-right: 7px;
+        }
+      }
+    }
+  }
+}
+
+main {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 1rem;
+
+  border-radius: 15px;
+
+  background: $background-color-secondary;
 }
 
 button {
@@ -46,16 +154,24 @@ button {
   outline: none;
 }
 
-.user {
+.loginContainerr {
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 100vh;
+}
 
-  p {
-    margin-right: 10px;
-  }
+.loginFormContainer {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
 
-  img {
-    border-radius: 50%;
-    margin-right: 5px;
+  border-radius: 15px;
+  background: $background-color-secondary;
+
+  button {
+    margin-top: 15px;
+    width: 100%;
   }
 }
