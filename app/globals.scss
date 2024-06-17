@@ -1,0 +1,61 @@
+@import "variables.scss";
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  background: $background-color;
+  color: $font-color;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+
+  padding: 2rem 1rem;
+}
+
+button {
+  padding: .5rem 1rem;
+  background: $background-color-secondary;
+  color: inherit;
+
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+
+  p {
+    margin-right: 10px;
+  }
+
+  img {
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+}
