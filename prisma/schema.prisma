@@ -16,6 +16,12 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
+  projectsOwned      Project[]           @relation(name: "ProjectOwner")
+  projects           Project[]           @relation(name: "ProjectMembers")
+  projectInvitations ProjectInvitation[]
+  taskAssignments    TaskAssignment[]
+  notes              Notes[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -57,4 +63,86 @@ model VerificationToken {
   expires    DateTime
 
   @@id([identifier, token])
+}
+
+model Project {
+  id                 Int                 @id @default(autoincrement())
+  name               String
+  description        String?
+  status             ProjectStatus       @default(IN_PROGRESS)
+  owner              User                @relation(fields: [ownerId], references: [id], name: "ProjectOwner")
+  ownerId            String
+  Tasks              Task[]
+  Notes              Notes[]
+  projectInvitations ProjectInvitation[]
+  members            User[]              @relation(name: "ProjectMembers")
+  dueDate            DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model ProjectInvitation {
+  id          Int      @id @default(autoincrement())
+  email       String
+  project     Project  @relation(fields: [projectId], references: [id])
+  projectId   Int
+  invitedBy   User     @relation(fields: [invitedById], references: [id])
+  invitedById String
+  accepted    Boolean
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Task {
+  id          Int              @id @default(autoincrement())
+  title       String
+  description String?
+  project     Project          @relation(fields: [projectId], references: [id])
+  projectId   Int
+  priority    Priority         @default(MEDIUM)
+  dueTime     DateTime?
+  assignedTo  TaskAssignment[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model TaskAssignment {
+  assigmentId  Int    @id @default(autoincrement())
+  task         Task   @relation(fields: [taskId], references: [id])
+  taskId       Int
+  assignedTo   User   @relation(fields: [assignedToId], references: [id])
+  assignedToId String
+}
+
+model Notes {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  Project     Project  @relation(fields: [projectId], references: [id])
+  projectId   Int
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum ProjectStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  ON_HOLD
+}
+
+enum TaskStatus {
+  TO_DO
+  ON_GOING
+  REVIEWING
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }

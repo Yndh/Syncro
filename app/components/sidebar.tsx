@@ -23,6 +23,8 @@ const Sidebar = ({ session }: ISidebar) => {
 
   const pathname = usePathname();
 
+  console.log(pathname);
+
   const toggleNavigationVisibility = () => {
     setIsNavigationShown(!isNavigationShown);
   };
@@ -61,8 +63,8 @@ const Sidebar = ({ session }: ISidebar) => {
               <span>Dashboard</span>
             </Link>
           </li>
-          <li className={pathname == "/projects" ? "active" : ""}>
-            <Link href={"/projects"}>
+          <li className={pathname == "/app/projects" ? "active" : ""}>
+            <Link href={"app/projects"}>
               <FontAwesomeIcon icon={faDiagramProject} />
               <span>Projects</span>
             </Link>
