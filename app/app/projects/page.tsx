@@ -2,12 +2,36 @@
 
 import { faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+interface Project {
+  id: number;
+  name: string;
+  description?: string;
+}
 
 const Projects = () => {
   const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [projectsList, setProjectsList] = useState<Project[]>([]);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const descInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      fetch("/api/projects")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+
+          setProjectsList(data.projects);
+        });
+    };
+
+    fetchData();
+  }, []);
 
   const toggleCreating = () => {
     setIsCreating(!isCreating);
@@ -28,7 +52,7 @@ const Projects = () => {
 
     toggleCreating();
 
-    await fetch("/api/project", {
+    await fetch("/api/projects", {
       method: "POST",
       body: JSON.stringify({ name, description }),
     })
@@ -45,9 +69,17 @@ const Projects = () => {
 
   return (
     <>
-      <div className="card" onClick={toggleCreating}>
-        <FontAwesomeIcon icon={faAdd} />
-        <p>New Project</p>
+      <div className="projectsList">
+        {projectsList.map((project) => (
+          <div className="card">
+            <p>{project.name}</p>
+            <span>{project.description}</span>
+          </div>
+        ))}
+        <div className="card" onClick={toggleCreating}>
+          <FontAwesomeIcon icon={faAdd} />
+          <p>New Project</p>
+        </div>
       </div>
 
       {isCreating && (
@@ -69,7 +101,8 @@ const Projects = () => {
               ref={descInputRef}
             />
 
-            <button>Create Project</button>
+            <button type="submit">Create Project</button>
+            <button onClick={toggleCreating}>Close</button>
           </form>
         </div>
       )}
