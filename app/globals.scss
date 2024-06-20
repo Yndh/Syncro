@@ -232,3 +232,59 @@ form {
   display: flex;
   gap: 20px;
 }
+
+.projectNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 10px;
+  width: 50%;
+  margin-top: 20px;
+
+
+  .navElement {
+    display: flex;
+
+
+    label {
+      padding: .5rem 1rem;
+      border-radius: 5px;
+      background: $background-color;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+
+    input {
+      display: none;
+
+      &:checked~label {
+        background: $accent-color-secondary;
+        color: $accent-color;
+      }
+    }
+  }
+}
+
+.projectElementContainer {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.todoContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 20px;
+  width: 100%;
+}
+
+.col {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}

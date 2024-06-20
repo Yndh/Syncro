@@ -2,6 +2,7 @@
 
 import { faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 interface Project {
@@ -71,10 +72,12 @@ const Projects = () => {
     <>
       <div className="projectsList">
         {projectsList.map((project) => (
-          <div className="card">
-            <p>{project.name}</p>
-            <span>{project.description}</span>
-          </div>
+          <Link href={`/app/projects/${project.id}`}>
+            <div className="card">
+              <p>{project.name}</p>
+              <span>{project.description}</span>
+            </div>
+          </Link>
         ))}
         <div className="card" onClick={toggleCreating}>
           <FontAwesomeIcon icon={faAdd} />
