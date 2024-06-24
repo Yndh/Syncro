@@ -36,7 +36,7 @@ export async function mPOST(req: Request, res: NextApiResponse) {
     });
 
     return new NextResponse(JSON.stringify({ id: project.id }), {
-      status: 200,
+      status: 201,
     });
   } catch (e) {
     console.error("Error creating project:", e);

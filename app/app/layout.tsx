@@ -8,7 +8,7 @@ export default async function Home({
   children: React.ReactNode;
 }>) {
   const session = await auth();
-  if (!session) redirect("signIn");
+  if (!session) redirect("../signIn");
 
   return (
     <div className="dashboard">

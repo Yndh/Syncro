@@ -43,7 +43,11 @@ export async function mGET(req: Request, res: ResponseInterface) {
       include: {
         members: true,
         owner: true,
-        Tasks: true
+        Tasks: {
+          include: {
+            assignedTo: true,
+          },
+        },
       },
     });
 

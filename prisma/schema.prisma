@@ -19,7 +19,7 @@ model User {
   projectsOwned      Project[]           @relation(name: "ProjectOwner")
   projects           Project[]           @relation(name: "ProjectMembers")
   projectInvitations ProjectInvitation[]
-  taskAssignments    TaskAssignment[]
+  tasksAssigned      Task[]              @relation(name: "TaskAssignments")
   notes              Notes[]
 
   createdAt DateTime @default(now())
@@ -94,24 +94,18 @@ model ProjectInvitation {
 }
 
 model Task {
-  id          Int              @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   title       String
   description String?
-  project     Project          @relation(fields: [projectId], references: [id])
+  project     Project    @relation(fields: [projectId], references: [id])
   projectId   Int
-  priority    Priority         @default(MEDIUM)
+  priority    Priority   @default(MEDIUM)
+  taskStatus  TaskStatus @default(TO_DO)
   dueTime     DateTime?
-  assignedTo  TaskAssignment[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-}
-
-model TaskAssignment {
-  assigmentId  Int    @id @default(autoincrement())
-  task         Task   @relation(fields: [taskId], references: [id])
-  taskId       Int
-  assignedTo   User   @relation(fields: [assignedToId], references: [id])
-  assignedToId String
+  assignedTo  User[]     @relation(name: "TaskAssignments")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userId      String?
 }
 
 model Notes {

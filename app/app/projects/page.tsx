@@ -19,16 +19,20 @@ const Projects = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      fetch("/api/projects")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            alert(data.error);
-            return;
-          }
+      try {
+        await fetch("/api/projects")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.error) {
+              alert(data.error);
+              return;
+            }
 
-          setProjectsList(data.projects);
-        });
+            setProjectsList(data.projects);
+          });
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      }
     };
 
     fetchData();
@@ -42,12 +46,14 @@ const Projects = () => {
     e.preventDefault();
 
     const name = nameInputRef.current?.value as string;
-    if (name.length < 1) {
+    if (name.trim().length < 1) {
+      alert("Name is empty");
       return;
     }
 
     const description = descInputRef.current?.value as string;
-    if (description.length < 1) {
+    if (description.trim().length < 1) {
+      alert("Description is empty");
       return;
     }
 

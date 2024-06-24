@@ -27,15 +27,29 @@ interface Project {
   status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "ON_HOLD";
   owner: User;
   ownerId: string;
-  Tasks: any[];
-  members: any[];
+  Tasks: Task[];
+  members: User[];
   dueDate: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
+interface Task {
+  id: number;
+  title: string;
+  description?: string;
+  dueTime?: Date;
+  projectId: number;
+  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  taskStatus: "TO_DO" | "ON_GOING" | "REVIEWING" | "DONE";
+  assignedTo: User[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 const Project = ({ params }: ProjectParams) => {
   const [project, setProject] = useState<Project | undefined>();
+  const [isOwner, setIsOwner] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<
     "tasks" | "notes" | "members" | "settings"
   >("tasks");
@@ -45,15 +59,19 @@ const Project = ({ params }: ProjectParams) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(`/api/project/${params.id}`);
-        const data = await res.json();
+        await fetch(`/api/project/${params.id}`)
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
 
-        if (data.error) {
-          alert(data.error);
-          router.push("/app/projects");
-        } else {
-          setProject(data.project);
-        }
+            if (data.error) {
+              alert(data.error);
+              router.push("/app/projects");
+            } else {
+              setProject(data.project);
+              setIsOwner(data.owner);
+            }
+          });
       } catch (error) {
         console.error("Error fetching project:", error);
       }
@@ -65,6 +83,9 @@ const Project = ({ params }: ProjectParams) => {
   const handleNavChange = (tab: "tasks" | "notes" | "members" | "settings") => {
     setSelectedTab(tab);
   };
+
+  console.log("===PROJECT===");
+  console.log(project);
 
   return (
     <>
@@ -117,7 +138,15 @@ const Project = ({ params }: ProjectParams) => {
       </div>
 
       <div className="projectElementContainer">
-        {selectedTab === "tasks" && <ToDo />}
+        {selectedTab === "tasks" && project && (
+          <ToDo
+            projectId={project?.id as number}
+            isOwner={isOwner}
+            owner={project?.owner}
+            members={project?.members}
+            tasks={project?.Tasks ? project?.Tasks : []}
+          />
+        )}
         {selectedTab === "notes" && <p>Notes</p>}
         {selectedTab === "members" && <p>Members</p>}
         {selectedTab === "settings" && <p>Settings</p>}

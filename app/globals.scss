@@ -158,7 +158,7 @@ button {
 }
 
 input {
-  padding: .5rem 2rem;
+  padding: .5rem;
 }
 
 .loginContainerr {
@@ -211,6 +211,7 @@ form {
   gap: 5px;
   margin-top: 10px;
   padding: 2rem;
+  width: 400px;
 
   background: $background-color;
 }
@@ -226,6 +227,32 @@ form {
   height: 100vh;
 
   backdrop-filter: blur(2px);
+}
+
+.membersList {
+  display: flex;
+  align-items: center;
+
+  overflow-x: scroll;
+
+  img {
+    width: 40px;
+    height: 40px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    border: 2px solid transparent;
+
+    cursor: pointer;
+    transition: .3s;
+  }
+
+  input {
+    display: none;
+  }
+
+  input:checked~label img {
+    border-color: $accent-color;
+  }
 }
 
 .projectsList {
@@ -273,6 +300,7 @@ form {
 }
 
 .todoContainer {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
@@ -287,4 +315,71 @@ form {
   padding: 20px;
   width: 100%;
   box-sizing: border-box;
+}
+
+.newTaskButton {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  aspect-ratio: 1/1;
+  scale: 1.3;
+
+  svg {
+    font-size: 22px;
+  }
+}
+
+.taskCard {
+  position: relative;
+  display: flex;
+  height: 150px;
+  gap: 5px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+
+  background: $background-color;
+
+  .indicator {
+    width: 5px !important;
+    height: 100%;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+
+    &.LOW {
+      background: $priorityLow;
+    }
+
+    &.MEDIUM {
+      background: $priorityMedium;
+    }
+
+    &.HIGH {
+      background: $priorityHigh;
+    }
+
+    &.URGENT {
+      background: $priorityUrgent;
+    }
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+
+    p {
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    span {
+      opacity: .7;
+    }
+  }
 }
