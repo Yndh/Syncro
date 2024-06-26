@@ -9,6 +9,26 @@ interface reqBody {
   description?: string;
   assignedMembers: string[]; // Ids
   dueTime?: Date;
+  taskStatus?: "TO_DO" | "ON_GOING" | "REVIEWING" | "DONE";
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+}
+
+interface CreateTaskReqBody {
+  title: string;
+  description?: string;
+  assignedMembers: string[]; // Ids
+  dueTime?: Date;
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+}
+
+interface UpdateTaskReqBody {
+  id: number;
+  title?: string;
+  description?: string;
+  assignedMembers?: string[];
+  dueTime?: Date;
+  taskStatus?: "TO_DO" | "ON_GOING" | "REVIEWING" | "DONE";
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 }
 
 interface ResponseInterface<T = any> extends NextApiResponse<T> {
@@ -69,24 +89,33 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const body: reqBody = await req.json();
-  if (body.title.trim().length < 1 || body.assignedMembers.length < 1) {
-    return new NextResponse(JSON.stringify({ error: "Invalid parameters" }), {
-      status: 400,
-    });
-  }
+  const body: CreateTaskReqBody | UpdateTaskReqBody = await req.json();
 
   try {
-    if (body.id) {
+    if ("id" in body) {
+      const existingTask = await prisma.task.findUnique({
+        where: { id: body.id },
+        include: { assignedTo: true },
+      });
+
+      if (!existingTask) {
+        return new NextResponse(JSON.stringify({ error: "Task not found." }), {
+          status: 404,
+        });
+      }
+
       const updatedTask = await prisma.task.update({
         where: { id: body.id },
         data: {
-          title: body.title.trim(),
+          title: body.title?.trim(),
           description: body.description,
           dueTime: body.dueTime,
-          assignedTo: {
-            set: body.assignedMembers.map((memberId) => ({ id: memberId })),
-          },
+          taskStatus: body.taskStatus,
+          assignedTo: body.assignedMembers?.length
+            ? {
+                set: body.assignedMembers.map((memberId) => ({ id: memberId })),
+              }
+            : undefined,
         },
         include: {
           assignedTo: true,

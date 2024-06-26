@@ -3,6 +3,9 @@
 import { faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { TaskColumn } from "./taskColumn";
 
 interface ToDoProps {
   projectId: number;
@@ -111,68 +114,68 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
     });
   };
 
+  const moveTask = async (taskId: number, newStatus: Task["taskStatus"]) => {
+    const prevTasksList = [...tasksList];
+
+    setTasksList((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === taskId ? { ...task, taskStatus: newStatus } : task
+      )
+    );
+
+    await fetch(`/api/project/${projectId}/tasks`, {
+      method: "POST",
+      body: JSON.stringify({
+        id: taskId,
+        taskStatus: newStatus,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          setTasksList(prevTasksList);
+          alert(data.error);
+          return;
+        }
+
+        if (data.task) {
+          setTasksList((prevTasks) =>
+            prevTasks.map((task) =>
+              task.id === data.task.id
+                ? { ...task, taskStatus: data.task.taskStatus }
+                : task
+            )
+          );
+        }
+      });
+  };
+
   console.log("===TasksList===");
   console.log(tasksList);
 
   return (
-    <>
+    <DndProvider backend={HTML5Backend}>
       <div className="todoContainer">
-        <div className="col">
-          <h1>TO DO</h1>
-          {tasksList
-            .filter((task) => task.taskStatus === "TO_DO")
-            .map((task) => (
-              <div key={task.id} className={`taskCard ${task.priority}`}>
-                <div className={`indicator ${task.priority}`}></div>
-                <div className="content">
-                  <p>{task.title}</p>
-                  <span>{task.description}</span>
-                </div>
-              </div>
-            ))}
-        </div>
-        <div className="col">
-          <h1>ON GOING</h1>
-          {tasksList
-            .filter((task) => task.taskStatus === "ON_GOING")
-            .map((task) => (
-              <div key={task.id} className={`taskCard ${task.priority}`}>
-                <div className={`indicator ${task.priority}`}></div>
-                <div className="content">
-                  <p>{task.title}</p>
-                  <span>{task.description}</span>
-                </div>
-              </div>
-            ))}
-        </div>
-        <div className="col">
-          <h1>REVIEWING</h1>
-          {tasksList
-            .filter((task) => task.taskStatus === "REVIEWING")
-            .map((task) => (
-              <div key={task.id} className={`taskCard ${task.priority}`}>
-                <div className={`indicator ${task.priority}`}></div>
-                <div className="content">
-                  <p>{task.title}</p>
-                  <span>{task.description}</span>
-                </div>
-              </div>
-            ))}
-        </div>
-        <div className="col">
-          <h1>DONE</h1>
-          {tasksList
-            .filter((task) => task.taskStatus === "DONE")
-            .map((task) => (
-              <div key={task.id} className={`taskCard ${task.priority}`}>
-                <div className={`indicator ${task.priority}`}></div>
-                <div className="content">
-                  <p>{task.title}</p>
-                  <span>{task.description}</span>
-                </div>
-              </div>
-            ))}
-        </div>
+        <TaskColumn
+          status="TO_DO"
+          tasks={tasksList.filter((task) => task.taskStatus === "TO_DO")}
+          moveTask={moveTask}
+        />
+        <TaskColumn
+          status="ON_GOING"
+          tasks={tasksList.filter((task) => task.taskStatus === "ON_GOING")}
+          moveTask={moveTask}
+        />
+        <TaskColumn
+          status="REVIEWING"
+          tasks={tasksList.filter((task) => task.taskStatus === "REVIEWING")}
+          moveTask={moveTask}
+        />
+        <TaskColumn
+          status="DONE"
+          tasks={tasksList.filter((task) => task.taskStatus === "DONE")}
+          moveTask={moveTask}
+        />
 
         {isOwner && (
           <button className="newTaskButton" onClick={toggleCreating}>
@@ -245,7 +248,7 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
           </form>
         </div>
       )}
-    </>
+    </DndProvider>
   );
 };
 

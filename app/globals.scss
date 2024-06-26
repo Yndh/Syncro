@@ -340,9 +340,10 @@ form {
   height: 150px;
   gap: 5px;
   border-radius: 10px;
-  margin-bottom: 10px;
+  margin-top: 10px;
 
   background: $background-color;
+  cursor: move;
 
   .indicator {
     width: 5px !important;
