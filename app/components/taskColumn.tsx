@@ -1,29 +1,7 @@
 import { useRef } from "react";
 import { useDrop } from "react-dnd";
 import { TaskCard } from "./taskCard";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  emailVerified: boolean | null;
-  image: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Task {
-  id: number;
-  title: string;
-  description?: string;
-  dueTime?: Date;
-  projectId: number;
-  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-  taskStatus: "TO_DO" | "ON_GOING" | "REVIEWING" | "DONE";
-  assignedTo: User[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { Task } from "../types/interfaces";
 
 interface DragItem {
   id: number;
@@ -49,11 +27,13 @@ export const TaskColumn = ({ status, tasks, moveTask }: TaskColumnProps) => {
   drop(divRef);
 
   return (
-    <div ref={divRef} className="col">
+    <div className="col" ref={divRef}>
       <h1>{status.replace("_", " ")}</h1>
-      {tasks.map((task) => (
-        <TaskCard key={task.id} task={task} moveTask={moveTask} />
-      ))}
+      <div className="cardsContainer">
+        {tasks.map((task) => (
+          <TaskCard key={task.id} task={task} moveTask={moveTask} />
+        ))}
+      </div>
     </div>
   );
 };

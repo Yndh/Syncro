@@ -64,7 +64,7 @@ const Sidebar = ({ session }: ISidebar) => {
             </Link>
           </li>
           <li className={pathname == "/app/projects" ? "active" : ""}>
-            <Link href={"app/projects"}>
+            <Link href={"/app/projects"}>
               <FontAwesomeIcon icon={faDiagramProject} />
               <span>Projects</span>
             </Link>

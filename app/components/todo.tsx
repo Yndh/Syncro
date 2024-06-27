@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TaskColumn } from "./taskColumn";
+import { Task, User } from "../types/interfaces";
 
 interface ToDoProps {
   projectId: number;
@@ -13,29 +14,6 @@ interface ToDoProps {
   owner: User | undefined;
   members: User[] | undefined;
   tasks: Task[];
-}
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  emailVerified: boolean | null;
-  image: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Task {
-  id: number;
-  title: string;
-  description?: string;
-  dueTime?: Date;
-  projectId: number;
-  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-  taskStatus: "TO_DO" | "ON_GOING" | "REVIEWING" | "DONE";
-  assignedTo: User[];
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
@@ -102,6 +80,7 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
 
   const toggleCreating = () => {
     setIsCreating(!isCreating);
+    setAssignedMembers([]);
   };
 
   const assignMember = (memberId: string) => {
@@ -149,10 +128,6 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
         }
       });
   };
-
-  console.log("===TasksList===");
-  console.log(tasksList);
-
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="todoContainer">

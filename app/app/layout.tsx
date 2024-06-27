@@ -1,6 +1,8 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Sidebar from "../components/sidebar";
+import ContextMenu from "../components/ContextMenu";
+import { ContextMenuProvider } from "../providers/ContextMenuProvider";
 
 export default async function Home({
   children,
@@ -13,7 +15,12 @@ export default async function Home({
   return (
     <div className="dashboard">
       <Sidebar session={session} />
-      <main>{children}</main>
+      <ContextMenuProvider>
+        <main>
+          <ContextMenu />
+          {children}
+        </main>
+      </ContextMenuProvider>
     </div>
   );
 }

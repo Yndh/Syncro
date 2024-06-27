@@ -28,13 +28,15 @@ export async function mGET(req: Request, res: NextApiResponse) {
       },
     });
 
+    console.log(projects);
+
     return new NextResponse(JSON.stringify({ projects: projects }), {
       status: 200,
     });
   } catch (e) {
     console.error("Error finding projects:", e);
     return new NextResponse(
-      JSON.stringify({ error: "Failed to create project" }),
+      JSON.stringify({ error: `Failed finding projects (${e})` }),
       {
         status: 500,
       }
