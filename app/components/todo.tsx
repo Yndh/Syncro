@@ -135,21 +135,29 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
           status="TO_DO"
           tasks={tasksList.filter((task) => task.taskStatus === "TO_DO")}
           moveTask={moveTask}
+          projectId={projectId}
+          setTasks={setTasksList}
         />
         <TaskColumn
           status="ON_GOING"
           tasks={tasksList.filter((task) => task.taskStatus === "ON_GOING")}
           moveTask={moveTask}
+          projectId={projectId}
+          setTasks={setTasksList}
         />
         <TaskColumn
           status="REVIEWING"
           tasks={tasksList.filter((task) => task.taskStatus === "REVIEWING")}
           moveTask={moveTask}
+          projectId={projectId}
+          setTasks={setTasksList}
         />
         <TaskColumn
           status="DONE"
           tasks={tasksList.filter((task) => task.taskStatus === "DONE")}
           moveTask={moveTask}
+          projectId={projectId}
+          setTasks={setTasksList}
         />
 
         {isOwner && (

@@ -9,6 +9,10 @@ const ContextMenu = () => {
 
   const { setContextMenu } = useContextMenu();
 
+  const handleClick = () => {
+    onClose();
+  };
+
   const handleClickOutside = (e: MouseEvent) => {
     if (
       !(
@@ -33,6 +37,7 @@ const ContextMenu = () => {
       className="contextMenu"
       style={{ left: x, top: y }}
       ref={contextMenuRef}
+      onClick={handleClick}
     >
       {content}
     </div>

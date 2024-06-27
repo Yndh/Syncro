@@ -7,10 +7,17 @@ import { useContextMenu } from "../providers/ContextMenuProvider";
 
 interface TaskCardProps {
   task: Task;
+  projectId: number;
   moveTask: (id: number, status: Task["taskStatus"]) => void;
+  handleDeleteTask: (taskId: number) => void;
 }
 
-export const TaskCard = ({ task, moveTask }: TaskCardProps) => {
+export const TaskCard = ({
+  task,
+  moveTask,
+  projectId,
+  handleDeleteTask,
+}: TaskCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [{ isDragging }, drag] = useDrag(
     () => ({
@@ -22,6 +29,7 @@ export const TaskCard = ({ task, moveTask }: TaskCardProps) => {
     }),
     [task.id]
   );
+  drag(cardRef);
   const { setContextMenu } = useContextMenu();
 
   const handleContextMenu = (
@@ -40,14 +48,14 @@ export const TaskCard = ({ task, moveTask }: TaskCardProps) => {
       content: (
         <ol className="contextMenuList">
           <li>Edit</li>
-          <li className="delete">Delete</li>
+          <li className="delete" onClick={() => handleDeleteTask(task.id)}>
+            Delete
+          </li>
         </ol>
       ),
       setContextMenu,
     });
   };
-
-  drag(cardRef);
 
   const displayAssignedMembers = (members: User[]) => {
     const MAX_NUM_OF_MEMBERS = 2;
