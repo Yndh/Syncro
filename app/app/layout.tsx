@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import Sidebar from "../components/sidebar";
 import ContextMenu from "../components/ContextMenu";
 import { ContextMenuProvider } from "../providers/ContextMenuProvider";
+import { ModalProvider } from "../providers/ModalProvider";
+import { Modal } from "../components/Modal";
 
 export default async function Home({
   children,
@@ -14,13 +16,16 @@ export default async function Home({
 
   return (
     <div className="dashboard">
-      <Sidebar session={session} />
-      <ContextMenuProvider>
-        <main>
-          <ContextMenu />
-          {children}
-        </main>
-      </ContextMenuProvider>
+      <ModalProvider>
+        <Sidebar session={session} />
+        <ContextMenuProvider>
+          <main>
+            <ContextMenu />
+            {children}
+          </main>
+        </ContextMenuProvider>
+        <Modal />
+      </ModalProvider>
     </div>
   );
 }

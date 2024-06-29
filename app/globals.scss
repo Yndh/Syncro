@@ -225,6 +225,14 @@ form {
   justify-content: center;
   width: 100%;
   height: 100vh;
+  transition: .3s;
+  pointer-events: none;
+  opacity: 0;
+
+  &.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
 
   backdrop-filter: blur(2px);
 }
@@ -252,6 +260,46 @@ form {
 
   input:checked~label img {
     border-color: $accent-color;
+  }
+}
+
+.prioritiesList {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  margin-bottom: 15px;
+
+  label {
+    padding: 5px 10px;
+    background: $background-color-secondary;
+    border: 1px solid $font-color;
+    border-radius: 5px;
+    color: $font-color;
+    transition: .3s;
+  }
+
+  input {
+    display: none;
+  }
+
+  input:checked~label {
+    border-color: transparent;
+  }
+
+  input#priorityLOW:checked~label {
+    background: $priorityLow;
+  }
+
+  input#priorityMEDIUM:checked~label {
+    background: $priorityMedium;
+  }
+
+  input#priorityHIGH:checked~label {
+    background: $priorityHigh;
+  }
+
+  input#priorityURGENT:checked~label {
+    background: $priorityUrgent;
   }
 }
 
@@ -423,7 +471,7 @@ form {
   border-radius: 5px;
   cursor: pointer;
 
-  .contextMenuList {
+  ol.contextMenuList {
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -431,17 +479,41 @@ form {
     list-style-type: none;
 
     li {
+      position: relative;
       padding: 5px 10px;
       transition: .3s;
 
       &:hover {
         background: $accent-color-secondary;
         color: $accent-color;
+
+        ol {
+          display: flex;
+        }
       }
 
       &.delete:hover {
         background: $priorityUrgent;
         color: $font-color;
+      }
+
+      svg {
+        font-size: 14px;
+      }
+
+      ol {
+        position: absolute;
+        left: 100%;
+        top: 0;
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+
+        background: $background-color-secondary;
+        border: 1px solid $font-color;
+        color: $font-color;
+        border-radius: 0 5px 5px 5px;
+        list-style-type: none;
       }
     }
   }

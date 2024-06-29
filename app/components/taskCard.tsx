@@ -4,6 +4,11 @@ import { useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
 import { Task, User } from "../types/interfaces";
 import { useContextMenu } from "../providers/ContextMenuProvider";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowRight,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface TaskCardProps {
   task: Task;
@@ -11,6 +16,13 @@ interface TaskCardProps {
   moveTask: (id: number, status: Task["taskStatus"]) => void;
   handleDeleteTask: (taskId: number) => void;
 }
+
+const taskStatuses: Task["taskStatus"][] = [
+  "TO_DO",
+  "ON_GOING",
+  "REVIEWING",
+  "DONE",
+];
 
 export const TaskCard = ({
   task,
@@ -37,8 +49,6 @@ export const TaskCard = ({
   ) => {
     e.preventDefault();
 
-    console.log(setContextMenu);
-
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
@@ -48,6 +58,16 @@ export const TaskCard = ({
       content: (
         <ol className="contextMenuList">
           <li>Edit</li>
+          <li>
+            Move <FontAwesomeIcon icon={faChevronRight} size="xs" />
+            <ol>
+              {taskStatuses.map((status) => (
+                <li onClick={() => moveTask(task.id, status)}>
+                  {status.replace("_", " ")}
+                </li>
+              ))}
+            </ol>
+          </li>
           <li className="delete" onClick={() => handleDeleteTask(task.id)}>
             Delete
           </li>

@@ -133,6 +133,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
           title: body.title.trim(),
           description: body.description?.trim(),
           dueTime: body.dueTime,
+          priority: body.priority,
           assignedTo: {
             connect: body.assignedMembers.map((memberId) => ({ id: memberId })),
           },

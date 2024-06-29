@@ -7,6 +7,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TaskColumn } from "./taskColumn";
 import { Task, User } from "../types/interfaces";
+import { useModal } from "../providers/ModalProvider";
 
 interface ToDoProps {
   projectId: number;
@@ -15,14 +16,19 @@ interface ToDoProps {
   members: User[] | undefined;
   tasks: Task[];
 }
+type Priority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+
+const priorities: Priority[] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 
 const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const [assignedMembers, setAssignedMembers] = useState<String[]>([]);
+  const [priority, setPriority] = useState<Priority>("MEDIUM");
   const [tasksList, setTasksList] = useState<Task[]>(tasks);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descInputRef = useRef<HTMLInputElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const { setModal } = useModal();
 
   const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -83,6 +89,100 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
     setAssignedMembers([]);
   };
 
+  const handleModal = () => {
+    setModal({
+      onClose: () => {
+        setModal(null);
+      },
+      content: (
+        <form onSubmit={submitForm}>
+          <label htmlFor="taskInput">Title</label>
+          <input
+            type="text"
+            id="taskInput"
+            placeholder="Task title"
+            ref={titleInputRef}
+          />
+
+          <label htmlFor="descInput">Description*</label>
+          <input
+            type="text"
+            id="descInput"
+            placeholder="Task Description"
+            ref={descInputRef}
+          />
+
+          <span>Assign To</span>
+          <div className="membersList">
+            {owner && (
+              <>
+                <input
+                  type="checkbox"
+                  className="member"
+                  name="todoAsign"
+                  id="ownerRadio"
+                  onChange={() => assignMember(owner.id)}
+                />
+                <label htmlFor="ownerRadio">
+                  <img src={owner.image} alt={owner.name} />
+                </label>
+              </>
+            )}
+            {members &&
+              members.map((member) => (
+                <div>
+                  <input
+                    type="checkbox"
+                    className="member"
+                    name="todoAsign"
+                    id={`radio${member.id}`}
+                    onChange={() => assignMember(member.id)}
+                  />
+                  <label htmlFor={`radio${member.id}`}>
+                    <img src={member.image} alt={member.name} />
+                  </label>
+                </div>
+              ))}
+          </div>
+
+          <label htmlFor="dueToDate">Due to*</label>
+          <input
+            type="datetime-local"
+            name=""
+            id="dueToDate"
+            ref={dateInputRef}
+          />
+
+          <label>Priority</label>
+          <div className="prioritiesList">
+            {priorities.map((currPriority) => (
+              <div key={currPriority}>
+                <input
+                  type="radio"
+                  name="setPriority"
+                  id={`priority${currPriority}`}
+                  onChange={() => changePriotiy(currPriority)}
+                  checked={priority === currPriority}
+                />
+                <label htmlFor={`priority${currPriority}`}>
+                  {currPriority}
+                </label>
+              </div>
+            ))}
+          </div>
+
+          <button type="submit">Create Task</button>
+          <button onClick={() => setModal(null)}>Close</button>
+        </form>
+      ),
+      setModal,
+    });
+  };
+  const changePriotiy = (newPriority: Priority) => {
+    setPriority(newPriority);
+    console.log(`new ${priority}`);
+  };
+
   const assignMember = (memberId: string) => {
     setAssignedMembers((members) => {
       if (members.includes(memberId)) {
@@ -91,6 +191,8 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
         return [...members, memberId];
       }
     });
+
+    console.log(assignedMembers);
   };
 
   const moveTask = async (taskId: number, newStatus: Task["taskStatus"]) => {
@@ -107,6 +209,7 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
       body: JSON.stringify({
         id: taskId,
         taskStatus: newStatus,
+        priority: priority,
       }),
     })
       .then((res) => res.json())
@@ -161,76 +264,11 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
         />
 
         {isOwner && (
-          <button className="newTaskButton" onClick={toggleCreating}>
+          <button className="newTaskButton" onClick={handleModal}>
             <FontAwesomeIcon icon={faAdd} />
           </button>
         )}
       </div>
-      {isCreating && isOwner && (
-        <div className="modalContainer">
-          <form onSubmit={submitForm}>
-            <label htmlFor="taskInput">Title</label>
-            <input
-              type="text"
-              id="taskInput"
-              placeholder="Task title"
-              ref={titleInputRef}
-            />
-
-            <label htmlFor="descInput">Description*</label>
-            <input
-              type="text"
-              id="descInput"
-              placeholder="Task Description"
-              ref={descInputRef}
-            />
-
-            <span>Assign To</span>
-            <div className="membersList">
-              {owner && (
-                <>
-                  <input
-                    type="checkbox"
-                    className="member"
-                    name="todoAsign"
-                    id="ownerRadio"
-                    onChange={() => assignMember(owner.id)}
-                  />
-                  <label htmlFor="ownerRadio">
-                    <img src={owner.image} alt={owner.name} />
-                  </label>
-                </>
-              )}
-              {members &&
-                members.map((member) => (
-                  <>
-                    <input
-                      type="checkbox"
-                      className="member"
-                      name="todoAsign"
-                      id={`radio${member.id}`}
-                      onChange={() => assignMember(member.id)}
-                    />
-                    <label htmlFor={`radio${member.id}`}>
-                      <img src={member.image} alt={member.name} />
-                    </label>
-                  </>
-                ))}
-            </div>
-
-            <label htmlFor="dueToDate">Due to*</label>
-            <input
-              type="datetime-local"
-              name=""
-              id="dueToDate"
-              ref={dateInputRef}
-            />
-
-            <button type="submit">Create Task</button>
-            <button onClick={toggleCreating}>Close</button>
-          </form>
-        </div>
-      )}
     </DndProvider>
   );
 };
