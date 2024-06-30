@@ -21,13 +21,12 @@ type Priority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 const priorities: Priority[] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 
 const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
-  const [isCreating, setIsCreating] = useState<boolean>(false);
-  const [assignedMembers, setAssignedMembers] = useState<String[]>([]);
-  const [priority, setPriority] = useState<Priority>("MEDIUM");
   const [tasksList, setTasksList] = useState<Task[]>(tasks);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descInputRef = useRef<HTMLInputElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const membersListRef = useRef<HTMLDivElement>(null);
+  const prioritiesListRef = useRef<HTMLDivElement>(null);
   const { setModal } = useModal();
 
   const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -40,13 +39,14 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
     }
 
     const description = descInputRef.current?.value.trim() as string;
-
+    const assignedMembers = getCheckedMemberIds();
     if (assignedMembers.length < 1) {
       alert("There is no assigned members");
       return;
     }
 
     const dueDate = dateInputRef.current?.value;
+    let isoDueDate;
     if (dueDate) {
       const date = new Date(dueDate);
       if (isNaN(date.getTime())) {
@@ -58,9 +58,13 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
         alert("Time traveling is not allowed");
         return;
       }
+
+      isoDueDate = new Date(dueDate).toISOString();
     }
 
-    toggleCreating();
+    const priority = getSelectedPriority();
+
+    setModal(null);
 
     await fetch(`/api/project/${projectId}/tasks`, {
       method: "POST",
@@ -68,7 +72,8 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
         title: title,
         description: description,
         assignedMembers: assignedMembers,
-        dueDate: dueDate,
+        dueTime: isoDueDate,
+        priority: priority,
       }),
     })
       .then((res) => res.json())
@@ -84,16 +89,32 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
       });
   };
 
-  const toggleCreating = () => {
-    setIsCreating(!isCreating);
-    setAssignedMembers([]);
+  const getCheckedMemberIds = (): string[] => {
+    const checkedMembers: string[] = [];
+    const checkboxes = membersListRef.current?.querySelectorAll(
+      'input[type="checkbox"]:checked'
+    );
+    if (checkboxes) {
+      checkboxes.forEach((checkbox) => {
+        checkedMembers.push(checkbox.id.replace("radio", ""));
+      });
+    }
+    return checkedMembers;
+  };
+
+  const getSelectedPriority = (): Priority => {
+    let selectedPriority: Priority = "MEDIUM";
+    const radios = prioritiesListRef.current?.querySelectorAll(
+      'input[type="radio"]:checked'
+    );
+    if (radios && radios.length > 0) {
+      selectedPriority = radios[0].id.replace("priority", "") as Priority;
+    }
+    return selectedPriority;
   };
 
   const handleModal = () => {
     setModal({
-      onClose: () => {
-        setModal(null);
-      },
       content: (
         <form onSubmit={submitForm}>
           <label htmlFor="taskInput">Title</label>
@@ -113,17 +134,16 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
           />
 
           <span>Assign To</span>
-          <div className="membersList">
+          <div className="membersList" ref={membersListRef}>
             {owner && (
               <>
                 <input
                   type="checkbox"
                   className="member"
                   name="todoAsign"
-                  id="ownerRadio"
-                  onChange={() => assignMember(owner.id)}
+                  id={owner.id}
                 />
-                <label htmlFor="ownerRadio">
+                <label htmlFor={owner.id}>
                   <img src={owner.image} alt={owner.name} />
                 </label>
               </>
@@ -135,8 +155,7 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
                     type="checkbox"
                     className="member"
                     name="todoAsign"
-                    id={`radio${member.id}`}
-                    onChange={() => assignMember(member.id)}
+                    id={member.id}
                   />
                   <label htmlFor={`radio${member.id}`}>
                     <img src={member.image} alt={member.name} />
@@ -154,15 +173,13 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
           />
 
           <label>Priority</label>
-          <div className="prioritiesList">
+          <div className="prioritiesList" ref={prioritiesListRef}>
             {priorities.map((currPriority) => (
               <div key={currPriority}>
                 <input
                   type="radio"
                   name="setPriority"
                   id={`priority${currPriority}`}
-                  onChange={() => changePriotiy(currPriority)}
-                  checked={priority === currPriority}
                 />
                 <label htmlFor={`priority${currPriority}`}>
                   {currPriority}
@@ -177,22 +194,6 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
       ),
       setModal,
     });
-  };
-  const changePriotiy = (newPriority: Priority) => {
-    setPriority(newPriority);
-    console.log(`new ${priority}`);
-  };
-
-  const assignMember = (memberId: string) => {
-    setAssignedMembers((members) => {
-      if (members.includes(memberId)) {
-        return members.filter((id) => id !== memberId);
-      } else {
-        return [...members, memberId];
-      }
-    });
-
-    console.log(assignedMembers);
   };
 
   const moveTask = async (taskId: number, newStatus: Task["taskStatus"]) => {
@@ -209,7 +210,6 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
       body: JSON.stringify({
         id: taskId,
         taskStatus: newStatus,
-        priority: priority,
       }),
     })
       .then((res) => res.json())
@@ -240,6 +240,8 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
           moveTask={moveTask}
           projectId={projectId}
           setTasks={setTasksList}
+          members={members || []}
+          owner={owner}
         />
         <TaskColumn
           status="ON_GOING"
@@ -247,6 +249,8 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
           moveTask={moveTask}
           projectId={projectId}
           setTasks={setTasksList}
+          members={members || []}
+          owner={owner}
         />
         <TaskColumn
           status="REVIEWING"
@@ -254,6 +258,8 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
           moveTask={moveTask}
           projectId={projectId}
           setTasks={setTasksList}
+          members={members || []}
+          owner={owner}
         />
         <TaskColumn
           status="DONE"
@@ -261,6 +267,8 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
           moveTask={moveTask}
           projectId={projectId}
           setTasks={setTasksList}
+          members={members || []}
+          owner={owner}
         />
 
         {isOwner && (

@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { useModal } from "../providers/ModalProvider";
 
 export const Modal = () => {
-  const { onClose, content, setModal } = useModal();
+  const { content, setModal } = useModal();
   const modalRef = useRef<HTMLDivElement>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
   const handleClickOutside = (e: MouseEvent) => {
     if (modalContainerRef.current && e.target === modalContainerRef.current) {
-      setModal(null);
+      setModal(null); // Close the modal
     }
   };
 
@@ -27,7 +27,7 @@ export const Modal = () => {
       ref={modalContainerRef}
     >
       <div className="modal" ref={modalRef}>
-        {content}
+        {content as ReactNode}
       </div>
     </div>
   );

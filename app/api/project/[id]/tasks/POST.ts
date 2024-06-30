@@ -111,6 +111,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
           description: body.description,
           dueTime: body.dueTime,
           taskStatus: body.taskStatus,
+          priority: body.priority,
           assignedTo: body.assignedMembers?.length
             ? {
                 set: body.assignedMembers.map((memberId) => ({ id: memberId })),

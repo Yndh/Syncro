@@ -3,8 +3,7 @@
 import { ReactNode, createContext, useContext, useState } from "react";
 
 interface ModalState {
-  content: JSX.Element | null;
-  onClose: () => void;
+  content: ReactNode | null;
   setModal: (modalState: ModalState | null) => void;
 }
 
@@ -32,7 +31,6 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
 
   const modalValue: ModalState = {
     content: modalState?.content || null,
-    onClose: modalState?.onClose || (() => {}),
     setModal,
   };
 
