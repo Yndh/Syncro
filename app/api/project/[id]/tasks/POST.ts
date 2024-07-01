@@ -66,12 +66,14 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   }
 
   try {
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-      select: { ownerId: true },
+    const membership = await prisma.projectMembership.findFirst({
+      where: { projectId: projectId, userId: session.user.id },
     });
 
-    if (!project || project.ownerId !== session.user.id) {
+    if (
+      !membership ||
+      (membership.role != "OWNER" && membership.role !== "ADMIN")
+    ) {
       return new NextResponse(
         JSON.stringify({ error: "Unauthorized access to project." }),
         {

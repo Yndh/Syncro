@@ -1,5 +1,6 @@
 "use client";
 
+import { useModal } from "@/app/providers/ModalProvider";
 import { faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -12,10 +13,10 @@ interface Project {
 }
 
 const Projects = () => {
-  const [isCreating, setIsCreating] = useState<boolean>(false);
   const [projectsList, setProjectsList] = useState<Project[]>([]);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const descInputRef = useRef<HTMLInputElement>(null);
+  const { setModal } = useModal();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,10 +39,6 @@ const Projects = () => {
     fetchData();
   }, []);
 
-  const toggleCreating = () => {
-    setIsCreating(!isCreating);
-  };
-
   const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -57,7 +54,7 @@ const Projects = () => {
       return;
     }
 
-    toggleCreating();
+    setModal(null);
 
     await fetch("/api/projects", {
       method: "POST",
@@ -74,6 +71,34 @@ const Projects = () => {
       });
   };
 
+  const handleModal = () => {
+    setModal({
+      content: (
+        <form onSubmit={submitForm}>
+          <label htmlFor="nameInput">Name</label>
+          <input
+            type="text"
+            id="nameInput"
+            placeholder="Project Name"
+            ref={nameInputRef}
+          />
+
+          <label htmlFor="descInput">Description*</label>
+          <input
+            type="text"
+            id="descInput"
+            placeholder="Project Description"
+            ref={descInputRef}
+          />
+
+          <button type="submit">Create Project</button>
+          <button onClick={() => setModal(null)}>Close</button>
+        </form>
+      ),
+      setModal,
+    });
+  };
+
   return (
     <>
       <div className="projectsList">
@@ -85,36 +110,11 @@ const Projects = () => {
             </div>
           </Link>
         ))}
-        <div className="card" onClick={toggleCreating}>
+        <div className="card" onClick={handleModal}>
           <FontAwesomeIcon icon={faAdd} />
           <p>New Project</p>
         </div>
       </div>
-
-      {isCreating && (
-        <div className="modalContainer">
-          <form onSubmit={submitForm}>
-            <label htmlFor="nameInput">Name</label>
-            <input
-              type="text"
-              id="nameInput"
-              placeholder="Project Name"
-              ref={nameInputRef}
-            />
-
-            <label htmlFor="descInput">Description*</label>
-            <input
-              type="text"
-              id="descInput"
-              placeholder="Project Description"
-              ref={descInputRef}
-            />
-
-            <button type="submit">Create Project</button>
-            <button onClick={toggleCreating}>Close</button>
-          </form>
-        </div>
-      )}
     </>
   );
 };

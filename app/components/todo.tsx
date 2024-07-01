@@ -6,22 +6,20 @@ import { useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TaskColumn } from "./taskColumn";
-import { Task, User } from "../types/interfaces";
+import { Project, Task, TaskStatus } from "../types/interfaces";
 import { useModal } from "../providers/ModalProvider";
 
 interface ToDoProps {
   projectId: number;
+  project: Project;
   isOwner: boolean;
-  owner: User | undefined;
-  members: User[] | undefined;
-  tasks: Task[];
 }
 type Priority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
 const priorities: Priority[] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 
-const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
-  const [tasksList, setTasksList] = useState<Task[]>(tasks);
+const ToDo = ({ projectId, isOwner, project }: ToDoProps) => {
+  const [tasksList, setTasksList] = useState<Task[]>(project.tasks);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descInputRef = useRef<HTMLInputElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
@@ -135,30 +133,17 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
 
           <span>Assign To</span>
           <div className="membersList" ref={membersListRef}>
-            {owner && (
-              <>
-                <input
-                  type="checkbox"
-                  className="member"
-                  name="todoAsign"
-                  id={owner.id}
-                />
-                <label htmlFor={owner.id}>
-                  <img src={owner.image} alt={owner.name} />
-                </label>
-              </>
-            )}
-            {members &&
-              members.map((member) => (
+            {project.members &&
+              project.members.map((member) => (
                 <div>
                   <input
                     type="checkbox"
                     className="member"
                     name="todoAsign"
-                    id={member.id}
+                    id={member.user.id}
                   />
-                  <label htmlFor={`radio${member.id}`}>
-                    <img src={member.image} alt={member.name} />
+                  <label htmlFor={member.user.id}>
+                    <img src={member.user.image} alt={member.user.name} />
                   </label>
                 </div>
               ))}
@@ -196,7 +181,7 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
     });
   };
 
-  const moveTask = async (taskId: number, newStatus: Task["taskStatus"]) => {
+  const moveTask = async (taskId: number, newStatus: TaskStatus) => {
     const prevTasksList = [...tasksList];
 
     setTasksList((prevTasks) =>
@@ -235,40 +220,36 @@ const ToDo = ({ projectId, isOwner, owner, members, tasks }: ToDoProps) => {
     <DndProvider backend={HTML5Backend}>
       <div className="todoContainer">
         <TaskColumn
-          status="TO_DO"
+          status={TaskStatus.TO_DO}
           tasks={tasksList.filter((task) => task.taskStatus === "TO_DO")}
           moveTask={moveTask}
           projectId={projectId}
           setTasks={setTasksList}
-          members={members || []}
-          owner={owner}
+          project={project}
         />
         <TaskColumn
-          status="ON_GOING"
+          status={TaskStatus.ON_GOING}
           tasks={tasksList.filter((task) => task.taskStatus === "ON_GOING")}
           moveTask={moveTask}
           projectId={projectId}
           setTasks={setTasksList}
-          members={members || []}
-          owner={owner}
+          project={project}
         />
         <TaskColumn
-          status="REVIEWING"
+          status={TaskStatus.REVIEWING}
           tasks={tasksList.filter((task) => task.taskStatus === "REVIEWING")}
           moveTask={moveTask}
           projectId={projectId}
           setTasks={setTasksList}
-          members={members || []}
-          owner={owner}
+          project={project}
         />
         <TaskColumn
-          status="DONE"
+          status={TaskStatus.DONE}
           tasks={tasksList.filter((task) => task.taskStatus === "DONE")}
           moveTask={moveTask}
           projectId={projectId}
           setTasks={setTasksList}
-          members={members || []}
-          owner={owner}
+          project={project}
         />
 
         {isOwner && (

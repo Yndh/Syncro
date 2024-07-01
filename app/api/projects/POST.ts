@@ -31,7 +31,12 @@ export async function mPOST(req: Request, res: NextApiResponse) {
       data: {
         name: body.name,
         description: body.description,
-        owner: { connect: { id: session.user.id as string } },
+        members: {
+          create: {
+            userId: session.user.id as string,
+            role: "OWNER",
+          },
+        },
       },
     });
 

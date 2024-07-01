@@ -41,9 +41,12 @@ export async function mGET(req: Request, res: ResponseInterface) {
     const project = await prisma.project.findUnique({
       where: { id: projectId },
       include: {
-        members: true,
-        owner: true,
-        Tasks: {
+        members: {
+          include: {
+            user: true,
+          },
+        },
+        tasks: {
           include: {
             assignedTo: true,
           },
@@ -57,23 +60,22 @@ export async function mGET(req: Request, res: ResponseInterface) {
       });
     }
 
-    const isOwner = project.ownerId == session.user.id;
-    const isMember = project.members.some(
-      (member) => member.id == session.user?.id
+    const membership = project.members.find(
+      (member) => member.userId === session.user?.id
     );
 
-    if (isOwner || isMember) {
-      return new NextResponse(
-        JSON.stringify({ project: project, owner: isOwner }),
-        {
-          status: 200,
-        }
-      );
-    } else {
+    if (!membership) {
       return new NextResponse(JSON.stringify({ error: "Access denied." }), {
         status: 403,
       });
     }
+
+    return new NextResponse(
+      JSON.stringify({ project: project, role: membership.role }),
+      {
+        status: 200,
+      }
+    );
   } catch (e) {
     return new NextResponse(
       JSON.stringify({ error: "Internal server error." }),

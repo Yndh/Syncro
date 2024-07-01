@@ -3,10 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
 
-interface reqBody {
-  id: number;
-}
-
 interface ResponseInterface<T = any> extends NextApiResponse<T> {
   params: {
     id: string;
@@ -62,10 +58,23 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
   try {
     const project = await prisma.project.findUnique({
       where: { id: projectId },
-      select: { ownerId: true },
+      select: { members: true },
     });
 
-    if (!project || project.ownerId !== session.user.id) {
+    if (!project) {
+      return new NextResponse(JSON.stringify({ error: "Project not found." }), {
+        status: 404,
+      });
+    }
+
+    const isOwnerOrAdmin = project.members.some((member) => {
+      return (
+        member.userId === session.user?.id &&
+        (member.role === "OWNER" || member.role === "ADMIN")
+      );
+    });
+
+    if (!isOwnerOrAdmin) {
       return new NextResponse(
         JSON.stringify({ error: "Unauthorized access to project." }),
         {

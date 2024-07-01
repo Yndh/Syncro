@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useDrop } from "react-dnd";
 import { TaskCard } from "./taskCard";
-import { Task, User } from "../types/interfaces";
+import { Project, Task, TaskStatus, User } from "../types/interfaces";
 
 interface DragItem {
   id: number;
@@ -11,20 +11,18 @@ interface DragItem {
 }
 
 interface TaskColumnProps {
-  status: Task["taskStatus"];
+  status: TaskStatus;
   tasks: Task[];
   projectId: number;
-  owner: User | undefined;
-  members: User[];
+  project: Project;
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-  moveTask: (id: number, status: Task["taskStatus"]) => void;
+  moveTask: (id: number, status: TaskStatus) => void;
 }
 
 export const TaskColumn = ({
   status,
   tasks,
-  owner,
-  members,
+  project,
   moveTask,
   projectId,
   setTasks,
@@ -76,8 +74,7 @@ export const TaskColumn = ({
             moveTask={moveTask}
             projectId={projectId}
             handleDeleteTask={handleDeleteTask}
-            members={members}
-            owner={owner}
+            project={project}
           />
         ))}
       </div>

@@ -17,8 +17,10 @@ export async function mGET(req: Request, res: NextApiResponse) {
   try {
     const projects = await prisma.project.findMany({
       where: {
-        owner: {
-          id: session.user.id as string,
+        members: {
+          some: {
+            userId: session.user.id,
+          },
         },
       },
       select: {
@@ -27,8 +29,6 @@ export async function mGET(req: Request, res: NextApiResponse) {
         description: true,
       },
     });
-
-    console.log(projects);
 
     return new NextResponse(JSON.stringify({ projects: projects }), {
       status: 200,

@@ -445,6 +445,11 @@ form {
       opacity: .7;
     }
 
+    span.dueTime {
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
     .assignedMembers {
       display: flex;
       gap: 10px;

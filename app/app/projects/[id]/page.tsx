@@ -4,6 +4,7 @@ import ToDo from "@/app/components/todo";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Project } from "@/app/types/interfaces";
+import { ProjectRole } from "@prisma/client";
 
 interface ProjectParams {
   params: {
@@ -13,11 +14,10 @@ interface ProjectParams {
 
 const ProjectPage = ({ params }: ProjectParams) => {
   const [project, setProject] = useState<Project | undefined>();
-  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [role, setRole] = useState<ProjectRole>("MEMBER");
   const [selectedTab, setSelectedTab] = useState<
     "tasks" | "notes" | "members" | "settings"
   >("tasks");
-
   const router = useRouter();
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
               router.push("/app/projects");
             } else {
               setProject(data.project);
-              setIsOwner(data.owner);
+              setRole(data.role);
             }
           });
       } catch (error) {
@@ -105,10 +105,8 @@ const ProjectPage = ({ params }: ProjectParams) => {
         {selectedTab === "tasks" && project && (
           <ToDo
             projectId={project?.id as number}
-            isOwner={isOwner}
-            owner={project?.owner}
-            members={project?.members}
-            tasks={project?.Tasks ? project?.Tasks : []}
+            isOwner={role === "OWNER"}
+            project={project}
           />
         )}
         {selectedTab === "notes" && <p>Notes</p>}

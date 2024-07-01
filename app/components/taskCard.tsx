@@ -1,41 +1,47 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
-import { Task, User } from "../types/interfaces";
+import {
+  Project,
+  Task,
+  TaskPriority,
+  TaskStatus,
+  User,
+} from "../types/interfaces";
 import { useContextMenu } from "../providers/ContextMenuProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowRight,
-  faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useModal } from "../providers/ModalProvider";
 
 interface TaskCardProps {
   task: Task;
   projectId: number;
-  owner: User | undefined;
-  members: User[];
-  moveTask: (id: number, status: Task["taskStatus"]) => void;
+  project: Project;
+  moveTask: (id: number, status: TaskStatus) => void;
   handleDeleteTask: (taskId: number) => void;
 }
 
-const taskStatuses: Task["taskStatus"][] = [
-  "TO_DO",
-  "ON_GOING",
-  "REVIEWING",
-  "DONE",
+const taskStatuses: TaskStatus[] = [
+  TaskStatus.TO_DO,
+  TaskStatus.ON_GOING,
+  TaskStatus.REVIEWING,
+  TaskStatus.DONE,
 ];
 
 type Priority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
-const priorities: Priority[] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
+const priorities: TaskPriority[] = [
+  TaskPriority.LOW,
+  TaskPriority.MEDIUM,
+  TaskPriority.HIGH,
+  TaskPriority.URGENT,
+];
 
 export const TaskCard = ({
   task,
   moveTask,
-  owner,
-  members,
+  project,
   projectId,
   handleDeleteTask,
 }: TaskCardProps) => {
@@ -205,36 +211,20 @@ export const TaskCard = ({
 
           <span>Assign To</span>
           <div className="membersList" ref={membersListRef}>
-            {owner && (
-              <>
-                <input
-                  type="checkbox"
-                  className="member"
-                  name="todoAsign"
-                  id={owner.id}
-                  defaultChecked={task.assignedTo.some(
-                    (tMember) => tMember.id === owner.id
-                  )}
-                />
-                <label htmlFor={owner.id}>
-                  <img src={owner.image} alt={owner.name} />
-                </label>
-              </>
-            )}
-            {members &&
-              members.map((member) => (
+            {project.members &&
+              project.members.map((member) => (
                 <div>
                   <input
                     type="checkbox"
                     className="member"
                     name="todoAsign"
-                    id={member.id}
+                    id={member.user.id}
                     defaultChecked={task.assignedTo.some(
-                      (tMember) => tMember.id === member.id
+                      (tMember) => tMember.id === member.user.id
                     )}
                   />
                   <label htmlFor={`radio${member.id}`}>
-                    <img src={member.image} alt={member.name} />
+                    <img src={member.user.image} alt={member.user.name} />
                   </label>
                 </div>
               ))}
@@ -322,6 +312,17 @@ export const TaskCard = ({
         <p>{task.title}</p>
         <span>{task.description}</span>
         {displayAssignedMembers(task.assignedTo)}
+        {task.dueTime && (
+          <span className="dueTime">
+            Due to&nbsp;
+            {new Intl.DateTimeFormat("en-US", {
+              day: "numeric",
+              month: "long",
+              hour: "numeric",
+              minute: "numeric",
+            }).format(new Date(task.dueTime))}
+          </span>
+        )}
       </div>
     </div>
   );
