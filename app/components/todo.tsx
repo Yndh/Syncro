@@ -8,6 +8,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { TaskColumn } from "./taskColumn";
 import { Project, Task, TaskStatus } from "../types/interfaces";
 import { useModal } from "../providers/ModalProvider";
+import Image from "next/image";
 
 interface ToDoProps {
   projectId: number;
@@ -143,7 +144,12 @@ const ToDo = ({ projectId, isOwner, project }: ToDoProps) => {
                     id={member.user.id}
                   />
                   <label htmlFor={member.user.id}>
-                    <img src={member.user.image} alt={member.user.name} />
+                    <Image
+                      src={member.user.image}
+                      alt={member.user.name}
+                      width={40}
+                      height={40}
+                    />
                   </label>
                 </div>
               ))}

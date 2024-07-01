@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Project } from "@/app/types/interfaces";
 import { ProjectRole } from "@prisma/client";
+import { MembersList } from "@/app/components/MembersList";
 
 interface ProjectParams {
   params: {
@@ -110,7 +111,9 @@ const ProjectPage = ({ params }: ProjectParams) => {
           />
         )}
         {selectedTab === "notes" && <p>Notes</p>}
-        {selectedTab === "members" && <p>Members</p>}
+        {selectedTab === "members" && (
+          <MembersList members={project?.members || []} />
+        )}
         {selectedTab === "settings" && <p>Settings</p>}
       </div>
     </>
