@@ -8,25 +8,13 @@ export interface User {
   updatedAt: string;
 }
 
-export interface Task {
-  id: number;
-  title: string;
-  description?: string;
-  dueTime?: Date;
-  projectId: number;
-  priority: TaskPriority;
-  taskStatus: TaskStatus;
-  assignedTo: User[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export interface Project {
   id: number;
   name: string;
   description: string;
   status: ProjectStatus;
   tasks: Task[];
+  notes: Note[];
   members: ProjectMembership[];
   dueDate: string | null;
   createdAt: string;
@@ -42,6 +30,31 @@ export interface ProjectMembership {
   role: ProjectRole;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Task {
+  id: number;
+  title: string;
+  description?: string;
+  dueTime?: Date;
+  projectId: number;
+  priority: TaskPriority;
+  taskStatus: TaskStatus;
+  assignedTo: User[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Note {
+  id: number;
+  title: string;
+  description?: string;
+  project: Project;
+  projectId: number;
+  createdBy: User;
+  createdById: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export enum ProjectRole {

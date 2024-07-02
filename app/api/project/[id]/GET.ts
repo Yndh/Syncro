@@ -51,6 +51,11 @@ export async function mGET(req: Request, res: ResponseInterface) {
             assignedTo: true,
           },
         },
+        notes: {
+          include: {
+            createdBy: true,
+          },
+        },
       },
     });
 

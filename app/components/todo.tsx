@@ -259,7 +259,7 @@ const ToDo = ({ projectId, isOwner, project }: ToDoProps) => {
         />
 
         {isOwner && (
-          <button className="newTaskButton" onClick={handleModal}>
+          <button className="absoluteButton" onClick={handleModal}>
             <FontAwesomeIcon icon={faAdd} />
           </button>
         )}

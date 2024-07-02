@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Project } from "@/app/types/interfaces";
 import { ProjectRole } from "@prisma/client";
 import { MembersList } from "@/app/components/MembersList";
+import { Notes } from "@/app/components/Notes";
 
 interface ProjectParams {
   params: {
@@ -110,7 +111,13 @@ const ProjectPage = ({ params }: ProjectParams) => {
             project={project}
           />
         )}
-        {selectedTab === "notes" && <p>Notes</p>}
+        {selectedTab === "notes" && project && (
+          <Notes
+            isOwner={role === "OWNER"}
+            projectId={project?.id as number}
+            project={project}
+          />
+        )}
         {selectedTab === "members" && (
           <MembersList members={project?.members || []} />
         )}

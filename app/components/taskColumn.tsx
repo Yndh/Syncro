@@ -72,9 +72,9 @@ export const TaskColumn = ({
             key={task.id}
             task={task}
             moveTask={moveTask}
-            projectId={projectId}
             handleDeleteTask={handleDeleteTask}
             project={project}
+            setTasks={setTasks}
           />
         ))}
       </div>

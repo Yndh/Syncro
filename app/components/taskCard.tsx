@@ -13,13 +13,14 @@ import { useContextMenu } from "../providers/ContextMenuProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useModal } from "../providers/ModalProvider";
+import Link from "next/link";
 
 interface TaskCardProps {
   task: Task;
-  projectId: number;
   project: Project;
   moveTask: (id: number, status: TaskStatus) => void;
   handleDeleteTask: (taskId: number) => void;
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 }
 
 const taskStatuses: TaskStatus[] = [
@@ -42,8 +43,8 @@ export const TaskCard = ({
   task,
   moveTask,
   project,
-  projectId,
   handleDeleteTask,
+  setTasks,
 }: TaskCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [{ isDragging }, drag] = useDrag(
@@ -135,7 +136,7 @@ export const TaskCard = ({
 
     setModal(null);
 
-    await fetch(`/api/project/${projectId}/tasks`, {
+    await fetch(`/api/project/${task.projectId}/tasks`, {
       method: "POST",
       body: JSON.stringify({
         id: task.id,
@@ -157,8 +158,12 @@ export const TaskCard = ({
           return;
         }
 
-        if (data.task) {
-          window.location.reload();
+        if (data.task as Task) {
+          setTasks((prevTasks) =>
+            prevTasks.map((prevTask) =>
+              prevTask.id == data.task.id ? data.task : prevTask
+            )
+          );
         }
       });
   };
@@ -300,6 +305,10 @@ export const TaskCard = ({
     );
   };
 
+  const truncateText = (text: string, maxLength: number) => {
+    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+  };
+
   return (
     <div
       ref={cardRef}
@@ -309,8 +318,11 @@ export const TaskCard = ({
     >
       <div className={`indicator ${task.priority}`}></div>
       <div className="content">
-        <p>{task.title}</p>
-        <span>{task.description}</span>
+        <p>{truncateText(task.title, 50)}</p>
+        <span>{truncateText(task.description as string, 250)}</span>
+        {(task.description?.length ?? 0) > 250 && (
+          <Link href={""}>Read more...</Link>
+        )}
         {displayAssignedMembers(task.assignedTo)}
         {task.dueTime && (
           <span className="dueTime">

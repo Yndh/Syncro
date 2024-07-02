@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 interface ResponseInterface<T = any> extends NextApiResponse<T> {
   params: {
     id: string;
-    taskId: string;
+    noteId: string;
   };
 }
 
@@ -38,8 +38,8 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     });
   }
 
-  const taskId = res.params.taskId;
-  if (!taskId) {
+  const noteId = res.params.noteId;
+  if (!noteId) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
       {
@@ -48,8 +48,8 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     );
   }
 
-  const taskId2 = parseInt(taskId); // taskId was so good that they made a sequel 🔥🔥
-  if (isNaN(taskId2)) {
+  const noteId2 = parseInt(noteId);
+  if (isNaN(noteId2)) {
     return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
       status: 400,
     });
@@ -67,23 +67,35 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
       });
     }
 
-    const isOwnerOrAdmin = project.members.some((member) => {
-      return (
-        member.userId === session.user?.id &&
-        (member.role === "OWNER" || member.role === "ADMIN")
-      );
+    const note = await prisma.notes.findUnique({
+      where: { id: noteId2 },
     });
 
-    if (!isOwnerOrAdmin) {
+    if (!note) {
+      return new NextResponse(JSON.stringify({ error: "Note not found." }), {
+        status: 404,
+      });
+    }
+
+    const isCreatorOrOwner =
+      note.createdById === session.user?.id ||
+      project.members.some((member) => {
+        return (
+          member.userId === session.user?.id &&
+          (member.role === "OWNER" || member.role === "ADMIN")
+        );
+      });
+
+    if (!isCreatorOrOwner) {
       return new NextResponse(
-        JSON.stringify({ error: "Unauthorized access to project." }),
+        JSON.stringify({ error: "Unauthorized access." }),
         {
           status: 403,
         }
       );
     }
   } catch (e) {
-    console.error(`Error deleting task: ${e}`);
+    console.error(`Error deleting nonte: ${e}`);
     return new NextResponse(
       JSON.stringify({ error: "Internal server error" }),
       {
@@ -93,25 +105,25 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
   }
 
   try {
-    const deleteTask = await prisma.task.delete({
-      where: { id: taskId2 },
+    const deleteNote = await prisma.notes.delete({
+      where: { id: noteId2 },
     });
 
-    const tasks = await prisma.task.findMany({
+    const notes = await prisma.notes.findMany({
       where: { projectId: projectId },
       include: {
-        assignedTo: true,
+        createdBy: true,
       },
     });
 
     return new NextResponse(
       JSON.stringify({
-        tasks: tasks,
+        notes: notes,
       }),
       { status: 200 }
     );
   } catch (e) {
-    console.error(`Error deleting task: ${e}`);
+    console.error(`Error deleting note: ${e}`);
     return new NextResponse(
       JSON.stringify({ error: "Internal server error" }),
       {
