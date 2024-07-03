@@ -5,17 +5,23 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useModal } from "../providers/ModalProvider";
 import { useRef } from "react";
+import Image from "next/image";
+import { auth } from "@/auth";
+import { useSession } from "next-auth/react";
 
 interface NoteCardProps {
   note: Note;
+  isAdmin: boolean;
   setNotes: React.Dispatch<React.SetStateAction<Note[]>>;
 }
 
-export const NoteCard = ({ note, setNotes }: NoteCardProps) => {
+export const NoteCard = ({ note, isAdmin, setNotes }: NoteCardProps) => {
   const { setContextMenu } = useContextMenu();
   const { setModal } = useModal();
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descInputRef = useRef<HTMLInputElement>(null);
+
+  const session = useSession();
 
   const truncateText = (text: string, maxLength: number) => {
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -140,13 +146,45 @@ export const NoteCard = ({ note, setNotes }: NoteCardProps) => {
     }
   };
 
+  const displayNoteDetails = () => {
+    setModal({
+      content: (
+        <div className="noteCard">
+          <h2>{note.title}</h2>
+          <span>{note.description}</span>
+          <Image
+            src={note.createdBy.image}
+            alt={note.createdBy.name}
+            width={30}
+            height={30}
+          />
+        </div>
+      ),
+      setModal,
+    });
+  };
+
   return (
-    <div className="noteCard" onContextMenu={handleContextMenu}>
+    <div
+      className="noteCard"
+      onContextMenu={
+        isAdmin || note.createdById === session.data?.user?.id
+          ? handleContextMenu
+          : () => {}
+      }
+      onClick={displayNoteDetails}
+    >
       <p>{truncateText(note.title, 50)}</p>
       <span>{truncateText(note.description as string, 250)}</span>
       {(note.description?.length ?? 0) > 250 && (
         <Link href={""}>Read more...</Link>
       )}
+      <Image
+        src={note.createdBy.image}
+        alt={note.createdBy.name}
+        width={30}
+        height={30}
+      />
     </div>
   );
 };

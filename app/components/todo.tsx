@@ -13,13 +13,13 @@ import Image from "next/image";
 interface ToDoProps {
   projectId: number;
   project: Project;
-  isOwner: boolean;
+  isAdmin: boolean;
 }
 type Priority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
 const priorities: Priority[] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 
-const ToDo = ({ projectId, isOwner, project }: ToDoProps) => {
+const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
   const [tasksList, setTasksList] = useState<Task[]>(project.tasks);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descInputRef = useRef<HTMLInputElement>(null);
@@ -228,37 +228,37 @@ const ToDo = ({ projectId, isOwner, project }: ToDoProps) => {
         <TaskColumn
           status={TaskStatus.TO_DO}
           tasks={tasksList.filter((task) => task.taskStatus === "TO_DO")}
-          moveTask={moveTask}
-          projectId={projectId}
-          setTasks={setTasksList}
           project={project}
+          isAdmin={isAdmin}
+          moveTask={moveTask}
+          setTasks={setTasksList}
         />
         <TaskColumn
           status={TaskStatus.ON_GOING}
           tasks={tasksList.filter((task) => task.taskStatus === "ON_GOING")}
-          moveTask={moveTask}
-          projectId={projectId}
-          setTasks={setTasksList}
           project={project}
+          isAdmin={isAdmin}
+          moveTask={moveTask}
+          setTasks={setTasksList}
         />
         <TaskColumn
           status={TaskStatus.REVIEWING}
           tasks={tasksList.filter((task) => task.taskStatus === "REVIEWING")}
-          moveTask={moveTask}
-          projectId={projectId}
-          setTasks={setTasksList}
           project={project}
+          isAdmin={isAdmin}
+          moveTask={moveTask}
+          setTasks={setTasksList}
         />
         <TaskColumn
           status={TaskStatus.DONE}
           tasks={tasksList.filter((task) => task.taskStatus === "DONE")}
-          moveTask={moveTask}
-          projectId={projectId}
-          setTasks={setTasksList}
           project={project}
+          isAdmin={isAdmin}
+          moveTask={moveTask}
+          setTasks={setTasksList}
         />
 
-        {isOwner && (
+        {isAdmin && (
           <button className="absoluteButton" onClick={handleModal}>
             <FontAwesomeIcon icon={faAdd} />
           </button>

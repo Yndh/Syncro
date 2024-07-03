@@ -7,6 +7,7 @@ import { Project } from "@/app/types/interfaces";
 import { ProjectRole } from "@prisma/client";
 import { MembersList } from "@/app/components/MembersList";
 import { Notes } from "@/app/components/Notes";
+import { Settings } from "@/app/components/Settings";
 
 interface ProjectParams {
   params: {
@@ -107,21 +108,25 @@ const ProjectPage = ({ params }: ProjectParams) => {
         {selectedTab === "tasks" && project && (
           <ToDo
             projectId={project?.id as number}
-            isOwner={role === "OWNER"}
+            isAdmin={role === "OWNER" || role === "ADMIN"}
             project={project}
           />
         )}
         {selectedTab === "notes" && project && (
           <Notes
-            isOwner={role === "OWNER"}
+            isAdmin={role === "OWNER" || role === "ADMIN"}
             projectId={project?.id as number}
             project={project}
           />
         )}
-        {selectedTab === "members" && (
-          <MembersList members={project?.members || []} />
+        {selectedTab === "members" && project && (
+          <MembersList
+            projectId={project.id}
+            members={project?.members}
+            isAdmin={role === "OWNER" || role === "ADMIN"}
+          />
         )}
-        {selectedTab === "settings" && <p>Settings</p>}
+        {selectedTab === "settings" && <Settings />}
       </div>
     </>
   );

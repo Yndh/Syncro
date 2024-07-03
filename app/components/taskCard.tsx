@@ -18,6 +18,7 @@ import Link from "next/link";
 interface TaskCardProps {
   task: Task;
   project: Project;
+  isAdmin: boolean;
   moveTask: (id: number, status: TaskStatus) => void;
   handleDeleteTask: (taskId: number) => void;
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
@@ -41,8 +42,9 @@ const priorities: TaskPriority[] = [
 
 export const TaskCard = ({
   task,
-  moveTask,
   project,
+  isAdmin,
+  moveTask,
   handleDeleteTask,
   setTasks,
 }: TaskCardProps) => {
@@ -309,12 +311,41 @@ export const TaskCard = ({
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
   };
 
+  const displayTaskDetails = () => {
+    setModal({
+      content: (
+        <div className={`taskCard ${task.priority}`}>
+          <div className={`indicator ${task.priority}`}></div>
+          <div className="content">
+            <h2>{task.title}</h2>
+            <span>{task.description}</span>
+
+            {displayAssignedMembers(task.assignedTo)}
+            {task.dueTime && (
+              <span className="dueTime">
+                Due to&nbsp;
+                {new Intl.DateTimeFormat("en-US", {
+                  day: "numeric",
+                  month: "long",
+                  hour: "numeric",
+                  minute: "numeric",
+                }).format(new Date(task.dueTime))}
+              </span>
+            )}
+          </div>
+        </div>
+      ),
+      setModal,
+    });
+  };
+
   return (
     <div
       ref={cardRef}
       className={`taskCard ${task.priority}`}
       style={{ opacity: isDragging ? 0.5 : 1 }}
-      onContextMenu={handleContextMenu}
+      onContextMenu={isAdmin ? handleContextMenu : () => {}}
+      onClick={displayTaskDetails}
     >
       <div className={`indicator ${task.priority}`}></div>
       <div className="content">

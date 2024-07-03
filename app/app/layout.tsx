@@ -5,6 +5,7 @@ import ContextMenu from "../components/ContextMenu";
 import { ContextMenuProvider } from "../providers/ContextMenuProvider";
 import { ModalProvider } from "../providers/ModalProvider";
 import { Modal } from "../components/Modal";
+import { SessionProvider } from "next-auth/react";
 
 export default async function Home({
   children,
@@ -16,16 +17,18 @@ export default async function Home({
 
   return (
     <div className="dashboard">
-      <ModalProvider>
-        <Sidebar session={session} />
-        <ContextMenuProvider>
-          <main>
-            <ContextMenu />
-            {children}
-          </main>
-        </ContextMenuProvider>
-        <Modal />
-      </ModalProvider>
+      <SessionProvider>
+        <ModalProvider>
+          <Sidebar session={session} />
+          <ContextMenuProvider>
+            <main>
+              <ContextMenu />
+              {children}
+            </main>
+          </ContextMenuProvider>
+          <Modal />
+        </ModalProvider>
+      </SessionProvider>
     </div>
   );
 }

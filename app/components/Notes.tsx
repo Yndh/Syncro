@@ -10,10 +10,10 @@ import { NoteCard } from "./noteCard";
 interface NotesProps {
   projectId: number;
   project: Project;
-  isOwner: boolean;
+  isAdmin: boolean;
 }
 
-export const Notes = ({ isOwner, projectId, project }: NotesProps) => {
+export const Notes = ({ isAdmin, projectId, project }: NotesProps) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descInputRef = useRef<HTMLInputElement>(null);
   const [notes, setNotes] = useState<Note[]>(project.notes);
@@ -89,14 +89,17 @@ export const Notes = ({ isOwner, projectId, project }: NotesProps) => {
       <h2>Team Notes</h2>
       <div className="notesGrid">
         {notes.map((note) => (
-          <NoteCard note={note} setNotes={setNotes} key={note.id} />
+          <NoteCard
+            note={note}
+            setNotes={setNotes}
+            key={note.id}
+            isAdmin={isAdmin}
+          />
         ))}
       </div>
-      {isOwner && (
-        <button className="absoluteButton" onClick={handleModal}>
-          <FontAwesomeIcon icon={faAdd} />
-        </button>
-      )}
+      <button className="absoluteButton" onClick={handleModal}>
+        <FontAwesomeIcon icon={faAdd} />
+      </button>
     </div>
   );
 };

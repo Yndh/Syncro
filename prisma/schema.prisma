@@ -89,15 +89,17 @@ model ProjectMembership {
 }
 
 model ProjectInvitation {
-  id          Int      @id @default(autoincrement())
-  email       String
-  project     Project  @relation(fields: [projectId], references: [id])
+  id          Int       @id @default(autoincrement())
+  linkId      String    @unique
+  maxUses     Int? // null is infinity
+  uses        Int       @default(0)
+  project     Project   @relation(fields: [projectId], references: [id])
   projectId   Int
-  invitedBy   User     @relation(fields: [invitedById], references: [id])
-  invitedById String
-  accepted    Boolean
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  expires     DateTime?
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Task {

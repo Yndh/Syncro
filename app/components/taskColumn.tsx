@@ -13,8 +13,8 @@ interface DragItem {
 interface TaskColumnProps {
   status: TaskStatus;
   tasks: Task[];
-  projectId: number;
   project: Project;
+  isAdmin: boolean;
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   moveTask: (id: number, status: TaskStatus) => void;
 }
@@ -23,8 +23,8 @@ export const TaskColumn = ({
   status,
   tasks,
   project,
+  isAdmin,
   moveTask,
-  projectId,
   setTasks,
 }: TaskColumnProps) => {
   const divRef = useRef<HTMLDivElement>(null);
@@ -40,7 +40,7 @@ export const TaskColumn = ({
   const handleDeleteTask = async (taskId: number) => {
     if (window.confirm(`Do you really want to delete task id ${taskId}?`)) {
       try {
-        await fetch(`/api/project/${projectId}/task/${taskId}`, {
+        await fetch(`/api/project/${project.id}/task/${taskId}`, {
           method: "DELETE",
         })
           .then((res) => res.json())
@@ -71,9 +71,10 @@ export const TaskColumn = ({
           <TaskCard
             key={task.id}
             task={task}
+            project={project}
+            isAdmin={isAdmin}
             moveTask={moveTask}
             handleDeleteTask={handleDeleteTask}
-            project={project}
             setTasks={setTasks}
           />
         ))}

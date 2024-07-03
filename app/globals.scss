@@ -15,6 +15,9 @@ body {
 body {
   background: $background-color;
   color: $font-color;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 a {
@@ -228,13 +231,27 @@ form {
   transition: .3s;
   pointer-events: none;
   opacity: 0;
+  backdrop-filter: blur(2px);
 
   &.visible {
     opacity: 1;
     pointer-events: all;
   }
 
-  backdrop-filter: blur(2px);
+  .noteCard,
+  .taskCard {
+    position: relative;
+    width: 500px;
+  }
+
+  .taskCard .content {
+    width: 490px;
+  }
+
+  .taskCard .indicator {
+    width: 5px;
+  }
+
 }
 
 .membersList {
@@ -377,6 +394,8 @@ form {
   flex-direction: column;
   width: 100%;
   overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   flex-grow: 1;
   max-height: 600px;
 }
@@ -406,7 +425,6 @@ form {
   margin-top: 10px;
 
   background: $background-color;
-  word-wrap: break-word;
   cursor: move;
 
 
@@ -437,6 +455,7 @@ form {
     flex-direction: column;
     gap: 5px;
     padding: 10px;
+    word-wrap: break-word !important;
 
     p {
       font-size: 18px;
@@ -536,7 +555,7 @@ form {
   ul {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 20px;
     margin-top: 20px;
     margin-left: 15px;
 
@@ -544,6 +563,10 @@ form {
       display: flex;
       align-items: center;
       gap: 7px;
+
+      &.invite {
+        margin-top: 25px;
+      }
 
       img {
         border-radius: 50%;
@@ -591,6 +614,8 @@ form {
   max-height: 100%;
   padding: 20px;
   overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .noteCard {
@@ -617,8 +642,58 @@ form {
   a {
     color: $accent-color;
   }
+
+  img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+  }
+}
+
+.settingsContainer {
+  display: flex;
+  flex-direction: column;
+  padding: .5rem 5rem;
+}
+
+.invitePage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  background: $background-color;
+}
+
+.invite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  gap: 5px;
+  padding: 1rem 2rem;
+  background: $background-color-secondary;
+  border-radius: 10px;
+  text-align: center;
+
+  button {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  span {
+    font-size: 12px;
+    opacity: .7;
+  }
+
+  p {
+    opacity: .8;
+  }
 }
 
 ::-webkit-scrollbar {
   display: none;
+  width: 0px;
 }

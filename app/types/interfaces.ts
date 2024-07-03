@@ -1,3 +1,5 @@
+import { DateTime } from "next-auth/providers/kakao";
+
 export interface User {
   id: string;
   name: string;
@@ -55,6 +57,20 @@ export interface Note {
   createdById: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface Invite {
+  id: number;
+  linkId: string;
+  maxUses?: number;
+  uses: number;
+  project: Project;
+  projectId: number;
+  expires?: DateTime;
+  createdBy: User;
+  createdById: string;
+  createdAt: DateTime;
+  updatedAt: DateTime;
 }
 
 export enum ProjectRole {
