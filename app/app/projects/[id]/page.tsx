@@ -17,6 +17,7 @@ interface ProjectParams {
 const ProjectPage = ({ params }: ProjectParams) => {
   const [project, setProject] = useState<Project | undefined>();
   const [role, setRole] = useState<ProjectRole>(ProjectRole.MEMBER);
+  const [membershipId, setMembershipId] = useState<number>();
   const [selectedTab, setSelectedTab] = useState<
     "tasks" | "notes" | "members" | "settings"
   >("tasks");
@@ -36,6 +37,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
             } else {
               setProject(data.project);
               setRole(data.role);
+              setMembershipId(data.membershipId);
             }
           });
       } catch (error) {
@@ -123,9 +125,16 @@ const ProjectPage = ({ params }: ProjectParams) => {
             projectId={project.id}
             members={project?.members}
             role={role}
+            setProject={setProject}
           />
         )}
-        {selectedTab === "settings" && <Settings />}
+        {selectedTab === "settings" && project && membershipId && (
+          <Settings
+            role={role}
+            membershipId={membershipId}
+            projectId={project.id}
+          />
+        )}
       </div>
     </>
   );

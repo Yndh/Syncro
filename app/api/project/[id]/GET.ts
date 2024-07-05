@@ -74,13 +74,25 @@ export async function mGET(req: Request, res: ResponseInterface) {
       });
     }
 
-    const role = project.members.find(
+    const me = project.members.find(
       (member) => member.userId === session.user?.id
-    )?.role;
+    );
+    if (!me) {
+      return new NextResponse(JSON.stringify({ error: "Member not found." }), {
+        status: 404,
+      });
+    }
 
-    return new NextResponse(JSON.stringify({ project: project, role: role }), {
-      status: 200,
-    });
+    return new NextResponse(
+      JSON.stringify({
+        project: project,
+        role: me?.role,
+        membershipId: me?.id,
+      }),
+      {
+        status: 200,
+      }
+    );
   } catch (e) {
     return new NextResponse(
       JSON.stringify({ error: "Internal server error." }),

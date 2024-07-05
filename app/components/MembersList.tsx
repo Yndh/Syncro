@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ProjectMembership, ProjectRole } from "../types/interfaces";
+import { Project, ProjectMembership, ProjectRole } from "../types/interfaces";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCrown,
@@ -16,9 +16,15 @@ interface MembersListProps {
   projectId: number;
   members: ProjectMembership[];
   role: ProjectRole;
+  setProject: React.Dispatch<React.SetStateAction<Project | undefined>>;
 }
 
-export const MembersList = ({ members, role, projectId }: MembersListProps) => {
+export const MembersList = ({
+  members,
+  role,
+  projectId,
+  setProject,
+}: MembersListProps) => {
   const { setModal } = useModal();
   const usesSelectRef = useRef<HTMLSelectElement>(null);
   const expiresSelectRef = useRef<HTMLSelectElement>(null);
@@ -127,8 +133,25 @@ export const MembersList = ({ members, role, projectId }: MembersListProps) => {
           return;
         }
 
-        if (data.member) {
-          location.reload();
+        if (data.project) {
+          setProject(data.project);
+        }
+      });
+  };
+
+  const kickUser = async (membershipId: number) => {
+    await fetch(`/api/project/${projectId}/members/${membershipId}`, {
+      method: "DELETE",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        if (data.project) {
+          setProject(data.project);
         }
       });
   };
@@ -158,16 +181,17 @@ export const MembersList = ({ members, role, projectId }: MembersListProps) => {
                 </button>
               )}
               {role == "OWNER" && member.role == "ADMIN" && (
-                <button onClick={() => updateRole(member.id, "MEMBER")}>
+                <button onClick={() => updateRole(member.id, "ADMIN")}>
                   <FontAwesomeIcon icon={faUser} />
                 </button>
               )}
-              {(role == "ADMIN" || role == "OWNER") &&
-                member.role === "MEMBER" && (
-                  <button>
+              {((role == "ADMIN" || role == "OWNER") &&
+                member.role === "MEMBER") ||
+                (role == "OWNER" && member.role != "OWNER" && (
+                  <button onClick={() => kickUser(member.id)}>
                     <FontAwesomeIcon icon={faRightFromBracket} />
                   </button>
-                )}
+                ))}
             </div>
           </li>
         ))}
