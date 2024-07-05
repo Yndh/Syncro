@@ -107,6 +107,26 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
   }
 
   try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        projectId: projectId,
+        assignedTo: { some: { id: membership.userId } },
+      },
+    });
+
+    const deleteTasks = tasks.map(async (task) => {
+      await prisma.task.update({
+        where: { id: task.id },
+        data: {
+          assignedTo: {
+            disconnect: { id: membership.userId },
+          },
+        },
+      });
+    });
+
+    await Promise.all(deleteTasks);
+
     const deleteUser = await prisma.projectMembership.delete({
       where: { id: membId },
     });

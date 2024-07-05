@@ -78,7 +78,7 @@ const InvitePage = ({ params }: ProjectParams) => {
         }
 
         if (data.projectId) {
-          router.push(`/app/projects/${data.projectId}`);
+          router.push(`/app/projects/${data.projectId as number}`);
         }
       });
   };
