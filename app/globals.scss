@@ -597,8 +597,26 @@ form {
           color: $accent-color-secondary;
         }
       }
+
+      .actions {
+        margin-left: 50px;
+
+        button {
+          background: none;
+          color: $font-color;
+          padding: 5px;
+          height: 100%;
+          font-size: 18px;
+
+          &.admin svg {
+            color: $priorityMedium
+          }
+        }
+      }
     }
   }
+
+
 }
 
 .notesContainer {

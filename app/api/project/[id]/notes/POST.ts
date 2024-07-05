@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import isMember from "@/lib/isMember";
 import { prisma } from "@/lib/prisma";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
@@ -45,6 +46,13 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   if (isNaN(projectId)) {
     return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
       status: 400,
+    });
+  }
+
+  const membership = isMember(projectId);
+  if (!membership) {
+    return new NextResponse(JSON.stringify({ error: "Access denied." }), {
+      status: 403,
     });
   }
 

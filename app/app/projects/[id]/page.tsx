@@ -3,8 +3,7 @@
 import ToDo from "@/app/components/todo";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Project } from "@/app/types/interfaces";
-import { ProjectRole } from "@prisma/client";
+import { Project, ProjectRole } from "@/app/types/interfaces";
 import { MembersList } from "@/app/components/MembersList";
 import { Notes } from "@/app/components/Notes";
 import { Settings } from "@/app/components/Settings";
@@ -17,7 +16,7 @@ interface ProjectParams {
 
 const ProjectPage = ({ params }: ProjectParams) => {
   const [project, setProject] = useState<Project | undefined>();
-  const [role, setRole] = useState<ProjectRole>("MEMBER");
+  const [role, setRole] = useState<ProjectRole>(ProjectRole.MEMBER);
   const [selectedTab, setSelectedTab] = useState<
     "tasks" | "notes" | "members" | "settings"
   >("tasks");
@@ -119,11 +118,11 @@ const ProjectPage = ({ params }: ProjectParams) => {
             project={project}
           />
         )}
-        {selectedTab === "members" && project && (
+        {selectedTab === "members" && project && role && (
           <MembersList
             projectId={project.id}
             members={project?.members}
-            isAdmin={role === "OWNER" || role === "ADMIN"}
+            role={role}
           />
         )}
         {selectedTab === "settings" && <Settings />}

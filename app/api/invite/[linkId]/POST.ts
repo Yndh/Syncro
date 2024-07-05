@@ -1,5 +1,8 @@
+import { Project } from "@/app/types/interfaces";
 import { auth } from "@/auth";
+import { joinProject } from "@/lib/joinProject";
 import { prisma } from "@/lib/prisma";
+import { ProjectMembership } from "@prisma/client";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
 
@@ -11,7 +14,7 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
 
 export async function mPOST(req: Request, res: ResponseInterface) {
   const session = await auth();
-  if (!session || !session.user) {
+  if (!session?.user?.id) {
     return new NextResponse(
       JSON.stringify({ error: "The user is not authenticated" }),
       {
@@ -80,21 +83,15 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       );
     }
 
-    const membership = await prisma.projectMembership.create({
-      data: {
-        project: {
-          connect: {
-            id: invite?.projectId,
-          },
-        },
-        user: {
-          connect: {
-            id: session.user.id,
-          },
-        },
-        role: "MEMBER",
-      },
-    });
+    const membership = joinProject(session.user.id, invite.projectId);
+    if (!membership) {
+      return new NextResponse(
+        JSON.stringify({ error: "Internal server error." }),
+        {
+          status: 500,
+        }
+      );
+    }
 
     await prisma.projectInvitation.update({
       where: { linkId: linkId },
@@ -103,12 +100,9 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       },
     });
 
-    return new NextResponse(
-      JSON.stringify({ projectId: membership.projectId }),
-      {
-        status: 200,
-      }
-    );
+    return new NextResponse(JSON.stringify({ projectId: membership }), {
+      status: 200,
+    });
   } catch (e) {
     return new NextResponse(
       JSON.stringify({ error: "Internal server error." }),

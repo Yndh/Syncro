@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import isAdmin from "@/lib/isAdmin";
 import { prisma } from "@/lib/prisma";
 import { error } from "console";
 import { connect } from "http2";
@@ -42,6 +43,16 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
       status: 400,
     });
+  }
+
+  const admin = isAdmin(projectId);
+  if (!admin) {
+    return new NextResponse(
+      JSON.stringify({ error: "Unauthorized access to project." }),
+      {
+        status: 403,
+      }
+    );
   }
 
   const characters =

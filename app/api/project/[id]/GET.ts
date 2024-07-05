@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import isMember from "@/lib/isMember";
 import { prisma } from "@/lib/prisma";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
@@ -37,6 +38,14 @@ export async function mGET(req: Request, res: ResponseInterface) {
     });
   }
 
+  const membership = isMember(projectId);
+
+  if (!membership) {
+    return new NextResponse(JSON.stringify({ error: "Access denied." }), {
+      status: 403,
+    });
+  }
+
   try {
     const project = await prisma.project.findUnique({
       where: { id: projectId },
@@ -65,22 +74,13 @@ export async function mGET(req: Request, res: ResponseInterface) {
       });
     }
 
-    const membership = project.members.find(
+    const role = project.members.find(
       (member) => member.userId === session.user?.id
-    );
+    )?.role;
 
-    if (!membership) {
-      return new NextResponse(JSON.stringify({ error: "Access denied." }), {
-        status: 403,
-      });
-    }
-
-    return new NextResponse(
-      JSON.stringify({ project: project, role: membership.role }),
-      {
-        status: 200,
-      }
-    );
+    return new NextResponse(JSON.stringify({ project: project, role: role }), {
+      status: 200,
+    });
   } catch (e) {
     return new NextResponse(
       JSON.stringify({ error: "Internal server error." }),

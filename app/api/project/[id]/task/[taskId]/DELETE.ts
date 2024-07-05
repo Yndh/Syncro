@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import isAdmin from "@/lib/isAdmin";
 import { prisma } from "@/lib/prisma";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
@@ -55,39 +56,12 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     });
   }
 
-  try {
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-      select: { members: true },
-    });
-
-    if (!project) {
-      return new NextResponse(JSON.stringify({ error: "Project not found." }), {
-        status: 404,
-      });
-    }
-
-    const isOwnerOrAdmin = project.members.some((member) => {
-      return (
-        member.userId === session.user?.id &&
-        (member.role === "OWNER" || member.role === "ADMIN")
-      );
-    });
-
-    if (!isOwnerOrAdmin) {
-      return new NextResponse(
-        JSON.stringify({ error: "Unauthorized access to project." }),
-        {
-          status: 403,
-        }
-      );
-    }
-  } catch (e) {
-    console.error(`Error deleting task: ${e}`);
+  const admin = isAdmin(projectId);
+  if (!admin) {
     return new NextResponse(
-      JSON.stringify({ error: "Internal server error" }),
+      JSON.stringify({ error: "Unauthorized access to project." }),
       {
-        status: 500,
+        status: 403,
       }
     );
   }

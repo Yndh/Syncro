@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import isAdmin from "@/lib/isAdmin";
 import { prisma } from "@/lib/prisma";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
@@ -65,28 +66,12 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     });
   }
 
-  try {
-    const membership = await prisma.projectMembership.findFirst({
-      where: { projectId: projectId, userId: session.user.id },
-    });
-
-    if (
-      !membership ||
-      (membership.role != "OWNER" && membership.role !== "ADMIN")
-    ) {
-      return new NextResponse(
-        JSON.stringify({ error: "Unauthorized access to project." }),
-        {
-          status: 403,
-        }
-      );
-    }
-  } catch (e) {
-    console.error(`Error creating/updating task: ${e}`);
+  const admin = isAdmin(projectId);
+  if (!admin) {
     return new NextResponse(
-      JSON.stringify({ error: "Internal server error" }),
+      JSON.stringify({ error: "Unauthorized access to project." }),
       {
-        status: 500,
+        status: 403,
       }
     );
   }
