@@ -684,6 +684,23 @@ form {
   background: $background-color;
 }
 
+.inviteList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  li {
+    display: flex;
+    flex-direction: column;
+
+    img {
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+    }
+  }
+}
+
 .invite {
   display: flex;
   flex-direction: column;

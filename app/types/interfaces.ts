@@ -18,6 +18,7 @@ export interface Project {
   tasks: Task[];
   notes: Note[];
   members: ProjectMembership[];
+  projectInvitations: Invite[];
   dueDate: string | null;
   createdAt: string;
   updatedAt: string;

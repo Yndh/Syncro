@@ -133,6 +133,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
             role={role}
             membershipId={membershipId}
             projectId={project.id}
+            project={project}
           />
         )}
       </div>

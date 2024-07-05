@@ -65,6 +65,12 @@ export async function mGET(req: Request, res: ResponseInterface) {
             createdBy: true,
           },
         },
+        projectInvitations: {
+          include: {
+            project: true,
+            createdBy: true,
+          },
+        },
       },
     });
 
