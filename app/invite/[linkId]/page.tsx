@@ -68,7 +68,7 @@ const InvitePage = ({ params }: ProjectParams) => {
 
   const handleJoin = () => {
     fetch(`/api/invite/${params.linkId}`, {
-      method: "POst",
+      method: "POST",
     })
       .then((res) => res.json())
       .then((data) => {

@@ -15,7 +15,7 @@ interface ProjectParams {
 }
 
 const ProjectPage = ({ params }: ProjectParams) => {
-  const [project, setProject] = useState<Project | undefined>();
+  const [project, setProject] = useState<Project>();
   const [role, setRole] = useState<ProjectRole>(ProjectRole.MEMBER);
   const [membershipId, setMembershipId] = useState<number>();
   const [selectedTab, setSelectedTab] = useState<
@@ -134,6 +134,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
             membershipId={membershipId}
             projectId={project.id}
             project={project}
+            setProject={setProject}
           />
         )}
       </div>

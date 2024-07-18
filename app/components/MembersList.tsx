@@ -48,7 +48,11 @@ export const MembersList = ({
           </select>
 
           <label htmlFor="expiresSelect">Expires</label>
-          <select ref={expiresSelectRef} id="expiresSelect">
+          <select
+            ref={expiresSelectRef}
+            id="expiresSelect"
+            defaultValue="10080"
+          >
             <option value="30">30 min</option>
             <option value="60">1 h</option>
             <option value="360">6 h</option>

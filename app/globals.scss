@@ -672,6 +672,7 @@ form {
   display: flex;
   flex-direction: column;
   padding: .5rem 5rem;
+  overflow-y: scroll;
 }
 
 .invitePage {
@@ -684,14 +685,37 @@ form {
   background: $background-color;
 }
 
+.projectDetails {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+
+  &.active {
+    display: flex;
+  }
+}
+
 .inviteList {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-bottom: 15px;
+
+  &.active {
+    max-height: 500px;
+    overflow-y: scroll;
+
+    li {
+      display: flex;
+    }
+  }
+
 
   li {
-    display: flex;
+    display: none;
     flex-direction: column;
+    width: fit-content;
+    gap: 5px;
 
     img {
       border-radius: 50%;
