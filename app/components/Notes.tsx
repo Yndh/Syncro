@@ -91,6 +91,7 @@ export const Notes = ({ isAdmin, projectId, project }: NotesProps) => {
         {notes.map((note) => (
           <NoteCard
             note={note}
+            notes={notes}
             setNotes={setNotes}
             key={note.id}
             isAdmin={isAdmin}

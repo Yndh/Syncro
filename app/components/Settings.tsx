@@ -50,6 +50,7 @@ export const Settings = ({
     if (
       window.confirm(`Do you really want to delete invite ${invite.linkId}?`)
     ) {
+
       await fetch(`/api/invite/${invite.linkId}`, {
         method: "DELETE",
       })
@@ -76,6 +77,11 @@ export const Settings = ({
     }
 
     const description = descriptionInpuut.current?.value as string;
+    
+    const prevProject = project
+
+    setProject({...project, name, description})
+
 
     await fetch(`/api/project/${projectId}`, {
       method: "POST",
@@ -88,6 +94,7 @@ export const Settings = ({
       .then((data) => {
         if (data.error) {
           alert(data.error);
+          setProject(prevProject)
           return;
         }
 

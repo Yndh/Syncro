@@ -141,9 +141,9 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
                     type="checkbox"
                     className="member"
                     name="todoAsign"
-                    id={member.user.id}
+                    id={`member${member.user.id}`}
                   />
-                  <label htmlFor={member.user.id}>
+                  <label htmlFor={`member${member.user.id}`}>
                     <Image
                       src={member.user.image}
                       alt={member.user.name}

@@ -18,6 +18,7 @@ import { useSession } from "next-auth/react"
 
 interface TaskCardProps {
   task: Task;
+  tasksList: Task[];
   project: Project;
   isAdmin: boolean;
   moveTask: (id: number, status: TaskStatus) => void;
@@ -43,6 +44,7 @@ const priorities: TaskPriority[] = [
 
 export const TaskCard = ({
   task,
+  tasksList,
   project,
   isAdmin,
   moveTask,
@@ -154,6 +156,14 @@ export const TaskCard = ({
 
     setModal(null);
 
+    const prevTask = [...tasksList]
+
+    setTasks((prevTasks) =>
+      prevTasks.map((distask) =>
+        distask.id === task.id ? { ...distask, title: title, description: description, priority: priority as TaskPriority} : distask
+      )
+    );
+
     await fetch(`/api/project/${task.projectId}/tasks`, {
       method: "POST",
       body: JSON.stringify({
@@ -173,6 +183,7 @@ export const TaskCard = ({
 
         if (data.error) {
           alert(data.error);
+          setTasks(prevTask)
           return;
         }
 
@@ -241,12 +252,12 @@ export const TaskCard = ({
                     type="checkbox"
                     className="member"
                     name="todoAsign"
-                    id={member.user.id}
+                    id={`member${member.id}`}
                     defaultChecked={task.assignedTo.some(
                       (tMember) => tMember.id === member.user.id
                     )}
                   />
-                  <label htmlFor={`radio${member.id}`}>
+                  <label htmlFor={`member${member.id}`}>
                     <img src={member.user.image} alt={member.user.name} />
                   </label>
                 </div>

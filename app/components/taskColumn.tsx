@@ -71,6 +71,7 @@ export const TaskColumn = ({
           <TaskCard
             key={task.id}
             task={task}
+            tasksList={tasks}
             project={project}
             isAdmin={isAdmin}
             moveTask={moveTask}

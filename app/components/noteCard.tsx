@@ -11,11 +11,12 @@ import { useSession } from "next-auth/react";
 
 interface NoteCardProps {
   note: Note;
+  notes: Note[];
   isAdmin: boolean;
   setNotes: React.Dispatch<React.SetStateAction<Note[]>>;
 }
 
-export const NoteCard = ({ note, isAdmin, setNotes }: NoteCardProps) => {
+export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
   const { setContextMenu } = useContextMenu();
   const { setModal } = useModal();
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -91,6 +92,14 @@ export const NoteCard = ({ note, isAdmin, setNotes }: NoteCardProps) => {
 
     setModal(null);
 
+    const prevNotes = [...notes]
+
+    setNotes((prevNotes) =>
+      prevNotes.map((disnote) =>
+        disnote.id == note.id ? {...note, title, description} : disnote
+      )
+    );
+
     await fetch(`/api/project/${note.projectId}/notes`, {
       method: "POST",
       body: JSON.stringify({
@@ -106,6 +115,7 @@ export const NoteCard = ({ note, isAdmin, setNotes }: NoteCardProps) => {
 
         if (data.error) {
           alert(data.error);
+          setNotes(prevNotes)
           return;
         }
 
