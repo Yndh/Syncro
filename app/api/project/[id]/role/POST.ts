@@ -123,7 +123,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       },
     });
 
-    const project = await prisma.project.findMany({
+    const project = await prisma.project.findFirst({
       where: { id: projectId },
       include: {
         members: {
@@ -138,6 +138,12 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         },
         notes: {
           include: {
+            createdBy: true,
+          },
+        },
+        projectInvitations: {
+          include: {
+            project: true,
             createdBy: true,
           },
         },

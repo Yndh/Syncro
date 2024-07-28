@@ -11,20 +11,24 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useModal } from "../providers/ModalProvider";
 import { useRef } from "react";
+import { faSquareWebAwesomeStroke, faSquareWebAwesome } from "@fortawesome/free-brands-svg-icons";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { useSession } from "next-auth/react";
 
 interface MembersListProps {
   projectId: number;
-  members: ProjectMembership[];
+  project: Project;
   role: ProjectRole;
   setProject: React.Dispatch<React.SetStateAction<Project | undefined>>;
 }
 
 export const MembersList = ({
-  members,
+  project,
   role,
   projectId,
   setProject,
 }: MembersListProps) => {
+  const session = useSession()
   const { setModal } = useModal();
   const usesSelectRef = useRef<HTMLSelectElement>(null);
   const expiresSelectRef = useRef<HTMLSelectElement>(null);
@@ -123,6 +127,22 @@ export const MembersList = ({
   };
 
   const updateRole = async (membershipId: number, role: "ADMIN" | "MEMBER") => {
+    const prevProject = {...project}
+
+    setProject((prevProj) => {
+      if (prevProj) {
+        return {
+          ...prevProj,
+          members: prevProj.members.map((member) =>
+            member.id === membershipId
+              ? { ...member, role: role as ProjectRole }
+              : member
+          ),
+        };
+      }
+      return undefined;
+    });
+
     await fetch(`/api/project/${projectId}/role`, {
       method: "POST",
       body: JSON.stringify({
@@ -134,6 +154,7 @@ export const MembersList = ({
       .then((data) => {
         if (data.error) {
           alert(data.error);
+          setProject(prevProject)
           return;
         }
 
@@ -144,6 +165,22 @@ export const MembersList = ({
   };
 
   const kickUser = async (membershipId: number) => {
+    const prevProject = {...project}
+    
+    setProject((prevProj) => {
+      if (prevProj) {
+        return {
+          ...prevProj,
+          members: prevProj.members.map((member) =>
+            member.id === membershipId
+              ? { ...member, role: role }
+              : member
+          ),
+        };
+      }
+      return undefined;
+    });
+    
     await fetch(`/api/project/${projectId}/members/${membershipId}`, {
       method: "DELETE",
     })
@@ -151,6 +188,7 @@ export const MembersList = ({
       .then((data) => {
         if (data.error) {
           alert(data.error);
+          setProject(prevProject)
           return;
         }
 
@@ -160,11 +198,13 @@ export const MembersList = ({
       });
   };
 
+  console.log(project)
+
   return (
     <div className="membersContainer">
       <h2>Members</h2>
       <ul>
-        {members.map((member) => (
+        {project.members.map((member) => (
           <li key={member.id}>
             <Image
               src={member.user.image}
@@ -181,17 +221,16 @@ export const MembersList = ({
             <div className="actions">
               {role == "OWNER" && member.role == "MEMBER" && (
                 <button onClick={() => updateRole(member.id, "ADMIN")}>
-                  <FontAwesomeIcon icon={faCrown} />
+                  <FontAwesomeIcon icon={faSquareWebAwesomeStroke as IconProp} />
                 </button>
               )}
               {role == "OWNER" && member.role == "ADMIN" && (
-                <button onClick={() => updateRole(member.id, "ADMIN")}>
-                  <FontAwesomeIcon icon={faUser} />
+                <button onClick={() => updateRole(member.id, "MEMBER")}>
+                  <FontAwesomeIcon icon={faSquareWebAwesome as IconProp} />
                 </button>
               )}
-              {((role == "ADMIN" || role == "OWNER") &&
-                member.role === "MEMBER") ||
-                (role == "OWNER" && member.role != "OWNER" && (
+              {(((role == "ADMIN" || role == "OWNER") &&
+                member.role != "OWNER") && (member.userId !== session?.data?.user?.id) && (
                   <button onClick={() => kickUser(member.id)}>
                     <FontAwesomeIcon icon={faRightFromBracket} />
                   </button>
@@ -199,14 +238,14 @@ export const MembersList = ({
             </div>
           </li>
         ))}
-        {role == "ADMIN" ||
-          (role == "OWNER" && (
+        {(role == "ADMIN" ||
+          role == "OWNER") && (
             <li className="invite">
               <button onClick={handleModal}>
                 <FontAwesomeIcon icon={faUserPlus} /> Invite Members
               </button>
             </li>
-          ))}
+          )}
       </ul>
     </div>
   );

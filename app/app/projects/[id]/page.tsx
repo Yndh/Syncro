@@ -123,7 +123,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
         {selectedTab === "members" && project && role && (
           <MembersList
             projectId={project.id}
-            members={project?.members}
+            project={project}
             role={role}
             setProject={setProject}
           />
