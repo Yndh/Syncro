@@ -66,20 +66,20 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     });
   }
 
-  const admin = isAdmin(projectId);
-  if (!admin) {
-    return new NextResponse(
-      JSON.stringify({ error: "Unauthorized access to project." }),
-      {
-        status: 403,
-      }
-    );
-  }
-
   const body: CreateTaskReqBody | UpdateTaskReqBody = await req.json();
 
   try {
     if ("id" in body) {
+      const admin = await isAdmin(projectId);
+      if (!admin && body.taskStatus == "DONE") {
+        return new NextResponse(
+          JSON.stringify({ error: "Unauthorized access to task." }),
+          {
+            status: 403,
+          }
+        );
+      }
+
       const existingTask = await prisma.task.findUnique({
         where: { id: body.id },
         include: { assignedTo: true },
@@ -90,6 +90,16 @@ export async function mPOST(req: Request, res: ResponseInterface) {
           status: 404,
         });
       }
+
+      if(!(existingTask.assignedTo.some(user => user.id === session.user?.id)) && !admin){
+        return new NextResponse(
+          JSON.stringify({ error: "Unauthorized access to task." }),
+          {
+            status: 403,
+          }
+        );
+      }
+      
 
       const updatedTask = await prisma.task.update({
         where: { id: body.id },
@@ -116,6 +126,17 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         { status: 200 }
       );
     } else {
+      const admin = await isAdmin(projectId);
+      
+      if (!admin) {
+        return new NextResponse(
+          JSON.stringify({ error: "Unauthorized access to project." }),
+          {
+            status: 403,
+          }
+        );
+      }
+
       const newTask = await prisma.task.create({
         data: {
           title: body.title.trim(),

@@ -64,7 +64,7 @@ export const TaskColumn = ({
   };
 
   return (
-    <div className="col" ref={divRef}>
+    <div className="cardCol" ref={divRef}>
       <h1>{status.replace("_", " ")}</h1>
       <div className="cardsContainer">
         {tasks.map((task) => (

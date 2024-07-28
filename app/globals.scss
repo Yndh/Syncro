@@ -379,13 +379,16 @@ form {
   overflow: hidden;
 }
 
-.col {
+.cardCol {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 5px;
-  padding: 20px;
-  // height: 100%;
-  box-sizing: border-box;
+  padding: 20px;  
+  max-height: 500px;
 
 }
 
@@ -393,11 +396,9 @@ form {
   display: flex;
   flex-direction: column;
   width: 100%;
-  overflow-y: scroll;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  height: 100%;
   flex-grow: 1;
-  max-height: 600px;
+  overflow-y: scroll;
 }
 
 .absoluteButton {
@@ -455,7 +456,8 @@ form {
     flex-direction: column;
     gap: 5px;
     padding: 10px;
-    word-wrap: break-word !important;
+    width: auto;
+    word-break: break-word !important;
 
     p {
       font-size: 18px;

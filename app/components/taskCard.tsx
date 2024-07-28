@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useModal } from "../providers/ModalProvider";
 import Link from "next/link";
+import { useSession } from "next-auth/react"
 
 interface TaskCardProps {
   task: Task;
@@ -48,6 +49,7 @@ export const TaskCard = ({
   handleDeleteTask,
   setTasks,
 }: TaskCardProps) => {
+  const session = useSession()
   const cardRef = useRef<HTMLDivElement>(null);
   const [{ isDragging }, drag] = useDrag(
     () => ({
@@ -59,7 +61,21 @@ export const TaskCard = ({
     }),
     [task.id]
   );
-  drag(cardRef);
+
+  console.log(task.assignedTo);
+  console.log(session);
+  
+  
+  const isAssigned = task.assignedTo.some(user => user.id === session.data?.user?.id);
+  console.log(isAssigned);
+  console.table(session);
+  
+  
+  
+  if(isAssigned || isAdmin){
+    drag(cardRef);
+  }
+
   const { setContextMenu } = useContextMenu();
   const { setModal } = useModal();
   const titleInputRef = useRef<HTMLInputElement>(null);

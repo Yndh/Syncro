@@ -17,7 +17,7 @@ export default async function Home({
 
   return (
     <div className="dashboard">
-      <SessionProvider>
+      <SessionProvider session={session}>
         <ModalProvider>
           <Sidebar session={session} />
           <ContextMenuProvider>
