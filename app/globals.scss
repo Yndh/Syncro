@@ -254,6 +254,29 @@ form {
 
 }
 
+.stagesList{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 100px;
+  overflow-y: scroll;
+
+  .newStageContainer{
+    display: flex;
+    gap: 2px;
+  }
+
+  input{
+    border: 1px solid transparent;
+    background: transparent;
+    width: 100%;
+
+    &:focus{
+      border-color: $accent-color;
+    }
+  }
+}
+
 .membersList {
   display: flex;
   align-items: center;
@@ -428,9 +451,9 @@ form {
   background: $background-color;
   cursor: move;
 
-
   .indicator {
     width: 5px !important;
+    height: 100%;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
 
@@ -456,7 +479,7 @@ form {
     flex-direction: column;
     gap: 5px;
     padding: 10px;
-    width: auto;
+    width: 100%;
     word-break: break-word !important;
 
     p {
@@ -475,6 +498,34 @@ form {
 
     a {
       color: $accent-color;
+    }
+
+    .progress{
+      display: flex;
+      justify-content: space-between;
+      gap: 2px;
+      width: 100%;
+
+      span{
+        background: $priorityMedium;
+        border-radius: 5px;
+        width: 100%;
+        height: 5px;
+
+        &.completed{
+          background: $priorityLow;
+        }
+      }
+    }
+
+    .stages{
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stage{
+      display: flex;
+      gap: 7px;
     }
 
     .assignedMembers {

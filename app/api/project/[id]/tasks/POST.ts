@@ -4,15 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
 
-interface reqBody {
-  id?: number;
-  title: string;
-  description?: string;
-  assignedMembers: string[]; // Ids
-  dueTime?: Date;
-  taskStatus?: "TO_DO" | "ON_GOING" | "REVIEWING" | "DONE";
-  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-}
 
 interface CreateTaskReqBody {
   title: string;
@@ -20,6 +11,7 @@ interface CreateTaskReqBody {
   assignedMembers: string[]; // Ids
   dueTime?: Date;
   priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  stages: string[]
 }
 
 interface UpdateTaskReqBody {
@@ -30,6 +22,7 @@ interface UpdateTaskReqBody {
   dueTime?: Date;
   taskStatus?: "TO_DO" | "ON_GOING" | "REVIEWING" | "DONE";
   priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  stages?: { id?: number; title?: string; isCompleted?: boolean }[];
 }
 
 interface ResponseInterface<T = any> extends NextApiResponse<T> {
@@ -82,7 +75,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
 
       const existingTask = await prisma.task.findUnique({
         where: { id: body.id },
-        include: { assignedTo: true },
+        include: { assignedTo: true, stages: true },
       });
 
       if (!existingTask) {
@@ -100,6 +93,28 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         );
       }
       
+      const providedStages = body.stages ?? [];
+
+      const stageCreate = providedStages
+        .filter(stage => stage.id == null)
+        .map(stage => ({
+          title: stage.title?.trim() as string,
+          isCompleted: stage.isCompleted ?? false,
+        }));
+
+      const stageUpdate = providedStages
+        .filter(stage => stage.id != null)
+        .map(stage => ({
+          where: { id: stage.id! },
+          data: {
+            title: stage.title,
+            isCompleted: stage.isCompleted ?? false,
+          },
+        }));
+
+      const stageDelete = existingTask.stages
+        .filter(stage => !providedStages.some(ps => ps.id === stage.id))
+        .map(stage => ({ id: stage.id as number }));
 
       const updatedTask = await prisma.task.update({
         where: { id: body.id },
@@ -114,9 +129,15 @@ export async function mPOST(req: Request, res: ResponseInterface) {
                 set: body.assignedMembers.map((memberId) => ({ id: memberId })),
               }
             : undefined,
+            stages: {
+              create: stageCreate,
+              update: stageUpdate,
+              deleteMany: stageDelete,
+            },
         },
         include: {
           assignedTo: true,
+          stages: true
         },
       });
       return new NextResponse(
@@ -137,6 +158,22 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         );
       }
 
+      const existingUsers = await prisma.user.findMany({
+        where: {
+          id: { in: body.assignedMembers },
+        },
+      });
+      
+      const validUserIds = new Set(existingUsers.map(user => user.id));
+      const invalidUserIds = body.assignedMembers.filter(id => !validUserIds.has(id));
+      
+      if (invalidUserIds.length > 0) {
+        return new NextResponse(
+          JSON.stringify({ error: `Invalid user IDs: ${invalidUserIds.join(", ")}` }),
+          { status: 400 }
+        );
+      }
+
       const newTask = await prisma.task.create({
         data: {
           title: body.title.trim(),
@@ -149,9 +186,16 @@ export async function mPOST(req: Request, res: ResponseInterface) {
           project: {
             connect: { id: projectId },
           },
+          stages: {
+            create: body.stages.map(title => ({
+              title: title.trim() as string,
+              isCompleted: false,
+            })),
+          },
         },
         include: {
           assignedTo: true,
+          stages: true
         },
       });
       return new NextResponse(

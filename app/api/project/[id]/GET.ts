@@ -58,6 +58,7 @@ export async function mGET(req: Request, res: ResponseInterface) {
         tasks: {
           include: {
             assignedTo: true,
+            stages: true
           },
         },
         notes: {

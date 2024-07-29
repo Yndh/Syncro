@@ -43,7 +43,18 @@ export interface Task {
   projectId: number;
   priority: TaskPriority;
   taskStatus: TaskStatus;
+  stages: TaskStage[];
   assignedTo: User[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TaskStage {
+  id: number;
+  title: string;
+  isCompleted: boolean;
+  task: Task;
+  taskId: number;
   createdAt: Date;
   updatedAt: Date;
 }

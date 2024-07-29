@@ -111,9 +111,20 @@ model Task {
   priority    Priority   @default(MEDIUM)
   taskStatus  TaskStatus @default(TO_DO)
   dueTime     DateTime?
+  stages TaskStage[]
   assignedTo  User[]     @relation(name: "TaskAssignments")
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+}
+
+model TaskStage {
+  id Int @id @default(autoincrement())
+  title String
+  isCompleted Boolean @default(false)
+  task Task @relation(fields: [taskId], references: [id])
+  taskId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Notes {

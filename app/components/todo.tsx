@@ -1,6 +1,6 @@
 "use client";
 
-import { faAdd } from "@fortawesome/free-solid-svg-icons";
+import { faAdd, faMinus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
@@ -9,6 +9,8 @@ import { TaskColumn } from "./taskColumn";
 import { Project, Task, TaskStatus } from "../types/interfaces";
 import { useModal } from "../providers/ModalProvider";
 import Image from "next/image";
+import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 interface ToDoProps {
   projectId: number;
@@ -44,6 +46,8 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
       return;
     }
 
+    const stages = getStages()
+
     const dueDate = dateInputRef.current?.value;
     let isoDueDate;
     if (dueDate) {
@@ -73,6 +77,7 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
         assignedMembers: assignedMembers,
         dueTime: isoDueDate,
         priority: priority,
+        stages: stages
       }),
     })
       .then((res) => res.json())
@@ -112,6 +117,42 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
     return selectedPriority;
   };
 
+  const getStages = () => {
+    const stagesList: string[] = []
+    const stageElements = document.querySelectorAll(".stagesList input");
+
+    stageElements.forEach(stage => {
+      const stageName = (stage as HTMLInputElement).value.trim()
+      if(stageName){
+        stagesList.push(stageName)
+      }
+    })
+
+    return stagesList
+
+  }
+
+  const addStage = () => {
+    const stagesList = document.querySelector(".stagesList")
+
+    const li = document.createElement("li")
+    li.className = "newStageContainer"
+
+    const input = document.createElement("input")
+    input.placeholder = "Add new stage"
+
+    const removeButton = document.createElement("button")
+    removeButton.onclick = () => {li.remove()}
+    removeButton.type = "button"
+
+    const root = createRoot(removeButton)
+    root.render(<FontAwesomeIcon icon={faTrash}/>)
+
+    li.appendChild(input)
+    li.appendChild(removeButton)
+    stagesList?.appendChild(li)
+  }
+
   const handleModal = () => {
     setModal({
       content: (
@@ -132,6 +173,12 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
             ref={descInputRef}
           />
 
+          <label htmlFor="">Stages</label>
+          <ul className="stagesList">
+
+          </ul>
+          <button onClick={addStage} type="button">Add stage</button>
+
           <span>Assign To</span>
           <div className="membersList" ref={membersListRef}>
             {project.members &&
@@ -141,9 +188,9 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
                     type="checkbox"
                     className="member"
                     name="todoAsign"
-                    id={`member${member.user.id}`}
+                    id={member.user.id}
                   />
-                  <label htmlFor={`member${member.user.id}`}>
+                  <label htmlFor={member.user.id}>
                     <Image
                       src={member.user.image}
                       alt={member.user.name}
