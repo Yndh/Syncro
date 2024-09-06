@@ -6,6 +6,7 @@ import {
   Project,
   Task,
   TaskPriority,
+  TaskStage,
   TaskStatus,
   User,
 } from "../types/interfaces";
@@ -154,7 +155,7 @@ export const TaskCard = ({
 
     const priority = getSelectedPriority();
 
-    const stages = getStages()
+    const stages = getStages();
 
     setModal(null);
 
@@ -258,7 +259,7 @@ export const TaskCard = ({
             {task.stages.map((stage, index) => (
               <li key={index} className="newStageContainer">
                 <input
-                id={`stage${stage.id}`}
+                  id={`stage${stage.id}`}
                   type="text"
                   placeholder="Stage name"
                   defaultValue={stage.title}
@@ -282,12 +283,12 @@ export const TaskCard = ({
                     type="checkbox"
                     className="member"
                     name="todoAsign"
-                    id={`${member.id}`}
+                    id={`${member.userId}`}
                     defaultChecked={task.assignedTo.some(
                       (tMember) => tMember.id === member.user.id
                     )}
                   />
-                  <label htmlFor={`${member.id}`}>
+                  <label htmlFor={`${member.userId}`}>
                     <img src={member.user.image} alt={member.user.name} />
                   </label>
                 </div>
@@ -346,25 +347,27 @@ export const TaskCard = ({
   };
 
   const addStage = () => {
-    const stagesList = document.querySelector(".stagesList")
+    const stagesList = document.querySelector(".stagesList");
 
-    const li = document.createElement("li")
-    li.className = "newStageContainer"
+    const li = document.createElement("li");
+    li.className = "newStageContainer";
 
-    const input = document.createElement("input")
-    input.placeholder = "Add new stage"
+    const input = document.createElement("input");
+    input.placeholder = "Add new stage";
 
-    const removeButton = document.createElement("button")
-    removeButton.onclick = () => {li.remove()}
-    removeButton.type = "button"
+    const removeButton = document.createElement("button");
+    removeButton.onclick = () => {
+      li.remove();
+    };
+    removeButton.type = "button";
 
-    const root = createRoot(removeButton)
-    root.render(<FontAwesomeIcon icon={faTrash}/>)
+    const root = createRoot(removeButton);
+    root.render(<FontAwesomeIcon icon={faTrash} />);
 
-    li.appendChild(input)
-    li.appendChild(removeButton)
-    stagesList?.appendChild(li)
-  }
+    li.appendChild(input);
+    li.appendChild(removeButton);
+    stagesList?.appendChild(li);
+  };
 
   const removeStage = (index: number) => {
     const stagesList = document.querySelector(".stagesList");
@@ -374,23 +377,29 @@ export const TaskCard = ({
         stageItems[index].remove();
       }
     }
-  }
+  };
   const getStages = () => {
-    const stages = Array.from(document.querySelectorAll(".stagesList input")).map((input) => {
+    const stages = Array.from(
+      document.querySelectorAll(".stagesList input")
+    ).map((input) => {
       const inputElement = input as HTMLInputElement;
       const id = inputElement.id.replace("stage", "");
-  
+
       const stage: any = {
         title: inputElement.value.trim(),
       };
-  
+
       if (id) {
         stage.id = parseInt(id);
       }
-  
+
+      stage.isCompleted = task.stages.find(
+        (stagee) => stagee.id == stage.id
+      )?.isCompleted;
+
       return stage;
     });
-  
+
     return stages;
   };
 
@@ -434,7 +443,7 @@ export const TaskCard = ({
                       type="checkbox"
                       id={`stage${stage.id}`}
                       defaultChecked={stage.isCompleted}
-                      onChange={updateStage}
+                      onChange={(e) => updateStage(e, stage.id)}
                     />
                     <label htmlFor={`stage${stage.id}`}>{stage.title}</label>
                   </div>
@@ -461,37 +470,33 @@ export const TaskCard = ({
     });
   };
 
-  const getUpdatedStages = (): {
-    id: number;
-    title?: string;
-    isCompleted?: boolean;
-  }[] => {
-    const updatedStages: {
-      id: number;
-      title?: string;
-      isCompleted?: boolean;
-    }[] = [];
-    const stageCheckboxes = document.querySelectorAll('input[type="checkbox"]');
-
-    stageCheckboxes.forEach((checkbox) => {
-      const stageId = parseInt(checkbox.id.replace("stage", ""));
-      const isCompleted = (checkbox as HTMLInputElement).checked;
-      updatedStages.push({ id: stageId, isCompleted });
-    });
-
-    return updatedStages;
-  };
-
-  const updateStage = async () => {
-    const stages = getUpdatedStages();
-
+  const updateStage = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    stageId: number
+  ) => {
     const prevTask = [...tasksList];
 
-    await fetch(`/api/project/${task.projectId}/tasks`, {
+    setTasks((prevTasks) =>
+      prevTasks.map((prevTask) =>
+        prevTask.id == task.id
+          ? {
+              ...prevTask,
+              stages: prevTask.stages.map((stage) =>
+                stage.id === stageId
+                  ? { ...stage, isCompleted: e.target.checked }
+                  : stage
+              ),
+            }
+          : prevTask
+      )
+    );
+
+    await fetch(`/api/project/${task.projectId}/stages`, {
       method: "POST",
       body: JSON.stringify({
-        id: task.id,
-        stages: stages,
+        id: stageId,
+        taskId: task.id,
+        isCompleted: e.target.checked,
       }),
     })
       .then((res) => res.json())
@@ -506,10 +511,17 @@ export const TaskCard = ({
           return;
         }
 
-        if (data.task as Task) {
+        if (data.stage as TaskStage) {
           setTasks((prevTasks) =>
             prevTasks.map((prevTask) =>
-              prevTask.id == data.task.id ? data.task : prevTask
+              prevTask.id == data.stage.taskId
+                ? {
+                    ...prevTask,
+                    stages: prevTask.stages.map((stage) =>
+                      stage.id === data.stage.id ? data.stage : stage
+                    ),
+                  }
+                : prevTask
             )
           );
         }
@@ -535,9 +547,13 @@ export const TaskCard = ({
         {task.stages.length > 0 && (
           <>
             <div className="progress">
-              {task.stages.map((stage) => (
-                <span className={stage.isCompleted ? "completed" : ""}></span>
-              ))}
+              {task.stages
+                .sort((a, b) =>
+                  a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? -1 : 1
+                )
+                .map((stage) => (
+                  <span className={stage.isCompleted ? "completed" : ""}></span>
+                ))}
             </div>
             <span>
               {task.stages.filter((stage) => stage.isCompleted).length}/

@@ -4,14 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
 
-
 interface CreateTaskReqBody {
   title: string;
   description?: string;
   assignedMembers: string[]; // Ids
   dueTime?: Date;
   priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-  stages: string[]
+  stages: string[];
 }
 
 interface UpdateTaskReqBody {
@@ -84,7 +83,10 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         });
       }
 
-      if(!(existingTask.assignedTo.some(user => user.id === session.user?.id)) && !admin){
+      if (
+        !existingTask.assignedTo.some((user) => user.id === session.user?.id) &&
+        !admin
+      ) {
         return new NextResponse(
           JSON.stringify({ error: "Unauthorized access to task." }),
           {
@@ -92,20 +94,21 @@ export async function mPOST(req: Request, res: ResponseInterface) {
           }
         );
       }
-      
+
       const providedStages = body.stages ?? [];
+      const providedMembers = body.assignedMembers ?? [];
 
       const stageCreate = providedStages
-        .filter(stage => stage.id == null)
-        .map(stage => ({
+        .filter((stage) => stage.id == null)
+        .map((stage) => ({
           title: stage.title?.trim() as string,
           isCompleted: stage.isCompleted ?? false,
         }));
 
       const stageUpdate = providedStages
-        .filter(stage => stage.id != null)
-        .map(stage => ({
-          where: { id: stage.id! },
+        .filter((stage) => stage.id != null)
+        .map((stage) => ({
+          where: { id: stage.id },
           data: {
             title: stage.title,
             isCompleted: stage.isCompleted ?? false,
@@ -113,33 +116,34 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         }));
 
       const stageDelete = existingTask.stages
-        .filter(stage => !providedStages.some(ps => ps.id === stage.id))
-        .map(stage => ({ id: stage.id as number }));
+        .filter((stage) => !providedStages.some((ps) => ps.id === stage.id))
+        .map((stage) => ({ id: stage.id as number }));
 
       const updatedTask = await prisma.task.update({
         where: { id: body.id },
         data: {
           title: body.title?.trim(),
-          description: body.description,
+          description: body.description?.trim(),
           dueTime: body.dueTime,
-          taskStatus: body.taskStatus,
+          taskStatus: body.taskStatus ?? undefined,
           priority: body.priority,
-          assignedTo: body.assignedMembers?.length
+          assignedTo: providedMembers?.length
             ? {
-                set: body.assignedMembers.map((memberId) => ({ id: memberId })),
+                set: providedMembers.map((memberId) => ({ id: memberId })),
               }
             : undefined,
-            stages: {
-              create: stageCreate,
-              update: stageUpdate,
-              deleteMany: stageDelete,
-            },
+          stages: {
+            create: stageCreate,
+            update: stageUpdate,
+            deleteMany: stageDelete,
+          },
         },
         include: {
           assignedTo: true,
-          stages: true
+          stages: true,
         },
       });
+
       return new NextResponse(
         JSON.stringify({
           task: updatedTask,
@@ -148,7 +152,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       );
     } else {
       const admin = await isAdmin(projectId);
-      
+
       if (!admin) {
         return new NextResponse(
           JSON.stringify({ error: "Unauthorized access to project." }),
@@ -163,13 +167,17 @@ export async function mPOST(req: Request, res: ResponseInterface) {
           id: { in: body.assignedMembers },
         },
       });
-      
-      const validUserIds = new Set(existingUsers.map(user => user.id));
-      const invalidUserIds = body.assignedMembers.filter(id => !validUserIds.has(id));
-      
+
+      const validUserIds = new Set(existingUsers.map((user) => user.id));
+      const invalidUserIds = body.assignedMembers.filter(
+        (id) => !validUserIds.has(id)
+      );
+
       if (invalidUserIds.length > 0) {
         return new NextResponse(
-          JSON.stringify({ error: `Invalid user IDs: ${invalidUserIds.join(", ")}` }),
+          JSON.stringify({
+            error: `Invalid user IDs: ${invalidUserIds.join(", ")}`,
+          }),
           { status: 400 }
         );
       }
@@ -187,7 +195,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
             connect: { id: projectId },
           },
           stages: {
-            create: body.stages.map(title => ({
+            create: body.stages.map((title) => ({
               title: title.trim() as string,
               isCompleted: false,
             })),
@@ -195,7 +203,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         },
         include: {
           assignedTo: true,
-          stages: true
+          stages: true,
         },
       });
       return new NextResponse(
