@@ -48,14 +48,6 @@ export async function mPOST(req: Request, res: ResponseInterface) {
 
   try {
     const admin = await isAdmin(projectId);
-    if (!admin) {
-      return new NextResponse(
-        JSON.stringify({ error: "Unauthorized access to task." }),
-        {
-          status: 403,
-        }
-      );
-    }
 
     const taskStage = await prisma.taskStage.findUnique({
       where: { id: body.id },
@@ -85,6 +77,19 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     if (
       !existingTask.assignedTo.some((user) => user.id === session.user?.id) &&
       !admin
+    ) {
+      return new NextResponse(
+        JSON.stringify({ error: "Unauthorized access to task." }),
+        {
+          status: 403,
+        }
+      );
+    }
+
+    if (
+      !admin &&
+      (existingTask.taskStatus == "REVIEWING" ||
+        existingTask.taskStatus == "DONE")
     ) {
       return new NextResponse(
         JSON.stringify({ error: "Unauthorized access to task." }),

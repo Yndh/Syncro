@@ -12,7 +12,11 @@ import {
 } from "../types/interfaces";
 import { useContextMenu } from "../providers/ContextMenuProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronRight, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronRight,
+  faGripVertical,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import { useModal } from "../providers/ModalProvider";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -75,7 +79,11 @@ export const TaskCard = ({
   console.log(isAssigned);
   console.table(session);
 
-  if (isAssigned || isAdmin) {
+  if (
+    (isAssigned &&
+      (task.taskStatus == "TO_DO" || task.taskStatus == "ON_GOING")) ||
+    isAdmin
+  ) {
     drag(cardRef);
   }
 
@@ -403,6 +411,67 @@ export const TaskCard = ({
     return stages;
   };
 
+  const updateStage = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    stageId: number
+  ) => {
+    const prevTask = [...tasksList];
+
+    setTasks((prevTasks) =>
+      prevTasks.map((prevTask) =>
+        prevTask.id == task.id
+          ? {
+              ...prevTask,
+              stages: prevTask.stages.map((stage) =>
+                stage.id === stageId
+                  ? { ...stage, isCompleted: e.target.checked }
+                  : stage
+              ),
+            }
+          : prevTask
+      )
+    );
+
+    const check = e.target.checked;
+
+    await fetch(`/api/project/${task.projectId}/stages`, {
+      method: "POST",
+      body: JSON.stringify({
+        id: stageId,
+        taskId: task.id,
+        isCompleted: check,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("updat?");
+
+        console.log(data);
+
+        if (data.error) {
+          alert(data.error);
+          setTasks(prevTask);
+          e.target.checked = !check;
+          return;
+        }
+
+        if (data.stage as TaskStage) {
+          setTasks((prevTasks) =>
+            prevTasks.map((prevTask) =>
+              prevTask.id == data.stage.taskId
+                ? {
+                    ...prevTask,
+                    stages: prevTask.stages.map((stage) =>
+                      stage.id === data.stage.id ? data.stage : stage
+                    ),
+                  }
+                : prevTask
+            )
+          );
+        }
+      });
+  };
+
   const displayAssignedMembers = (members: User[]) => {
     const MAX_NUM_OF_MEMBERS = 2;
     const remainingMembers = members.length - MAX_NUM_OF_MEMBERS;
@@ -444,6 +513,12 @@ export const TaskCard = ({
                       id={`stage${stage.id}`}
                       defaultChecked={stage.isCompleted}
                       onChange={(e) => updateStage(e, stage.id)}
+                      disabled={
+                        !isAssigned ||
+                        (!isAdmin &&
+                          (task.taskStatus == "REVIEWING" ||
+                            task.taskStatus == "DONE"))
+                      }
                     />
                     <label htmlFor={`stage${stage.id}`}>{stage.title}</label>
                   </div>
@@ -470,64 +545,6 @@ export const TaskCard = ({
     });
   };
 
-  const updateStage = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-    stageId: number
-  ) => {
-    const prevTask = [...tasksList];
-
-    setTasks((prevTasks) =>
-      prevTasks.map((prevTask) =>
-        prevTask.id == task.id
-          ? {
-              ...prevTask,
-              stages: prevTask.stages.map((stage) =>
-                stage.id === stageId
-                  ? { ...stage, isCompleted: e.target.checked }
-                  : stage
-              ),
-            }
-          : prevTask
-      )
-    );
-
-    await fetch(`/api/project/${task.projectId}/stages`, {
-      method: "POST",
-      body: JSON.stringify({
-        id: stageId,
-        taskId: task.id,
-        isCompleted: e.target.checked,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("updat?");
-
-        console.log(data);
-
-        if (data.error) {
-          alert(data.error);
-          setTasks(prevTask);
-          return;
-        }
-
-        if (data.stage as TaskStage) {
-          setTasks((prevTasks) =>
-            prevTasks.map((prevTask) =>
-              prevTask.id == data.stage.taskId
-                ? {
-                    ...prevTask,
-                    stages: prevTask.stages.map((stage) =>
-                      stage.id === data.stage.id ? data.stage : stage
-                    ),
-                  }
-                : prevTask
-            )
-          );
-        }
-      });
-  };
-
   return (
     <div
       ref={cardRef}
@@ -537,6 +554,13 @@ export const TaskCard = ({
       onClick={displayTaskDetails}
     >
       <div className={`indicator ${task.priority}`}></div>
+      {((isAssigned &&
+        (task.taskStatus == "TO_DO" || task.taskStatus == "ON_GOING")) ||
+        isAdmin) && (
+        <div className="gripContainer">
+          <FontAwesomeIcon icon={faGripVertical} />
+        </div>
+      )}
       <div className="content">
         <p>{truncateText(task.title, 50)}</p>
         <span>{truncateText(task.description as string, 250)}</span>
