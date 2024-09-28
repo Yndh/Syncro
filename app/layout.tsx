@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Familjen_Grotesk, Inter } from "next/font/google";
 import "./globals.scss";
 
 const inter = Inter({ subsets: ["latin"] });
+const familjenGrotest = Familjen_Grotesk({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Project Manager",
@@ -16,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={familjenGrotest.className}>{children}</body>
     </html>
   );
 }

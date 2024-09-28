@@ -1,4 +1,6 @@
 import { signOut } from "@/auth";
+import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const SignOutButton = () => {
   return (
@@ -7,7 +9,9 @@ const SignOutButton = () => {
         signOut();
       }}
     >
-      <button type="submit">Sign Out</button>
+      <button type="submit">
+        <FontAwesomeIcon icon={faRightFromBracket} />
+      </button>
     </form>
   );
 };

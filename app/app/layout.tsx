@@ -16,7 +16,7 @@ export default async function Home({
   if (!session) redirect("../signIn");
 
   return (
-    <div className="dashboard">
+    <div className="app__container">
       <SessionProvider session={session}>
         <ModalProvider>
           <Sidebar session={session} />
