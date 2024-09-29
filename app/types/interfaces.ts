@@ -40,6 +40,7 @@ export interface Task {
   title: string;
   description?: string;
   dueTime?: Date;
+  project?: Project;
   projectId: number;
   priority: TaskPriority;
   taskStatus: TaskStatus;
