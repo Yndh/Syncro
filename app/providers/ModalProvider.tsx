@@ -3,7 +3,9 @@
 import { ReactNode, createContext, useContext, useState } from "react";
 
 interface ModalState {
+  title: string;
   content: ReactNode | null;
+  bottom: ReactNode | null;
   setModal: (modalState: ModalState | null) => void;
 }
 
@@ -30,7 +32,9 @@ export const ModalProvider = ({ children }: ModalProviderProps) => {
   };
 
   const modalValue: ModalState = {
+    title: modalState?.title as string,
     content: modalState?.content || null,
+    bottom: modalState?.bottom || null,
     setModal,
   };
 

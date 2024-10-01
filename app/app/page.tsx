@@ -11,7 +11,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ResponsiveBar } from "@nivo/bar";
 import { ResponsivePie } from "@nivo/pie";
 import { useEffect, useState } from "react";
-import { Project, Task, TaskStatus } from "../types/interfaces";
+import { Project, Task, TaskPriority, TaskStatus } from "../types/interfaces";
+import { useTasks } from "../providers/UserTasksProvider";
+import { useProjects } from "../providers/ProjectsProvider";
 
 interface TaskData {
   id: "Completed" | "Uncompleted";
@@ -25,9 +27,18 @@ interface BarData {
   [key: string]: number | string;
 }
 
+const priorityOrder = [
+  TaskPriority.URGENT,
+  TaskPriority.HIGH,
+  TaskPriority.MEDIUM,
+  TaskPriority.LOW,
+];
+
 const App = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const { tasks, setTasks } = useTasks();
+  const { projects, setProjects } = useProjects();
+
+  console.log(tasks);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,8 +108,6 @@ const App = () => {
       const day = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(
         createdAt
       );
-
-      console.log(day);
 
       taskByDay[day] += 1;
     });
@@ -173,70 +182,79 @@ const App = () => {
           <div className="card">
             <p>My Tasks</p>
             <div className="tasksScroll">
-              {uncompletedTasks.map((task) => (
-                <div className="uncompletedTask" key={`task${task.id}`}>
-                  <div className="icon">
-                    <FontAwesomeIcon icon={faFlag} />
-                  </div>
-                  <div className="details">
-                    <div className="detailsHeader">
-                      <h2>{task.title}</h2>
-                      <p>{task.project?.name}</p>
+              {uncompletedTasks
+                .sort(
+                  (a, b) =>
+                    priorityOrder.indexOf(a.priority) -
+                    priorityOrder.indexOf(b.priority)
+                )
+                .map((task) => (
+                  <div
+                    className={`uncompletedTask ${task.priority.toLowerCase()}`}
+                    key={`task${task.id}`}
+                  >
+                    <div className="icon">
+                      <FontAwesomeIcon icon={faFlag} />
                     </div>
+                    <div className="details">
+                      <div className="detailsHeader">
+                        <h2>{task.title}</h2>
+                        <p>{task.project?.name}</p>
+                      </div>
 
-                    <div className="taskDetails">
-                      <div className="col">
-                        <p>Status</p>
-                        <span>
-                          {task.taskStatus.replace("_", " ").toLowerCase()}
-                        </span>
-                      </div>
-                      <div className="col">
-                        <p>Priority</p>
-                        <span>
-                          {task.priority.replace("_", " ").toLowerCase()}
-                        </span>
-                      </div>
-                      <div className="col">
-                        <p>Stages Completed</p>
-                        {task.stages.length > 0 ? (
+                      <div className="taskDetails">
+                        <div className="col">
+                          <p>Status</p>
                           <span>
-                            {
-                              task.stages.filter((stage) => stage.isCompleted)
-                                .length
-                            }
-                            /{task.stages.length}
+                            {task.taskStatus.replace("_", " ").toLowerCase()}
                           </span>
-                        ) : (
-                          <span>No stages</span>
-                        )}
-                      </div>
-                      <div className="col">
-                        <p>Due Date</p>
-                        <span>
-                          {task.dueTime ? (
-                            new Intl.DateTimeFormat("en-US", {
-                              day: "numeric",
-                              month: "long",
-                              hour: "numeric",
-                              minute: "numeric",
-                            }).format(new Date(task.dueTime))
+                        </div>
+                        <div className="col">
+                          <p>Priority</p>
+                          <span>
+                            {task.priority.replace("_", " ").toLowerCase()}
+                          </span>
+                        </div>
+                        <div className="col">
+                          <p>Stages Completed</p>
+                          {task.stages.length > 0 ? (
+                            <span>
+                              {
+                                task.stages.filter((stage) => stage.isCompleted)
+                                  .length
+                              }
+                              /{task.stages.length}
+                            </span>
                           ) : (
-                            <span>None</span>
+                            <span>No stages</span>
                           )}
-                        </span>
+                        </div>
+                        <div className="col">
+                          <p>Due Date</p>
+                          <span>
+                            {task.dueTime ? (
+                              new Intl.DateTimeFormat("en-US", {
+                                day: "numeric",
+                                month: "long",
+                                hour: "numeric",
+                                minute: "numeric",
+                              }).format(new Date(task.dueTime))
+                            ) : (
+                              <span>None</span>
+                            )}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </div>
         <div className="row-col">
           <div className="card chart">
             <p>Completed Tasks Chart</p>
-            <div className="pieChart">
+            <div className="chart">
               <ResponsivePie
                 data={pieData}
                 innerRadius={0.8}
@@ -259,12 +277,12 @@ const App = () => {
           </div>
           <div className="card chart">
             <p>Graphs and Analysis</p>
-            <div className="pieChart">
+            <div className="chart">
               <ResponsiveBar
                 data={barData}
                 keys={["completed"]}
                 margin={{ top: 20, right: 0, bottom: 30, left: 0 }}
-                padding={0.4}
+                padding={0.6}
                 indexBy="day"
                 enableLabel={false}
                 enableGridY={false}

@@ -39,9 +39,22 @@ export async function mGET(req: Request, res: NextApiResponse) {
         },
       },
       include: {
-        tasks: true,
-        notes: true,
-        members: true,
+        members: {
+          include: {
+            user: true,
+          },
+        },
+        tasks: {
+          include: {
+            assignedTo: true,
+            stages: true,
+          },
+        },
+        notes: {
+          include: {
+            createdBy: true,
+          },
+        },
       },
     });
 

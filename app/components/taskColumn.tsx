@@ -65,7 +65,10 @@ export const TaskColumn = ({
 
   return (
     <div className="cardCol" ref={divRef}>
-      <h1>{status.replace("_", " ")}</h1>
+      <div className="colHeader">
+        <h1>{status.replace("_", " ").toLowerCase()}</h1>
+        <span className="count">{tasks.length}</span>
+      </div>
       <div className="cardsContainer">
         {tasks.map((task) => (
           <TaskCard

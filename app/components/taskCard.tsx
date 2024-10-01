@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronRight,
   faGripVertical,
+  faPlus,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { useModal } from "../providers/ModalProvider";
@@ -70,14 +71,9 @@ export const TaskCard = ({
     [task.id]
   );
 
-  console.log(task.assignedTo);
-  console.log(session);
-
   const isAssigned = task.assignedTo.some(
     (user) => user.id === session.data?.user?.id
   );
-  console.log(isAssigned);
-  console.table(session);
 
   if (
     (isAssigned &&
@@ -90,7 +86,7 @@ export const TaskCard = ({
   const { setContextMenu } = useContextMenu();
   const { setModal } = useModal();
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const descInputRef = useRef<HTMLInputElement>(null);
+  const descInputRef = useRef<HTMLTextAreaElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
   const membersListRef = useRef<HTMLDivElement>(null);
   const prioritiesListRef = useRef<HTMLDivElement>(null);
@@ -189,17 +185,13 @@ export const TaskCard = ({
         title: title,
         description: description,
         assignedMembers: assignedMembers,
-        dueDate: dueDate,
+        dueDate: isoDueDate,
         priority: priority,
         stages: stages,
       }),
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("updat?");
-
-        console.log(data);
-
         if (data.error) {
           alert(data.error);
           setTasks(prevTask);
@@ -242,113 +234,153 @@ export const TaskCard = ({
 
   const handleModal = () => {
     setModal({
+      title: "Edit Task",
       content: (
-        <form onSubmit={submitForm}>
-          <label htmlFor="taskInput">Title</label>
-          <input
-            type="text"
-            id="taskInput"
-            placeholder="Task title"
-            ref={titleInputRef}
-            defaultValue={task.title}
-          />
+        <form onSubmit={submitForm} id="updateTask">
+          <div className="formRow">
+            <label htmlFor="taskInput">
+              <p>Name</p>
+              <span>Name of task</span>
+            </label>
+            <input
+              type="text"
+              id="taskInput"
+              placeholder="Task title"
+              ref={titleInputRef}
+              defaultValue={task.title}
+            />
+          </div>
 
-          <label htmlFor="descInput">Description*</label>
-          <input
-            type="text"
-            id="descInput"
-            placeholder="Task Description"
-            ref={descInputRef}
-            defaultValue={task.description}
-          />
+          <div className="formRow">
+            <label htmlFor="descInput">
+              <p>Description</p>
+              <span>Description of task</span>
+            </label>
+            <textarea
+              id="descInput"
+              placeholder="Task Description"
+              ref={descInputRef}
+              defaultValue={task.description}
+            />
+          </div>
 
-          <label htmlFor="stages">Stages</label>
-          <ul className="stagesList">
-            {task.stages.map((stage, index) => (
-              <li key={index} className="newStageContainer">
+          <div className="formRow">
+            <label htmlFor="stages">
+              <p>Sub tasks</p>
+              <span>Create subtasks</span>
+            </label>
+            <div className="stagesContainer">
+              <ul className="stagesList">
+                {task.stages.map((stage, index) => (
+                  <li key={index} className="newStageContainer">
+                    <input
+                      id={`stage${stage.id}`}
+                      type="text"
+                      placeholder="Stage name"
+                      defaultValue={stage.title}
+                    />
+                    <button type="button" onClick={() => removeStage(index)}>
+                      <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <button type="button" onClick={addStage}>
+                <FontAwesomeIcon icon={faPlus} />
+                Add subtask
+              </button>
+            </div>
+          </div>
+
+          <div className="formRow">
+            <label>
+              <p>Asignee</p>
+              <span>Asign task to members of the project</span>
+            </label>
+            <div className="membersList" ref={membersListRef}>
+              {project.members &&
+                project.members.map((member) => (
+                  <div>
+                    <input
+                      type="checkbox"
+                      className="member"
+                      name="todoAsign"
+                      id={`${member.userId}`}
+                      defaultChecked={task.assignedTo.some(
+                        (tMember) => tMember.id === member.user.id
+                      )}
+                    />
+                    <label htmlFor={`${member.userId}`}>
+                      <img src={member.user.image} alt={member.user.name} />
+                    </label>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          <div className="formRow">
+            <label htmlFor="dueToDate">
+              <p>Due Date</p>
+              <span>Deadline of task</span>
+            </label>
+            {task.dueTime && (
+              <>
                 <input
-                  id={`stage${stage.id}`}
-                  type="text"
-                  placeholder="Stage name"
-                  defaultValue={stage.title}
+                  type="datetime-local"
+                  name=""
+                  id="dueToDate"
+                  ref={dateInputRef}
+                  defaultValue={new Date(task.dueTime)
+                    .toISOString()
+                    .slice(0, 16)}
                 />
-                <button type="button" onClick={() => removeStage(index)}>
-                  <FontAwesomeIcon icon={faTrash} />
-                </button>
-              </li>
-            ))}
-          </ul>
-          <button type="button" onClick={addStage}>
-            Add stage
-          </button>
+              </>
+            )}
 
-          <span>Assign To</span>
-          <div className="membersList" ref={membersListRef}>
-            {project.members &&
-              project.members.map((member) => (
-                <div>
+            {!task.dueTime && (
+              <>
+                <input
+                  type="datetime-local"
+                  name=""
+                  id="dueToDate"
+                  ref={dateInputRef}
+                />
+              </>
+            )}
+          </div>
+
+          <div className="formRow">
+            <label>
+              <p>Priority</p>
+              <span>Set priority of task</span>
+            </label>
+            <div className="prioritiesList" ref={prioritiesListRef}>
+              {priorities.map((currPriority) => (
+                <div key={currPriority}>
                   <input
-                    type="checkbox"
-                    className="member"
-                    name="todoAsign"
-                    id={`${member.userId}`}
-                    defaultChecked={task.assignedTo.some(
-                      (tMember) => tMember.id === member.user.id
-                    )}
+                    type="radio"
+                    name="setPriority"
+                    id={`priority${currPriority}`}
+                    defaultChecked={task.priority === currPriority}
                   />
-                  <label htmlFor={`${member.userId}`}>
-                    <img src={member.user.image} alt={member.user.name} />
+                  <label htmlFor={`priority${currPriority}`}>
+                    {currPriority}
                   </label>
                 </div>
               ))}
+            </div>
           </div>
-
-          <label htmlFor="dueToDate">Due to*</label>
-          {task.dueTime && (
-            <>
-              {console.log(new Date(task.dueTime).toISOString())}
-              <input
-                type="datetime-local"
-                name=""
-                id="dueToDate"
-                ref={dateInputRef}
-                defaultValue={new Date(task.dueTime).toISOString().slice(0, 16)}
-              />
-            </>
-          )}
-
-          {!task.dueTime && (
-            <>
-              <span>no date {task.dueTime}</span>
-              <input
-                type="datetime-local"
-                name=""
-                id="dueToDate"
-                ref={dateInputRef}
-              />
-            </>
-          )}
-
-          <label>Priority</label>
-          <div className="prioritiesList" ref={prioritiesListRef}>
-            {priorities.map((currPriority) => (
-              <div key={currPriority}>
-                <input
-                  type="radio"
-                  name="setPriority"
-                  id={`priority${currPriority}`}
-                  defaultChecked={task.priority === currPriority}
-                />
-                <label htmlFor={`priority${currPriority}`}>
-                  {currPriority}
-                </label>
-              </div>
-            ))}
-          </div>
-
-          <button type="submit">Update Task</button>
-          <button onClick={() => setModal(null)}>Close</button>
         </form>
+      ),
+      bottom: (
+        <>
+          <button type="submit" form="updateTask">
+            Update Task
+          </button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
+        </>
       ),
       setModal,
     });
@@ -497,49 +529,60 @@ export const TaskCard = ({
 
   const displayTaskDetails = () => {
     setModal({
+      title: task.taskStatus.replace("_", " ").toLowerCase(),
       content: (
-        <div className={`taskCard ${task.priority}`}>
-          <div className={`indicator ${task.priority}`}></div>
-          <div className="content">
+        <>
+          <div className="header">
             <h2>{task.title}</h2>
             <span>{task.description}</span>
-
-            {task.stages.length > 0 && (
-              <div className="stages">
-                {task.stages.map((stage) => (
-                  <div className="stage">
-                    <input
-                      type="checkbox"
-                      id={`stage${stage.id}`}
-                      defaultChecked={stage.isCompleted}
-                      onChange={(e) => updateStage(e, stage.id)}
-                      disabled={
-                        !isAssigned ||
-                        (!isAdmin &&
-                          (task.taskStatus == "REVIEWING" ||
-                            task.taskStatus == "DONE"))
-                      }
-                    />
-                    <label htmlFor={`stage${stage.id}`}>{stage.title}</label>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {displayAssignedMembers(task.assignedTo)}
-            {task.dueTime && (
-              <span className="dueTime">
-                Due to&nbsp;
-                {new Intl.DateTimeFormat("en-US", {
-                  day: "numeric",
-                  month: "long",
-                  hour: "numeric",
-                  minute: "numeric",
-                }).format(new Date(task.dueTime))}
-              </span>
-            )}
           </div>
-        </div>
+
+          {task.stages.length > 0 && (
+            <div className="stages">
+              <p>Subtasks</p>
+              {task.stages.map((stage) => (
+                <div className="stage">
+                  <input
+                    type="checkbox"
+                    id={`stage${stage.id}`}
+                    defaultChecked={stage.isCompleted}
+                    onChange={(e) => updateStage(e, stage.id)}
+                    disabled={
+                      !isAssigned ||
+                      (!isAdmin &&
+                        (task.taskStatus == "REVIEWING" ||
+                          task.taskStatus == "DONE"))
+                    }
+                  />
+                  <label htmlFor={`stage${stage.id}`}>{stage.title}</label>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="contentBottom">
+            <div>
+              {task.dueTime && (
+                <span className="dueTime">
+                  {new Intl.DateTimeFormat("en-US", {
+                    day: "numeric",
+                  }).format(new Date(task.dueTime))}{" "}
+                  {new Intl.DateTimeFormat("en-US", { month: "long" }).format(
+                    new Date(task.dueTime)
+                  )}
+                </span>
+              )}
+            </div>
+            {displayAssignedMembers(task.assignedTo)}
+          </div>
+        </>
+      ),
+      bottom: (
+        <>
+          <button onClick={() => setModal(null)} className="secondary">
+            Close
+          </button>
+        </>
       ),
       setModal,
     });
@@ -562,42 +605,53 @@ export const TaskCard = ({
         </div>
       )}
       <div className="content">
-        <p>{truncateText(task.title, 50)}</p>
-        <span>{truncateText(task.description as string, 250)}</span>
-        {(task.description?.length ?? 0) > 250 && (
-          <Link href={""}>Read more...</Link>
-        )}
+        <div className="contentHeader">
+          <p>{truncateText(task.title, 50)}</p>
+          <span>{truncateText(task.description as string, 250)}</span>
+          {(task.description?.length ?? 0) > 250 && (
+            <Link href={""}>Read more...</Link>
+          )}
+        </div>
 
         {task.stages.length > 0 && (
-          <>
+          <div className="progressContainer">
+            <div className="progressText">
+              <span>Progress</span>
+              <p>
+                {task.stages.filter((stage) => stage.isCompleted).length}/
+                {task.stages.length}
+              </p>
+            </div>
             <div className="progress">
               {task.stages
                 .sort((a, b) =>
                   a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? -1 : 1
                 )
                 .map((stage) => (
-                  <span className={stage.isCompleted ? "completed" : ""}></span>
+                  <span
+                    key={`stage${stage.id}`}
+                    className={stage.isCompleted ? "completed" : ""}
+                  ></span>
                 ))}
             </div>
-            <span>
-              {task.stages.filter((stage) => stage.isCompleted).length}/
-              {task.stages.length}
-            </span>
-          </>
+          </div>
         )}
 
-        {displayAssignedMembers(task.assignedTo)}
-        {task.dueTime && (
-          <span className="dueTime">
-            Due to&nbsp;
-            {new Intl.DateTimeFormat("en-US", {
-              day: "numeric",
-              month: "long",
-              hour: "numeric",
-              minute: "numeric",
-            }).format(new Date(task.dueTime))}
-          </span>
-        )}
+        <div className="contentBottom">
+          <div>
+            {task.dueTime && (
+              <span className="dueTime">
+                {new Intl.DateTimeFormat("en-US", { day: "numeric" }).format(
+                  new Date(task.dueTime)
+                )}{" "}
+                {new Intl.DateTimeFormat("en-US", { month: "long" }).format(
+                  new Date(task.dueTime)
+                )}
+              </span>
+            )}
+          </div>
+          {displayAssignedMembers(task.assignedTo)}
+        </div>
       </div>
     </div>
   );

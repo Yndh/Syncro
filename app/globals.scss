@@ -36,8 +36,27 @@ button {
   outline: none;
 }
 
-input {
-  padding: .5rem;
+input,
+textarea {
+  padding: 2px 10px;
+  border-radius: 10px;
+  border: 1px solid $border-color;
+  color: $secondary-font-color;
+  background: transparent;
+  outline: none;
+
+  &::placeholder {
+    color: $teritiary-font-color;
+  }
+}
+
+input[type="checkbox"] {
+  background: transparent;
+  accent-color: transparent;
+  color: $secondary-font-color;
+  height: 18px;
+  width: 18px;
+
 }
 
 .app__container {
@@ -49,20 +68,82 @@ input {
 .sidebar {
   display: flex;
   flex-direction: column;
-  min-width: 300px;
+
+  width: 100px;
   padding: 50px 30px;
+  padding-right: 0px;
   gap: 30px;
   box-sizing: border-box;
+
+  transition: .3s;
+
+  &:hover {
+    width: 300px;
+    padding-right: 30px;
+
+    .logo {
+      justify-content: unset;
+
+      h1 {
+        display: block;
+      }
+    }
+
+    nav {
+      align-items: unset;
+
+      p {
+        opacity: 1;
+      }
+
+      ol>li {
+        width: auto;
+
+        span {
+          display: block;
+        }
+
+        svg:nth-child(3) {
+          display: block;
+        }
+      }
+    }
+
+    .userContainer {
+      .user {
+        justify-content: unset;
+      }
+
+      .userDetails {
+        display: flex !important;
+      }
+
+      form {
+        display: flex !important;
+      }
+    }
+
+    &~main .projectPage .projectsList {
+      max-width: 0px;
+      min-width: 0px;
+      width: 0px;
+      transition: opacity 0s;
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
 
   .logo {
     display: flex;
     flex-direction: row;
+    justify-content: center;
     align-items: center;
     gap: 15px;
     width: 100%;
 
     h1 {
       font-size: 36px;
+      display: none;
     }
 
   }
@@ -70,6 +151,7 @@ input {
   nav {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 10px;
     width: 100%;
 
@@ -77,6 +159,7 @@ input {
       font-size: 18px;
       font-weight: 600;
       color: $secondary-font-color;
+      opacity: 0;
     }
 
     ol {
@@ -92,10 +175,12 @@ input {
         display: flex;
         flex-direction: row;
         padding: 10px;
+        width: 60px;
 
         border-radius: 10px;
         color: $secondary-font-color;
 
+        cursor: pointer;
         transition: .3s;
 
         &.active {
@@ -115,6 +200,10 @@ input {
 
         a {
           width: 100%;
+        }
+
+        span {
+          display: none;
         }
 
         .navElement {
@@ -146,10 +235,10 @@ input {
             font-size: 20px;
             font-weight: 600;
             width: 100%;
-
           }
 
-          svg:not(:first-child) {
+          svg:nth-child(3) {
+            display: none;
             margin-right: 7px;
           }
         }
@@ -171,6 +260,7 @@ input {
 
     .user {
       display: flex;
+      justify-content: center;
       width: 100%;
       gap: 7px;
 
@@ -181,7 +271,7 @@ input {
       }
 
       .userDetails {
-        display: flex;
+        display: none;
         flex-direction: column;
 
         p {
@@ -198,7 +288,7 @@ input {
     }
 
     form {
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       flex-grow: 1;
@@ -225,6 +315,33 @@ input {
   }
 }
 
+.blurCircle {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: $accent-color;
+  filter: blur(100px);
+  opacity: .15;
+  z-index: -1;
+  transition: .3s;
+  animation: 5s breathe infinite;
+
+  &:nth-child(3) {
+    top: 200px;
+    left: 170px;
+  }
+
+  &:nth-child(4) {
+    right: 100px;
+    bottom: 100px;
+  }
+
+  &:nth-child(5) {
+    right: 30%;
+    top: 50px;
+  }
+}
+
 main {
   position: relative;
   display: flex;
@@ -246,11 +363,34 @@ main {
       margin: 0;
     }
 
+    h2 {
+      font-size: 42px;
+      color: $primary-font-color;
+      margin: 0;
+    }
+
     p {
       font-size: 20px;
       font-weight: 500;
       color: $secondary-font-color;
       margin: 0;
+    }
+
+    .percentage {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      progress {
+
+        &::-webkit-progress-bar {
+          background-color: $teritiary-font-color;
+        }
+
+        &::-webkit-progress-value {
+          background: $accent-color;
+        }
+      }
     }
   }
 
@@ -331,7 +471,7 @@ main {
         }
       }
 
-      .pieChart {
+      .chart {
         position: relative;
         display: flex;
         align-items: center;
@@ -380,6 +520,26 @@ main {
           gap: 10px;
           // border: 1px solid $border-color;
           // border-radius: 5px;
+
+          &.low .icon {
+            background: rgba($success-color, .8);
+            box-shadow: 0px 2px 10px $success-color;
+          }
+
+          &.medium .icon {
+            background: rgba($warning-color, .8);
+            box-shadow: 0px 2px 10px $warning-color;
+          }
+
+          &.high .icon {
+            background: rgba($high-color, .8);
+            box-shadow: 0px 2px 10px $high-color;
+          }
+
+          &.urgent .icon {
+            background: rgba($error-color, .8);
+            box-shadow: 0px 2px 10px $error-color;
+          }
 
           .icon {
             display: flex;
@@ -444,6 +604,387 @@ main {
     border-radius: 5px;
     box-shadow: 0 4px 10px rgb(0, 0, 0, .1);
   }
+
+  .projectPage {
+    display: flex;
+    height: 100%;
+
+    .projectsList {
+      display: flex;
+      flex-direction: column;
+      min-width: 200px;
+      padding-right: 20px;
+      padding-top: 50px;
+      gap: 20px;
+      transition: .3s;
+
+      h2 {
+        font-size: 32px;
+        color: $primary-font-color;
+      }
+
+      .list {
+        display: flex;
+        justify-content: flex-start;
+        flex-direction: column;
+        gap: 10px;
+
+        p {
+          font-size: 16px;
+          color: $secondary-font-color;
+        }
+
+        ol {
+          display: flex;
+          flex-direction: column;
+
+          list-style-type: none;
+          gap: 10px;
+          border-left: 1px solid $teritiary-font-color;
+
+          li {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            .min {
+              height: 1px;
+              background: $teritiary-font-color;
+              width: 10px;
+            }
+
+            a {
+              width: 100%;
+              padding: 7px 15px;
+              border-radius: 5px;
+              font-weight: 500;
+              color: $secondary-font-color;
+              font-size: 14px;
+              transition: .3s;
+
+              &:hover {
+                opacity: .9;
+              }
+
+              &.active {
+                background: $accent-color;
+                color: $primary-light-font-color;
+              }
+            }
+          }
+        }
+
+        button {
+          display: flex;
+          width: 100%;
+          justify-content: space-between;
+          padding: 10px 15px;
+          background: $card-color;
+          color: $secondary-font-color;
+          box-shadow: 0px 2px 10px rgb(0, 0, 0, .1);
+
+          span {
+            width: 100%;
+            font-weight: 600;
+          }
+        }
+      }
+
+    }
+
+    .projectContainer {
+      display: flex;
+      flex-direction: column;
+      padding-left: 30px;
+      gap: 20px;
+      height: 100%;
+
+      .projectNav {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: row;
+        gap: 10px;
+        padding: 7px;
+        width: fit-content;
+        background: $secondary-accent-color;
+        border-radius: 15px;
+
+
+        .navElement {
+          display: flex;
+
+
+          label {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 0px;
+            width: 120px;
+            border-radius: 10px;
+            color: $secondary-font-color;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+          }
+
+          input {
+            display: none;
+
+            &:checked~label {
+              background: $card-color;
+              color: $primary-font-color;
+
+            }
+          }
+        }
+      }
+
+      .projectElementContainer {
+        position: relative !important;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+
+        .todoContainer {
+          position: relative !important;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+          width: 100%;
+          height: 100%;
+          box-sizing: border-box;
+          overflow: hidden;
+
+          .cardCol {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: $card-color;
+            border-radius: 10px;
+            border: 1px dashed $secondary-font-color;
+            padding: 20px;
+            height: 100%;
+            gap: 15px;
+
+            .colHeader {
+              display: flex;
+              align-items: center;
+              gap: 7px;
+
+              h1 {
+                color: $primary-font-color;
+                font-weight: 600;
+                font-size: 28px;
+                text-transform: capitalize;
+              }
+
+              .count {
+                background: $secondary-font-color;
+                color: $primary-light-font-color;
+                font-weight: 500;
+                font-size: 14px;
+                padding: 3px 7px;
+                border-radius: 3px;
+              }
+            }
+
+            .cardsContainer {
+              position: relative;
+              display: flex;
+              flex-direction: column;
+              width: 100%;
+              flex: 1 1 auto;
+              gap: 15px;
+              height: 0;
+              overflow-y: scroll;
+              scrollbar-width: none !important;
+
+              .taskCard {
+                position: relative;
+                display: flex;
+                gap: 5px;
+                border-radius: 10px;
+
+                color: $secondary-font-color;
+                background: $card-color;
+                box-shadow: 0px 2px 10px rgb(0, 0, 0, .1);
+                cursor: pointer;
+
+                .indicator {
+                  width: 5px !important;
+                  height: 100%;
+                  border-top-left-radius: 10px;
+                  border-bottom-left-radius: 10px;
+
+                  &.LOW {
+                    background: $success-color;
+                  }
+
+                  &.MEDIUM {
+                    background: $warning-color;
+                  }
+
+                  &.HIGH {
+                    background: $high-color;
+                  }
+
+                  &.URGENT {
+                    background: $error-color;
+                  }
+                }
+
+                .gripContainer {
+                  position: absolute;
+                  right: 0;
+                  top: 0;
+                  padding: 5px 10px;
+                  opacity: .4;
+                  font-size: 14px;
+                  transition: .3s;
+                  cursor: move;
+
+                  &:hover {
+                    opacity: .7;
+                  }
+
+                }
+
+                .content {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 15px;
+                  padding: 10px;
+                  width: 100%;
+                  word-break: break-word !important;
+
+                  .contentHeader {
+                    display: flex;
+                    flex-direction: column;
+                    word-break: break-word !important;
+
+                    p {
+                      font-size: 20px;
+                      font-weight: 500;
+                      color: $primary-font-color;
+                    }
+
+                    span {
+                      font-size: 16px;
+                      font-weight: 400;
+                      color: $secondary-font-color;
+                    }
+                  }
+
+                  .progressContainer {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 3px;
+
+                    .progressText {
+                      display: flex;
+                      justify-content: space-between;
+                      width: 100%;
+                      font-size: 14px;
+
+                      p {
+                        color: $primary-font-color;
+                        font-weight: 500;
+                      }
+                    }
+
+                    .progress {
+                      display: flex;
+                      justify-content: space-between;
+                      gap: 2px;
+                      width: 100%;
+
+                      span {
+                        background: rgba(0, 0, 0, 0.3);
+                        border-radius: 5px;
+                        width: 100%;
+                        height: 5px;
+
+                        &.completed {
+                          background: $priorityLow;
+                        }
+                      }
+                    }
+
+
+                  }
+
+                  .contentBottom {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    width: 100%;
+
+                    span.dueTime {
+                      font-size: 14px;
+                      padding: 4px 8px;
+                      background: rgba($error-color, .2);
+                      color: $error-color;
+                      border-radius: 5px;
+                    }
+                  }
+
+
+                  a {
+                    color: $accent-color;
+                  }
+
+                  .stages {
+                    display: flex;
+                    flex-direction: column;
+                    margin-top: 10px;
+                  }
+
+                  .stage {
+                    display: flex;
+                    gap: 7px;
+                  }
+
+                  .assignedMembers {
+                    display: flex;
+                    gap: 10px;
+                    margin-top: 10px;
+
+                    img {
+                      width: 30px;
+                      height: 30px;
+                      border-radius: 50%;
+                    }
+                  }
+                }
+              }
+            }
+
+          }
+        }
+
+        .absoluteButton {
+          position: absolute;
+          bottom: 15px;
+          right: 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          border-radius: 50%;
+          aspect-ratio: 1/1;
+          scale: 1.3;
+
+          svg {
+            font-size: 22px;
+          }
+        }
+      }
+    }
+  }
 }
 
 
@@ -491,620 +1032,579 @@ main {
 // //   }
 // // }
 
-// form {
-//   display: flex;
-//   flex-direction: column;
-//   gap: 5px;
-//   margin-top: 10px;
-//   padding: 2rem;
-//   width: 400px;
-
-//   background: $background-color;
-// }
-
-// .modalContainer {
-//   position: absolute;
-//   top: 0;
-//   left: 0;
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-//   width: 100%;
-//   height: 100vh;
-//   transition: .3s;
-//   pointer-events: none;
-//   opacity: 0;
-//   backdrop-filter: blur(2px);
-
-//   &.visible {
-//     opacity: 1;
-//     pointer-events: all;
-//   }
-
-//   .noteCard,
-//   .taskCard {
-//     position: relative;
-//     width: 500px;
-//   }
-
-//   .taskCard .content {
-//     width: 490px;
-//   }
-
-//   .taskCard .indicator {
-//     width: 5px;
-//   }
-
-// }
-
-// .stagesList {
-//   display: flex;
-//   flex-direction: column;
-//   gap: 5px;
-//   max-height: 100px;
-//   overflow-y: scroll;
-
-//   .newStageContainer {
-//     display: flex;
-//     gap: 2px;
-//   }
-
-//   input {
-//     border: 1px solid transparent;
-//     background: transparent;
-//     width: 100%;
-
-//     &:focus {
-//       border-color: $accent-color;
-//     }
-//   }
-// }
-
-// .membersList {
-//   display: flex;
-//   align-items: center;
-
-//   overflow-x: scroll;
-
-//   img {
-//     width: 40px;
-//     height: 40px;
-//     aspect-ratio: 1/1;
-//     border-radius: 50%;
-//     border: 2px solid transparent;
-
-//     cursor: pointer;
-//     transition: .3s;
-//   }
-
-//   input {
-//     display: none;
-//   }
-
-//   input:checked~label img {
-//     border-color: $accent-color;
-//   }
-// }
-
-// .prioritiesList {
-//   display: flex;
-//   justify-content: space-between;
-//   margin-top: 5px;
-//   margin-bottom: 15px;
-
-//   label {
-//     padding: 5px 10px;
-//     background: $background-color-secondary;
-//     border: 1px solid $primary-font-color;
-//     border-radius: 5px;
-//     color: $primary-font-color;
-//     transition: .3s;
-//   }
-
-//   input {
-//     display: none;
-//   }
-
-//   input:checked~label {
-//     border-color: transparent;
-//   }
-
-//   input#priorityLOW:checked~label {
-//     background: $priorityLow;
-//   }
-
-//   input#priorityMEDIUM:checked~label {
-//     background: $priorityMedium;
-//   }
-
-//   input#priorityHIGH:checked~label {
-//     background: $priorityHigh;
-//   }
-
-//   input#priorityURGENT:checked~label {
-//     background: $priorityUrgent;
-//   }
-// }
-
-// .projectsList {
-//   display: flex;
-//   gap: 20px;
-// }
-
-// .projectNav {
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-//   flex-direction: row;
-//   gap: 10px;
-//   width: 50%;
-//   margin-top: 20px;
-
-
-//   .navElement {
-//     display: flex;
-
-
-//     label {
-//       padding: .5rem 1rem;
-//       border-radius: 5px;
-//       background: $background-color;
-//       box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-//       cursor: pointer;
-//     }
-
-//     input {
-//       display: none;
-
-//       &:checked~label {
-//         background: $secondary-accent-color;
-//         color: $accent-color;
-//       }
-//     }
-//   }
-// }
-
-// .projectElementContainer {
-//   position: relative !important;
-//   display: flex;
-//   flex-direction: column;
-//   width: 100%;
-//   height: 100%;
-//   overflow: hidden;
-// }
-
-// .todoContainer {
-//   position: relative !important;
-//   display: grid;
-//   grid-template-columns: repeat(4, 1fr);
-//   gap: 20px;
-//   padding: 20px;
-//   width: 100%;
-//   height: 100%;
-//   box-sizing: border-box;
-//   overflow: hidden;
-// }
-
-// .cardCol {
-//   position: relative;
-//   display: flex;
-//   flex-direction: column;
-//   background-color: #fff;
-//   border: 1px solid #ddd;
-//   border-radius: 5px;
-//   padding: 20px;
-//   height: 100%;
-
-// }
-
-// .cardsContainer {
-//   position: relative;
-//   display: flex;
-//   flex-direction: column;
-//   width: 100%;
-//   flex: 1 1 auto;
-//   height: 0;
-//   overflow-y: scroll;
-//   scrollbar-width: none !important;
-// }
-
-// .absoluteButton {
-//   position: absolute;
-//   bottom: 15px;
-//   right: 15px;
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-
-//   border-radius: 50%;
-//   aspect-ratio: 1/1;
-//   scale: 1.3;
-
-//   svg {
-//     font-size: 22px;
-//   }
-// }
-
-// .taskCard {
-//   position: relative;
-//   display: flex;
-//   gap: 5px;
-//   border-radius: 10px;
-//   margin-top: 10px;
-
-//   background: $background-color;
-//   cursor: pointer;
-
-//   .indicator {
-//     width: 5px !important;
-//     height: 100%;
-//     border-top-left-radius: 10px;
-//     border-bottom-left-radius: 10px;
-
-//     &.LOW {
-//       background: $priorityLow;
-//     }
-
-//     &.MEDIUM {
-//       background: $priorityMedium;
-//     }
-
-//     &.HIGH {
-//       background: $priorityHigh;
-//     }
-
-//     &.URGENT {
-//       background: $priorityUrgent;
-//     }
-//   }
-
-//   .gripContainer {
-//     position: absolute;
-//     right: 0;
-//     top: 0;
-//     padding: 5px 10px;
-//     opacity: .4;
-//     font-size: 14px;
-//     transition: .3s;
-//     cursor: move;
-
-//     &:hover {
-//       opacity: .7;
-//     }
-
-//   }
-
-//   .content {
-//     display: flex;
-//     flex-direction: column;
-//     gap: 5px;
-//     padding: 10px;
-//     width: 100%;
-//     word-break: break-word !important;
-
-//     p {
-//       font-size: 18px;
-//       font-weight: 500;
-//     }
-
-//     span {
-//       opacity: .7;
-//     }
-
-//     span.dueTime {
-//       font-size: 14px;
-//       margin-top: 5px;
-//     }
-
-//     a {
-//       color: $accent-color;
-//     }
-
-//     .progress {
-//       display: flex;
-//       justify-content: space-between;
-//       gap: 2px;
-//       width: 100%;
-
-//       span {
-//         background: rgba(0, 0, 0, 0.3);
-//         border-radius: 5px;
-//         width: 100%;
-//         height: 5px;
-
-//         &.completed {
-//           background: $priorityLow;
-//         }
-//       }
-//     }
-
-//     .stages {
-//       display: flex;
-//       flex-direction: column;
-//       margin-top: 10px;
-//     }
-
-//     .stage {
-//       display: flex;
-//       gap: 7px;
-//     }
-
-//     .assignedMembers {
-//       display: flex;
-//       gap: 10px;
-//       margin-top: 10px;
-
-//       img {
-//         width: 30px;
-//         height: 30px;
-//         border-radius: 50%;
-//       }
-//     }
-//   }
-// }
-
-// .contextMenu {
-//   position: fixed;
-//   z-index: 998;
-//   display: flex;
-//   gap: 5px;
-//   flex-direction: column;
-
-//   background: $background-color-secondary;
-//   border: 1px solid $primary-font-color;
-//   border-radius: 5px;
-//   cursor: pointer;
-
-//   ol.contextMenuList {
-//     display: flex;
-//     flex-direction: column;
-//     gap: 5px;
-
-//     list-style-type: none;
-
-//     li {
-//       position: relative;
-//       padding: 5px 10px;
-//       transition: .3s;
-
-//       &:hover {
-//         background: $secondary-accent-color;
-//         color: $accent-color;
-
-//         ol {
-//           display: flex;
-//         }
-//       }
-
-//       &.delete:hover {
-//         background: $priorityUrgent;
-//         color: $primary-font-color;
-//       }
-
-//       svg {
-//         font-size: 14px;
-//       }
-
-//       ol {
-//         position: absolute;
-//         left: 100%;
-//         top: 0;
-//         display: none;
-//         flex-direction: column;
-//         gap: 5px;
-
-//         background: $background-color-secondary;
-//         border: 1px solid $primary-font-color;
-//         color: $primary-font-color;
-//         border-radius: 0 5px 5px 5px;
-//         list-style-type: none;
-//       }
-//     }
-//   }
-// }
-
-// .membersContainer {
-//   padding: .5rem 4rem;
-
-//   ul {
-//     display: flex;
-//     flex-direction: column;
-//     gap: 20px;
-//     margin-top: 20px;
-//     margin-left: 15px;
-
-//     li {
-//       display: flex;
-//       align-items: center;
-//       gap: 7px;
-
-//       &.invite {
-//         margin-top: 25px;
-//       }
-
-//       img {
-//         border-radius: 50%;
-//       }
-
-//       .details {
-//         display: flex;
-//         flex-direction: column;
-
-//         p {
-//           display: flex;
-//           align-items: center;
-//           gap: 5px;
-//           font-weight: bold;
-//         }
-
-//         span {
-//           opacity: .7;
-//           font-size: 14px;
-//         }
-
-//         span.role {
-//           padding: 4px;
-//           font-size: 10px;
-//           border-radius: 5px;
-//           font-weight: normal;
-//           background: $accent-color;
-//           color: $secondary-accent-color;
-//         }
-//       }
-
-//       .actions {
-//         margin-left: 50px;
-
-//         button {
-//           background: none;
-//           color: $primary-font-color;
-//           padding: 5px;
-//           height: 100%;
-//           font-size: 18px;
-
-//           &.admin svg {
-//             color: $priorityMedium
-//           }
-//         }
-//       }
-//     }
-//   }
-
-
-// }
-
-// .notesContainer {
-//   height: 100%;
-//   position: relative;
-// }
-
-// .notesGrid {
-//   display: grid;
-//   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-//   gap: 10px;
-//   width: 100%;
-//   max-height: 100%;
-//   padding: 20px;
-//   overflow-y: scroll;
-//   scrollbar-width: none;
-//   -ms-overflow-style: none;
-// }
-
-// .noteCard {
-//   display: flex;
-//   flex-direction: column;
-//   gap: 7px;
-//   border-radius: 10px;
-//   padding: 10px;
-//   height: fit-content;
-//   word-wrap: break-word;
-//   align-self: start;
-
-//   background: $background-color;
-
-//   p {
-//     font-size: 18px;
-//     font-weight: 500;
-//   }
-
-//   span {
-//     opacity: .7;
-//   }
-
-//   a {
-//     color: $accent-color;
-//   }
-
-//   img {
-//     width: 30px;
-//     height: 30px;
-//     border-radius: 50%;
-//   }
-// }
-
-// .settingsContainer {
-//   display: flex;
-//   flex-direction: column;
-//   padding: .5rem 5rem;
-//   overflow-y: scroll;
-// }
-
-// .invitePage {
-//   display: flex;
-//   flex-direction: column;
-//   align-items: center;
-//   justify-content: center;
-//   width: 100%;
-//   height: 100vh;
-//   background: $background-color;
-// }
-
-// .projectDetails {
-//   display: none;
-//   flex-direction: column;
-//   gap: 5px;
-
-//   &.active {
-//     display: flex;
-//   }
-// }
-
-// .inviteList {
-//   display: flex;
-//   flex-direction: column;
-//   gap: 10px;
-//   margin-bottom: 15px;
-
-//   &.active {
-//     max-height: 500px;
-//     overflow-y: scroll;
-
-//     li {
-//       display: flex;
-//     }
-//   }
-
-
-//   li {
-//     display: none;
-//     flex-direction: column;
-//     width: fit-content;
-//     gap: 5px;
-
-//     img {
-//       border-radius: 50%;
-//       width: 30px;
-//       height: 30px;
-//     }
-//   }
-// }
-
-// .invite {
-//   display: flex;
-//   flex-direction: column;
-//   align-items: center;
-//   justify-content: center;
-//   width: 300px;
-//   gap: 5px;
-//   padding: 1rem 2rem;
-//   background: $background-color-secondary;
-//   border-radius: 10px;
-//   text-align: center;
-
-//   button {
-//     width: 100%;
-//     margin-top: 10px;
-//   }
-
-//   span {
-//     font-size: 12px;
-//     opacity: .7;
-//   }
-
-//   p {
-//     opacity: .8;
-//   }
-// }
+
+.modalContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  transition: .3s;
+  pointer-events: none;
+  opacity: 0;
+  backdrop-filter: blur(2px);
+
+  &.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px 20px;
+    background: $background-color;
+    color: $secondary-font-color;
+    box-shadow: 0px 2px 100px rgb(0, 0, 0, .1);
+    border-radius: 10px;
+    width: 800px;
+
+    .title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-transform: capitalize;
+      color: $primary-font-color;
+      font-size: 20px;
+
+
+      button {
+        background: none;
+        border: none;
+        padding: none;
+        font-size: 22px;
+        color: $primary-font-color;
+      }
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+      gap: 15px;
+      padding: 20px 0;
+      border: 1px solid $border-color;
+      border-left: none;
+      border-right: none;
+
+      .header {
+        text-align: center;
+
+        h2 {
+          font-size: 26px;
+          font-weight: 600;
+          color: $primary-font-color;
+        }
+
+        span {
+          font-size: 16px;
+          color: $secondary-font-color;
+          word-break: break-all;
+        }
+      }
+
+      .stages {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        p {
+          color: $secondary-font-color;
+          font-weight: 700;
+          font-size: 18px;
+        }
+
+        .stage {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          padding: 2px 7px;
+          font-size: 16px;
+
+          input[type="checkbox"]:checked~label {
+            text-decoration: line-through;
+          }
+        }
+      }
+
+      .contentBottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+
+        span.dueTime {
+          font-size: 14px;
+          padding: 4px 8px;
+          background: rgba($error-color, .2);
+          color: $error-color;
+          border-radius: 5px;
+        }
+
+        .assignedMembers {
+          display: flex;
+          gap: 10px;
+          margin-top: 10px;
+
+          img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+          }
+        }
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        .formRow {
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+
+          label {
+            display: flex;
+            flex-direction: column;
+
+            p {
+              color: $secondary-font-color;
+              font-weight: 600;
+            }
+
+            span {
+              color: $teritiary-font-color;
+            }
+          }
+
+          input:not([type="checkbox"]),
+          textarea {
+            width: 450px;
+          }
+
+          textarea {
+            resize: vertical;
+            min-height: 70px;
+          }
+
+          input[type="datetime-local"] {
+            width: 200px;
+          }
+
+          .stagesContainer {
+            display: flex;
+            flex-direction: column;
+            width: 450px;
+
+            .stagesList {
+              display: flex;
+              flex-direction: column;
+              gap: 5px;
+              padding-top: 15px;
+              max-height: 200px;
+              width: 100%;
+              overflow-y: scroll;
+              list-style-type: none !important;
+
+              .newStageContainer {
+                display: flex;
+                align-items: center;
+                gap: 2px;
+
+                button {
+                  background: none;
+                  color: $teritiary-font-color;
+                  transition: .3s;
+
+                  &:hover {
+                    color: $error-color;
+                  }
+                }
+              }
+            }
+
+            button {
+              display: flex;
+              gap: 7px;
+              align-items: center;
+              background: none;
+              text-align: left;
+              font-weight: 600;
+              font-size: 12px;
+            }
+          }
+        }
+      }
+    }
+
+    .bottom {
+      display: flex;
+      flex-direction: row-reverse;
+      gap: 7px;
+
+      button {
+        background: $secondary-accent-color;
+        color: $primary-font-color;
+        padding: 15px 20px;
+        font-size: 14px;
+        font-weight: 700;
+        border: none;
+        border-radius: 5px;
+        box-shadow: 0px 2px 10px rgb(0, 0, 0, .1);
+
+
+        &.secondary {
+          background: none;
+          color: $teritiary-font-color;
+          box-shadow: none;
+        }
+      }
+    }
+  }
+
+}
+
+
+
+.membersList {
+  display: flex;
+  align-items: center;
+
+  overflow-x: scroll;
+
+  img {
+    width: 40px;
+    height: 40px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    border: 2px solid transparent;
+
+    cursor: pointer;
+    transition: .3s;
+  }
+
+  input {
+    display: none;
+  }
+
+  input:checked~label img {
+    border-color: $accent-color;
+  }
+}
+
+.prioritiesList {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  margin-bottom: 15px;
+
+  label {
+    padding: 5px 10px;
+    background: $background-color-secondary;
+    border: 1px solid $primary-font-color;
+    border-radius: 5px;
+    color: $primary-font-color;
+    transition: .3s;
+  }
+
+  input {
+    display: none;
+  }
+
+  input:checked~label {
+    border-color: transparent;
+  }
+
+  input#priorityLOW:checked~label {
+    background: $priorityLow;
+  }
+
+  input#priorityMEDIUM:checked~label {
+    background: $priorityMedium;
+  }
+
+  input#priorityHIGH:checked~label {
+    background: $priorityHigh;
+  }
+
+  input#priorityURGENT:checked~label {
+    background: $priorityUrgent;
+  }
+}
+
+.projectsList {
+  display: flex;
+  gap: 20px;
+}
+
+.contextMenu {
+  position: fixed;
+  z-index: 998;
+  display: flex;
+  gap: 5px;
+  flex-direction: column;
+
+  background: $background-color-secondary;
+  border: 1px solid $primary-font-color;
+  border-radius: 5px;
+  cursor: pointer;
+
+  ol.contextMenuList {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    list-style-type: none;
+
+    li {
+      position: relative;
+      padding: 5px 10px;
+      transition: .3s;
+
+      &:hover {
+        background: $secondary-accent-color;
+        color: $accent-color;
+
+        ol {
+          display: flex;
+        }
+      }
+
+      &.delete:hover {
+        background: $priorityUrgent;
+        color: $primary-font-color;
+      }
+
+      svg {
+        font-size: 14px;
+      }
+
+      ol {
+        position: absolute;
+        left: 100%;
+        top: 0;
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+
+        background: $background-color-secondary;
+        border: 1px solid $primary-font-color;
+        color: $primary-font-color;
+        border-radius: 0 5px 5px 5px;
+        list-style-type: none;
+      }
+    }
+  }
+}
+
+.membersContainer {
+  padding: .5rem 4rem;
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+    margin-left: 15px;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+
+      &.invite {
+        margin-top: 25px;
+      }
+
+      img {
+        border-radius: 50%;
+      }
+
+      .details {
+        display: flex;
+        flex-direction: column;
+
+        p {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          font-weight: bold;
+        }
+
+        span {
+          opacity: .7;
+          font-size: 14px;
+        }
+
+        span.role {
+          padding: 4px;
+          font-size: 10px;
+          border-radius: 5px;
+          font-weight: normal;
+          background: $accent-color;
+          color: $secondary-accent-color;
+        }
+      }
+
+      .actions {
+        margin-left: 50px;
+
+        button {
+          background: none;
+          color: $primary-font-color;
+          padding: 5px;
+          height: 100%;
+          font-size: 18px;
+
+          &.admin svg {
+            color: $priorityMedium
+          }
+        }
+      }
+    }
+  }
+
+
+}
+
+.notesContainer {
+  height: 100%;
+  position: relative;
+}
+
+.notesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-height: 100%;
+  padding: 20px;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.noteCard {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  border-radius: 10px;
+  padding: 10px;
+  height: fit-content;
+  word-wrap: break-word;
+  align-self: start;
+
+  background: $background-color;
+
+  p {
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  span {
+    opacity: .7;
+  }
+
+  a {
+    color: $accent-color;
+  }
+
+  img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+  }
+}
+
+.settingsContainer {
+  display: flex;
+  flex-direction: column;
+  padding: .5rem 5rem;
+  overflow-y: scroll;
+}
+
+.invitePage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  background: $background-color;
+}
+
+.projectDetails {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+
+  &.active {
+    display: flex;
+  }
+}
+
+.inviteList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+
+  &.active {
+    max-height: 500px;
+    overflow-y: scroll;
+
+    li {
+      display: flex;
+    }
+  }
+
+
+  li {
+    display: none;
+    flex-direction: column;
+    width: fit-content;
+    gap: 5px;
+
+    img {
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+    }
+  }
+}
+
+.invite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  gap: 5px;
+  padding: 1rem 2rem;
+  background: $background-color-secondary;
+  border-radius: 10px;
+  text-align: center;
+
+  button {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  span {
+    font-size: 12px;
+    opacity: .7;
+  }
+
+  p {
+    opacity: .8;
+  }
+}
 
 ::-webkit-scrollbar {
   display: none;
@@ -1113,4 +1613,21 @@ main {
 
 body::-webkit-scrollbar {
   display: none;
+}
+
+@keyframes breathe {
+  0% {
+    scale: 1;
+    opacity: .15;
+  }
+
+  50% {
+    scale: 1.3;
+    opacity: .25;
+  }
+
+  100% {
+    scale: 1;
+    opacity: .15;
+  }
 }

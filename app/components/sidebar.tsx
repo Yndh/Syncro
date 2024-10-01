@@ -18,21 +18,20 @@ import {
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { usePathname } from "next/navigation";
+import { useProjects } from "../providers/ProjectsProvider";
 
 interface ISidebar {
   session: Session;
 }
 
 const Sidebar = ({ session }: ISidebar) => {
-  const [isNavigationShown, setIsNavigationShown] = useState<boolean>(true);
+  const [projectId, setProjectId] = useState<number | boolean>(false);
+  const { projects } = useProjects();
+  if (projects.length > 0 && !projectId) {
+    setProjectId(projects[0].id);
+  }
 
   const pathname = usePathname();
-
-  console.log(pathname);
-
-  const toggleNavigationVisibility = () => {
-    setIsNavigationShown(!isNavigationShown);
-  };
 
   return (
     <div className="sidebar">
@@ -56,7 +55,7 @@ const Sidebar = ({ session }: ISidebar) => {
             </Link>
           </li>
           <li className={pathname == "/app/projects" ? "active" : ""}>
-            <Link href={"/app/projects"}>
+            <Link href={`/app/projects/${projectId}`}>
               <div className={"navElement"}>
                 <div className="icon">
                   <FontAwesomeIcon icon={faDiagramProject} />

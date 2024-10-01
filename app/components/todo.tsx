@@ -1,6 +1,11 @@
 "use client";
 
-import { faAdd, faMinus, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faAdd,
+  faMinus,
+  faPlus,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
@@ -24,7 +29,7 @@ const priorities: Priority[] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
   const [tasksList, setTasksList] = useState<Task[]>(project.tasks);
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const descInputRef = useRef<HTMLInputElement>(null);
+  const descInputRef = useRef<HTMLTextAreaElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
   const membersListRef = useRef<HTMLDivElement>(null);
   const prioritiesListRef = useRef<HTMLDivElement>(null);
@@ -46,7 +51,7 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
       return;
     }
 
-    const stages = getStages()
+    const stages = getStages();
 
     const dueDate = dateInputRef.current?.value;
     let isoDueDate;
@@ -77,7 +82,7 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
         assignedMembers: assignedMembers,
         dueTime: isoDueDate,
         priority: priority,
-        stages: stages
+        stages: stages,
       }),
     })
       .then((res) => res.json())
@@ -118,117 +123,158 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
   };
 
   const getStages = () => {
-    const stagesList: string[] = []
+    const stagesList: string[] = [];
     const stageElements = document.querySelectorAll(".stagesList input");
 
-    stageElements.forEach(stage => {
-      const stageName = (stage as HTMLInputElement).value.trim()
-      if(stageName){
-        stagesList.push(stageName)
+    stageElements.forEach((stage) => {
+      const stageName = (stage as HTMLInputElement).value.trim();
+      if (stageName) {
+        stagesList.push(stageName);
       }
-    })
+    });
 
-    return stagesList
-
-  }
+    return stagesList;
+  };
 
   const addStage = () => {
-    const stagesList = document.querySelector(".stagesList")
+    const stagesList = document.querySelector(".stagesList");
 
-    const li = document.createElement("li")
-    li.className = "newStageContainer"
+    const li = document.createElement("li");
+    li.className = "newStageContainer";
 
-    const input = document.createElement("input")
-    input.placeholder = "Add new stage"
+    const input = document.createElement("input");
+    input.placeholder = "Add new stage";
 
-    const removeButton = document.createElement("button")
-    removeButton.onclick = () => {li.remove()}
-    removeButton.type = "button"
+    const removeButton = document.createElement("button");
+    removeButton.onclick = () => {
+      li.remove();
+    };
+    removeButton.type = "button";
 
-    const root = createRoot(removeButton)
-    root.render(<FontAwesomeIcon icon={faTrash}/>)
+    const root = createRoot(removeButton);
+    root.render(<FontAwesomeIcon icon={faTrash} />);
 
-    li.appendChild(input)
-    li.appendChild(removeButton)
-    stagesList?.appendChild(li)
-  }
+    li.appendChild(input);
+    li.appendChild(removeButton);
+    stagesList?.appendChild(li);
+  };
 
   const handleModal = () => {
     setModal({
+      title: "test",
       content: (
-        <form onSubmit={submitForm}>
-          <label htmlFor="taskInput">Title</label>
-          <input
-            type="text"
-            id="taskInput"
-            placeholder="Task title"
-            ref={titleInputRef}
-          />
+        <form onSubmit={submitForm} id="createTask">
+          <div className="formRow">
+            <label htmlFor="taskInput">
+              <p>Name</p>
+              <span>Name of task</span>
+            </label>
+            <input
+              type="text"
+              id="taskInput"
+              placeholder="Task title"
+              ref={titleInputRef}
+            />
+          </div>
 
-          <label htmlFor="descInput">Description*</label>
-          <input
-            type="text"
-            id="descInput"
-            placeholder="Task Description"
-            ref={descInputRef}
-          />
+          <div className="formRow">
+            <label htmlFor="descInput">
+              <p>Description</p>
+              <span>Description of task</span>
+            </label>
+            <textarea
+              id="descInput"
+              placeholder="Task Description"
+              ref={descInputRef}
+            />
+          </div>
 
-          <label htmlFor="">Stages</label>
-          <ul className="stagesList">
+          <div className="formRow">
+            <label htmlFor="stages">
+              <p>Sub tasks</p>
+              <span>Create subtasks</span>
+            </label>
+            <div className="stagesContainer">
+              <ul className="stagesList"></ul>
+              <button type="button" onClick={addStage}>
+                <FontAwesomeIcon icon={faPlus} />
+                Add subtask
+              </button>
+            </div>
+          </div>
 
-          </ul>
-          <button onClick={addStage} type="button">Add stage</button>
-
-          <span>Assign To</span>
-          <div className="membersList" ref={membersListRef}>
-            {project.members &&
-              project.members.map((member) => (
-                <div>
-                  <input
-                    type="checkbox"
-                    className="member"
-                    name="todoAsign"
-                    id={member.user.id}
-                  />
-                  <label htmlFor={member.user.id}>
-                    <Image
-                      src={member.user.image}
-                      alt={member.user.name}
-                      width={40}
-                      height={40}
+          <div className="formRow">
+            <label>
+              <p>Asignee</p>
+              <span>Asign task to members of the project</span>
+            </label>
+            <div className="membersList" ref={membersListRef}>
+              {project.members &&
+                project.members.map((member) => (
+                  <div>
+                    <input
+                      type="checkbox"
+                      className="member"
+                      name="todoAsign"
+                      id={member.user.id}
                     />
+                    <label htmlFor={member.user.id}>
+                      <Image
+                        src={member.user.image}
+                        alt={member.user.name}
+                        width={40}
+                        height={40}
+                      />
+                    </label>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          <div className="formRow">
+            <label htmlFor="dueToDate">
+              <p>Due Date</p>
+              <span>Deadline of task</span>
+            </label>
+            <input
+              type="datetime-local"
+              name=""
+              id="dueToDate"
+              ref={dateInputRef}
+            />
+          </div>
+
+          <div className="formRow">
+            <label>
+              <p>Priority</p>
+              <span>Set priority of task</span>
+            </label>
+            <div className="prioritiesList" ref={prioritiesListRef}>
+              {priorities.map((currPriority) => (
+                <div key={currPriority}>
+                  <input
+                    type="radio"
+                    name="setPriority"
+                    id={`priority${currPriority}`}
+                  />
+                  <label htmlFor={`priority${currPriority}`}>
+                    {currPriority}
                   </label>
                 </div>
               ))}
+            </div>
           </div>
-
-          <label htmlFor="dueToDate">Due to*</label>
-          <input
-            type="datetime-local"
-            name=""
-            id="dueToDate"
-            ref={dateInputRef}
-          />
-
-          <label>Priority</label>
-          <div className="prioritiesList" ref={prioritiesListRef}>
-            {priorities.map((currPriority) => (
-              <div key={currPriority}>
-                <input
-                  type="radio"
-                  name="setPriority"
-                  id={`priority${currPriority}`}
-                />
-                <label htmlFor={`priority${currPriority}`}>
-                  {currPriority}
-                </label>
-              </div>
-            ))}
-          </div>
-
-          <button type="submit">Create Task</button>
-          <button onClick={() => setModal(null)}>Close</button>
         </form>
+      ),
+      bottom: (
+        <>
+          <button type="submit" form="createTask">
+            Create Task
+          </button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
+        </>
       ),
       setModal,
     });

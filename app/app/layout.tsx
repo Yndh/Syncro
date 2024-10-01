@@ -6,6 +6,8 @@ import { ContextMenuProvider } from "../providers/ContextMenuProvider";
 import { ModalProvider } from "../providers/ModalProvider";
 import { Modal } from "../components/Modal";
 import { SessionProvider } from "next-auth/react";
+import { ProjectsProvider } from "../providers/ProjectsProvider";
+import { TasksProvider } from "../providers/UserTasksProvider";
 
 export default async function Home({
   children,
@@ -18,16 +20,23 @@ export default async function Home({
   return (
     <div className="app__container">
       <SessionProvider session={session}>
-        <ModalProvider>
-          <Sidebar session={session} />
-          <ContextMenuProvider>
-            <main>
-              <ContextMenu />
-              {children}
-            </main>
-          </ContextMenuProvider>
-          <Modal />
-        </ModalProvider>
+        <ProjectsProvider>
+          <TasksProvider>
+            <ModalProvider>
+              <Sidebar session={session} />
+              <ContextMenuProvider>
+                <main>
+                  <ContextMenu />
+                  {children}
+                </main>
+              </ContextMenuProvider>
+              <div className="blurCircle"></div>
+              <div className="blurCircle"></div>
+              <div className="blurCircle"></div>
+              <Modal />
+            </ModalProvider>
+          </TasksProvider>
+        </ProjectsProvider>
       </SessionProvider>
     </div>
   );

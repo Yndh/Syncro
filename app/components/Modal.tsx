@@ -2,9 +2,11 @@
 
 import { ReactNode, useEffect, useRef } from "react";
 import { useModal } from "../providers/ModalProvider";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClose } from "@fortawesome/free-solid-svg-icons";
 
 export const Modal = () => {
-  const { content, setModal } = useModal();
+  const { title, content, bottom, setModal } = useModal();
   const modalRef = useRef<HTMLDivElement>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
@@ -27,7 +29,14 @@ export const Modal = () => {
       ref={modalContainerRef}
     >
       <div className="modal" ref={modalRef}>
-        {content as ReactNode}
+        <div className="title">
+          <h1>{title}</h1>
+          <button onClick={() => setModal(null)}>
+            <FontAwesomeIcon icon={faClose} />
+          </button>
+        </div>
+        <div className="content">{content as ReactNode}</div>
+        <div className="bottom">{bottom}</div>
       </div>
     </div>
   );
