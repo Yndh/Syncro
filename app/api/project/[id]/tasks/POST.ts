@@ -8,7 +8,7 @@ interface CreateTaskReqBody {
   title: string;
   description?: string;
   assignedMembers: string[]; // Ids
-  dueTime?: Date;
+  dueDate?: Date;
   priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   stages: string[];
 }
@@ -18,7 +18,7 @@ interface UpdateTaskReqBody {
   title?: string;
   description?: string;
   assignedMembers?: string[];
-  dueTime?: Date;
+  dueDate?: Date;
   taskStatus?: "TO_DO" | "ON_GOING" | "REVIEWING" | "DONE";
   priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   stages?: { id?: number; title?: string; isCompleted?: boolean }[];
@@ -119,12 +119,14 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         .filter((stage) => !providedStages.some((ps) => ps.id === stage.id))
         .map((stage) => ({ id: stage.id as number }));
 
+      console.log(body.dueDate);
+
       const updatedTask = await prisma.task.update({
         where: { id: body.id },
         data: {
           title: body.title?.trim(),
           description: body.description?.trim(),
-          dueTime: body.dueTime,
+          dueTime: body.dueDate,
           taskStatus: body.taskStatus ?? undefined,
           priority: body.priority,
           assignedTo: providedMembers?.length
@@ -186,7 +188,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         data: {
           title: body.title.trim(),
           description: body.description?.trim(),
-          dueTime: body.dueTime,
+          dueTime: body.dueDate,
           priority: body.priority,
           assignedTo: {
             connect: body.assignedMembers.map((memberId) => ({ id: memberId })),

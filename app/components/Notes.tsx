@@ -15,33 +15,50 @@ interface NotesProps {
 
 export const Notes = ({ isAdmin, projectId, project }: NotesProps) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const descInputRef = useRef<HTMLInputElement>(null);
+  const descInputRef = useRef<HTMLTextAreaElement>(null);
   const [notes, setNotes] = useState<Note[]>(project.notes);
   const { setModal } = useModal();
 
   const handleModal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setModal({
+      title: "New Note",
       content: (
-        <form onSubmit={submitForm}>
-          <label htmlFor="taskInput">Title</label>
-          <input
-            type="text"
-            id="taskInput"
-            placeholder="Task title"
-            ref={titleInputRef}
-          />
+        <form onSubmit={submitForm} id="createNote">
+          <div className="formRow">
+            <label htmlFor="taskInput">
+              <p>Title</p>
+              <span>Title of note</span>
+            </label>
+            <input
+              type="text"
+              id="taskInput"
+              placeholder="Note title"
+              ref={titleInputRef}
+            />
+          </div>
 
-          <label htmlFor="descInput">Description*</label>
-          <input
-            type="text"
-            id="descInput"
-            placeholder="Task Description"
-            ref={descInputRef}
-          />
-
-          <button type="submit">Create Note</button>
-          <button onClick={() => setModal(null)}>Close</button>
+          <div className="formRow">
+            <label htmlFor="descInput">
+              <p>Description</p>
+              <span>Description of note</span>
+            </label>
+            <textarea
+              id="descInput"
+              placeholder="Note Description"
+              ref={descInputRef}
+            />
+          </div>
         </form>
+      ),
+      bottom: (
+        <>
+          <button type="submit" form="createNote">
+            Create Note
+          </button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
+        </>
       ),
       setModal,
     });
@@ -86,17 +103,63 @@ export const Notes = ({ isAdmin, projectId, project }: NotesProps) => {
 
   return (
     <div className="notesContainer">
-      <h2>Team Notes</h2>
-      <div className="notesGrid">
-        {notes.map((note) => (
-          <NoteCard
-            note={note}
-            notes={notes}
-            setNotes={setNotes}
-            key={note.id}
-            isAdmin={isAdmin}
-          />
-        ))}
+      <div className="notesheader">
+        <h1>Notes</h1>
+        <span className="count">{notes.length}</span>
+      </div>
+      <div className="notess">
+        <div className="column">
+          {notes
+            .filter((_, index) => index % 4 === 0)
+            .map((note) => (
+              <NoteCard
+                note={note}
+                notes={notes}
+                setNotes={setNotes}
+                key={note.id}
+                isAdmin={isAdmin}
+              />
+            ))}
+        </div>
+        <div className="column">
+          {notes
+            .filter((_, index) => index % 4 === 1)
+            .map((note) => (
+              <NoteCard
+                note={note}
+                notes={notes}
+                setNotes={setNotes}
+                key={note.id}
+                isAdmin={isAdmin}
+              />
+            ))}
+        </div>
+        <div className="column">
+          {notes
+            .filter((_, index) => index % 4 === 2)
+            .map((note) => (
+              <NoteCard
+                note={note}
+                notes={notes}
+                setNotes={setNotes}
+                key={note.id}
+                isAdmin={isAdmin}
+              />
+            ))}
+        </div>
+        <div className="column">
+          {notes
+            .filter((_, index) => index % 4 === 3)
+            .map((note) => (
+              <NoteCard
+                note={note}
+                notes={notes}
+                setNotes={setNotes}
+                key={note.id}
+                isAdmin={isAdmin}
+              />
+            ))}
+        </div>
       </div>
       <button className="absoluteButton" onClick={handleModal}>
         <FontAwesomeIcon icon={faAdd} />

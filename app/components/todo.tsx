@@ -2,6 +2,7 @@
 
 import {
   faAdd,
+  faFlag,
   faMinus,
   faPlus,
   faTrash,
@@ -11,28 +12,65 @@ import { useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TaskColumn } from "./taskColumn";
-import { Project, Task, TaskStatus } from "../types/interfaces";
+import { Project, Task, TaskPriority, TaskStatus } from "../types/interfaces";
 import { useModal } from "../providers/ModalProvider";
 import Image from "next/image";
 import ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
+import Select from "./Select";
 
 interface ToDoProps {
   projectId: number;
   project: Project;
   isAdmin: boolean;
 }
-type Priority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
-const priorities: Priority[] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
+const options = [
+  {
+    value: TaskPriority.LOW as string,
+    label: (
+      <div className="prioritySelect low">
+        <FontAwesomeIcon icon={faFlag} />
+        <span>Low</span>
+      </div>
+    ),
+  },
+  {
+    value: TaskPriority.MEDIUM as string,
+    label: (
+      <div className="prioritySelect medium">
+        <FontAwesomeIcon icon={faFlag} />
+        <span>Medium</span>
+      </div>
+    ),
+  },
+  {
+    value: TaskPriority.HIGH as string,
+    label: (
+      <div className="prioritySelect high">
+        <FontAwesomeIcon icon={faFlag} />
+        <span>High</span>
+      </div>
+    ),
+  },
+  {
+    value: TaskPriority.URGENT as string,
+    label: (
+      <div className="prioritySelect urgent">
+        <FontAwesomeIcon icon={faFlag} />
+        <span>Urgent</span>
+      </div>
+    ),
+  },
+];
 
 const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
   const [tasksList, setTasksList] = useState<Task[]>(project.tasks);
+  const [selectedPriority, setSelectedPriority] = useState<string | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descInputRef = useRef<HTMLTextAreaElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
   const membersListRef = useRef<HTMLDivElement>(null);
-  const prioritiesListRef = useRef<HTMLDivElement>(null);
   const { setModal } = useModal();
 
   const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -70,8 +108,6 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
       isoDueDate = new Date(dueDate).toISOString();
     }
 
-    const priority = getSelectedPriority();
-
     setModal(null);
 
     await fetch(`/api/project/${projectId}/tasks`, {
@@ -80,8 +116,8 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
         title: title,
         description: description,
         assignedMembers: assignedMembers,
-        dueTime: isoDueDate,
-        priority: priority,
+        dueDate: isoDueDate,
+        priority: selectedPriority,
         stages: stages,
       }),
     })
@@ -109,17 +145,6 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
       });
     }
     return checkedMembers;
-  };
-
-  const getSelectedPriority = (): Priority => {
-    let selectedPriority: Priority = "MEDIUM";
-    const radios = prioritiesListRef.current?.querySelectorAll(
-      'input[type="radio"]:checked'
-    );
-    if (radios && radios.length > 0) {
-      selectedPriority = radios[0].id.replace("priority", "") as Priority;
-    }
-    return selectedPriority;
   };
 
   const getStages = () => {
@@ -161,7 +186,7 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
 
   const handleModal = () => {
     setModal({
-      title: "test",
+      title: "New Task",
       content: (
         <form onSubmit={submitForm} id="createTask">
           <div className="formRow">
@@ -249,20 +274,12 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
               <p>Priority</p>
               <span>Set priority of task</span>
             </label>
-            <div className="prioritiesList" ref={prioritiesListRef}>
-              {priorities.map((currPriority) => (
-                <div key={currPriority}>
-                  <input
-                    type="radio"
-                    name="setPriority"
-                    id={`priority${currPriority}`}
-                  />
-                  <label htmlFor={`priority${currPriority}`}>
-                    {currPriority}
-                  </label>
-                </div>
-              ))}
-            </div>
+            <Select
+              options={options}
+              onChange={(option) =>
+                setSelectedPriority(option?.value as string)
+              }
+            />
           </div>
         </form>
       ),

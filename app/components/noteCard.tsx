@@ -20,7 +20,7 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
   const { setContextMenu } = useContextMenu();
   const { setModal } = useModal();
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const descInputRef = useRef<HTMLInputElement>(null);
+  const descInputRef = useRef<HTMLTextAreaElement>(null);
 
   const session = useSession();
 
@@ -51,29 +51,46 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
 
   const handleModal = (e: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
     setModal({
+      title: "Edit Note",
       content: (
-        <form onSubmit={submitForm}>
-          <label htmlFor="taskInput">Title</label>
-          <input
-            type="text"
-            id="taskInput"
-            placeholder="Task title"
-            ref={titleInputRef}
-            defaultValue={note.title}
-          />
+        <form onSubmit={submitForm} id="updateNote">
+          <div className="formRow">
+            <label htmlFor="taskInput">
+              <p>Title</p>
+              <span>Title of note</span>
+            </label>
+            <input
+              type="text"
+              id="taskInput"
+              placeholder="Note title"
+              ref={titleInputRef}
+              defaultValue={note.title}
+            />
+          </div>
 
-          <label htmlFor="descInput">Description*</label>
-          <input
-            type="text"
-            id="descInput"
-            placeholder="Task Description"
-            ref={descInputRef}
-            defaultValue={note.description as string}
-          />
-
-          <button type="submit">Update Note</button>
-          <button onClick={() => setModal(null)}>Close</button>
+          <div className="formRow">
+            <label htmlFor="descInput">
+              <p>Description</p>
+              <span>Description of note</span>
+            </label>
+            <textarea
+              id="descInput"
+              placeholder="Note Description"
+              ref={descInputRef}
+              defaultValue={note.description}
+            />
+          </div>
         </form>
+      ),
+      bottom: (
+        <>
+          <button type="submit" form="updateNote">
+            Update Note
+          </button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Close
+          </button>
+        </>
       ),
       setModal,
     });
@@ -92,11 +109,11 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
 
     setModal(null);
 
-    const prevNotes = [...notes]
+    const prevNotes = [...notes];
 
     setNotes((prevNotes) =>
       prevNotes.map((disnote) =>
-        disnote.id == note.id ? {...note, title, description} : disnote
+        disnote.id == note.id ? { ...note, title, description } : disnote
       )
     );
 
@@ -115,7 +132,7 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
 
         if (data.error) {
           alert(data.error);
-          setNotes(prevNotes)
+          setNotes(prevNotes);
           return;
         }
 
@@ -158,17 +175,42 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
 
   const displayNoteDetails = () => {
     setModal({
+      title: "Note",
       content: (
-        <div className="noteCard">
-          <h2>{note.title}</h2>
-          <span>{note.description}</span>
-          <Image
-            src={note.createdBy.image}
-            alt={note.createdBy.name}
-            width={30}
-            height={30}
-          />
-        </div>
+        <>
+          <div className="header">
+            <h2>{note.title}</h2>
+            <span>{note.description}</span>
+          </div>
+          <div className="contentBottom">
+            <div>
+              <span className="createdTime">
+                {new Intl.DateTimeFormat("en-US", {
+                  day: "numeric",
+                }).format(new Date(note.createdAt))}{" "}
+                {new Intl.DateTimeFormat("en-US", { month: "long" }).format(
+                  new Date(note.createdAt)
+                )}
+              </span>
+            </div>
+            <div className="assignedMembers">
+              <Image
+                src={note.createdBy.image}
+                alt={note.createdBy.name}
+                width={30}
+                height={30}
+                className="memberAvatar"
+              />
+            </div>
+          </div>
+        </>
+      ),
+      bottom: (
+        <>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Close
+          </button>
+        </>
       ),
       setModal,
     });
@@ -184,17 +226,33 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
       }
       onClick={displayNoteDetails}
     >
-      <p>{truncateText(note.title, 50)}</p>
-      <span>{truncateText(note.description as string, 250)}</span>
-      {(note.description?.length ?? 0) > 250 && (
-        <Link href={""}>Read more...</Link>
-      )}
-      <Image
-        src={note.createdBy.image}
-        alt={note.createdBy.name}
-        width={30}
-        height={30}
-      />
+      <div className="content">
+        <div className="contentHeader">
+          <p>{truncateText(note.title, 50)}</p>
+          <span>{truncateText(note.description as string, 250)}</span>
+          {(note.description?.length ?? 0) > 250 && (
+            <Link href={""}>Read more...</Link>
+          )}
+        </div>
+        <div className="contentBottom">
+          <div>
+            <span className="createdTime">
+              {new Intl.DateTimeFormat("en-US", { day: "numeric" }).format(
+                new Date(note.createdAt)
+              )}{" "}
+              {new Intl.DateTimeFormat("en-US", { month: "long" }).format(
+                new Date(note.createdAt)
+              )}
+            </span>
+          </div>
+          <Image
+            src={note.createdBy.image}
+            alt={note.createdBy.name}
+            width={30}
+            height={30}
+          />
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
 import {
   Project,
@@ -14,6 +14,7 @@ import { useContextMenu } from "../providers/ContextMenuProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronRight,
+  faFlag,
   faGripVertical,
   faPlus,
   faTrash,
@@ -22,6 +23,8 @@ import { useModal } from "../providers/ModalProvider";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { createRoot } from "react-dom/client";
+import Select from "./Select";
+import Image from "next/image";
 
 interface TaskCardProps {
   task: Task;
@@ -49,6 +52,45 @@ const priorities: TaskPriority[] = [
   TaskPriority.URGENT,
 ];
 
+const options = [
+  {
+    value: TaskPriority.LOW as string,
+    label: (
+      <div className="prioritySelect low">
+        <FontAwesomeIcon icon={faFlag} />
+        <span>Low</span>
+      </div>
+    ),
+  },
+  {
+    value: TaskPriority.MEDIUM as string,
+    label: (
+      <div className="prioritySelect medium">
+        <FontAwesomeIcon icon={faFlag} />
+        <span>Medium</span>
+      </div>
+    ),
+  },
+  {
+    value: TaskPriority.HIGH as string,
+    label: (
+      <div className="prioritySelect high">
+        <FontAwesomeIcon icon={faFlag} />
+        <span>High</span>
+      </div>
+    ),
+  },
+  {
+    value: TaskPriority.URGENT as string,
+    label: (
+      <div className="prioritySelect urgent">
+        <FontAwesomeIcon icon={faFlag} />
+        <span>Urgent</span>
+      </div>
+    ),
+  },
+];
+
 export const TaskCard = ({
   task,
   tasksList,
@@ -60,6 +102,9 @@ export const TaskCard = ({
 }: TaskCardProps) => {
   const session = useSession();
   const cardRef = useRef<HTMLDivElement>(null);
+  const [selectedPriority, setSelectedPriority] = useState<string | null>(
+    task.priority
+  );
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: "TASK",
@@ -157,8 +202,6 @@ export const TaskCard = ({
       isoDueDate = new Date(dueDate).toISOString();
     }
 
-    const priority = getSelectedPriority();
-
     const stages = getStages();
 
     setModal(null);
@@ -172,11 +215,13 @@ export const TaskCard = ({
               ...distask,
               title: title,
               description: description,
-              priority: priority as TaskPriority,
+              priority: selectedPriority as TaskPriority,
             }
           : distask
       )
     );
+
+    console.log(selectedPriority);
 
     await fetch(`/api/project/${task.projectId}/tasks`, {
       method: "POST",
@@ -186,7 +231,7 @@ export const TaskCard = ({
         description: description,
         assignedMembers: assignedMembers,
         dueDate: isoDueDate,
-        priority: priority,
+        priority: selectedPriority,
         stages: stages,
       }),
     })
@@ -219,17 +264,6 @@ export const TaskCard = ({
       });
     }
     return checkedMembers;
-  };
-
-  const getSelectedPriority = (): Priority => {
-    let selectedPriority: Priority = "MEDIUM";
-    const radios = prioritiesListRef.current?.querySelectorAll(
-      'input[type="radio"]:checked'
-    );
-    if (radios && radios.length > 0) {
-      selectedPriority = radios[0].id.replace("priority", "") as Priority;
-    }
-    return selectedPriority;
   };
 
   const handleModal = () => {
@@ -354,21 +388,15 @@ export const TaskCard = ({
               <p>Priority</p>
               <span>Set priority of task</span>
             </label>
-            <div className="prioritiesList" ref={prioritiesListRef}>
-              {priorities.map((currPriority) => (
-                <div key={currPriority}>
-                  <input
-                    type="radio"
-                    name="setPriority"
-                    id={`priority${currPriority}`}
-                    defaultChecked={task.priority === currPriority}
-                  />
-                  <label htmlFor={`priority${currPriority}`}>
-                    {currPriority}
-                  </label>
-                </div>
-              ))}
-            </div>
+            <Select
+              options={options}
+              onChange={(option) =>
+                setSelectedPriority(option?.value as string)
+              }
+              selectedOption={options.find(
+                (option) => option.value == task.priority
+              )}
+            />
           </div>
         </form>
       ),
@@ -511,11 +539,13 @@ export const TaskCard = ({
     return (
       <div className="assignedMembers">
         {members.slice(0, MAX_NUM_OF_MEMBERS).map((member) => (
-          <img
+          <Image
             key={member.id}
             src={member.image}
             alt={member.name}
             className="memberAvatar"
+            width={30}
+            height={30}
           />
         ))}
         {remainingMembers > 0 && <span>+{remainingMembers}</span>}
