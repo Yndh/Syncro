@@ -27,7 +27,7 @@ interface ISidebar {
 const Sidebar = ({ session }: ISidebar) => {
   const [projectId, setProjectId] = useState<number | boolean>(false);
   const { projects } = useProjects();
-  if (projects.length > 0 && !projectId) {
+  if (projects != null && projects.length > 0 && !projectId) {
     setProjectId(projects[0].id);
   }
 

@@ -8,8 +8,8 @@ import {
   faProjectDiagram,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ResponsiveBar } from "@nivo/bar";
-import { ResponsivePie } from "@nivo/pie";
+import { ResponsiveBar, Bar } from "@nivo/bar";
+import { ResponsivePie, Pie } from "@nivo/pie";
 import { useEffect, useState } from "react";
 import { Project, Task, TaskPriority, TaskStatus } from "../types/interfaces";
 import { useTasks } from "../providers/UserTasksProvider";
@@ -51,6 +51,7 @@ const App = () => {
             if (data.error) {
               alert(data.error);
             } else {
+              console.log(data);
               if (data.tasks) {
                 setTasks(data.tasks);
               }
@@ -142,7 +143,7 @@ const App = () => {
             <div className="icon">
               <FontAwesomeIcon icon={faProjectDiagram} />
             </div>
-            <p>{projects.length}</p>
+            <p>{projects ? projects.length : 0}</p>
           </div>
         </div>
 
@@ -182,72 +183,77 @@ const App = () => {
           <div className="card">
             <p>My Tasks</p>
             <div className="tasksScroll">
-              {uncompletedTasks
-                .sort(
-                  (a, b) =>
-                    priorityOrder.indexOf(a.priority) -
-                    priorityOrder.indexOf(b.priority)
-                )
-                .map((task) => (
-                  <div
-                    className={`uncompletedTask ${task.priority.toLowerCase()}`}
-                    key={`task${task.id}`}
-                  >
-                    <div className="icon">
-                      <FontAwesomeIcon icon={faFlag} />
-                    </div>
-                    <div className="details">
-                      <div className="detailsHeader">
-                        <h2>{task.title}</h2>
-                        <p>{task.project?.name}</p>
+              {uncompletedTasks ? (
+                uncompletedTasks
+                  .sort(
+                    (a, b) =>
+                      priorityOrder.indexOf(a.priority) -
+                      priorityOrder.indexOf(b.priority)
+                  )
+                  .map((task) => (
+                    <div
+                      className={`uncompletedTask ${task.priority.toLowerCase()}`}
+                      key={`task${task.id}`}
+                    >
+                      <div className="icon">
+                        <FontAwesomeIcon icon={faFlag} />
                       </div>
+                      <div className="details">
+                        <div className="detailsHeader">
+                          <h2>{task.title}</h2>
+                          <p>{task.project?.name}</p>
+                        </div>
 
-                      <div className="taskDetails">
-                        <div className="col">
-                          <p>Status</p>
-                          <span>
-                            {task.taskStatus.replace("_", " ").toLowerCase()}
-                          </span>
-                        </div>
-                        <div className="col">
-                          <p>Priority</p>
-                          <span>
-                            {task.priority.replace("_", " ").toLowerCase()}
-                          </span>
-                        </div>
-                        <div className="col">
-                          <p>Stages Completed</p>
-                          {task.stages.length > 0 ? (
+                        <div className="taskDetails">
+                          <div className="col">
+                            <p>Status</p>
                             <span>
-                              {
-                                task.stages.filter((stage) => stage.isCompleted)
-                                  .length
-                              }
-                              /{task.stages.length}
+                              {task.taskStatus.replace("_", " ").toLowerCase()}
                             </span>
-                          ) : (
-                            <span>No stages</span>
-                          )}
-                        </div>
-                        <div className="col">
-                          <p>Due Date</p>
-                          <span>
-                            {task.dueTime ? (
-                              new Intl.DateTimeFormat("en-US", {
-                                day: "numeric",
-                                month: "long",
-                                hour: "numeric",
-                                minute: "numeric",
-                              }).format(new Date(task.dueTime))
+                          </div>
+                          <div className="col">
+                            <p>Priority</p>
+                            <span>
+                              {task.priority.replace("_", " ").toLowerCase()}
+                            </span>
+                          </div>
+                          <div className="col">
+                            <p>Stages Completed</p>
+                            {task.stages.length > 0 ? (
+                              <span>
+                                {
+                                  task.stages.filter(
+                                    (stage) => stage.isCompleted
+                                  ).length
+                                }
+                                /{task.stages.length}
+                              </span>
                             ) : (
-                              <span>None</span>
+                              <span>No stages</span>
                             )}
-                          </span>
+                          </div>
+                          <div className="col">
+                            <p>Due Date</p>
+                            <span>
+                              {task.dueTime ? (
+                                new Intl.DateTimeFormat("en-US", {
+                                  day: "numeric",
+                                  month: "long",
+                                  hour: "numeric",
+                                  minute: "numeric",
+                                }).format(new Date(task.dueTime))
+                              ) : (
+                                <span>None</span>
+                              )}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+              ) : (
+                <p>No tasks</p>
+              )}
             </div>
           </div>
         </div>
@@ -255,8 +261,10 @@ const App = () => {
           <div className="card chart">
             <p>Completed Tasks Chart</p>
             <div className="chart">
-              <ResponsivePie
+              <Pie
                 data={pieData}
+                width={200}
+                height={200}
                 innerRadius={0.8}
                 padAngle={2}
                 cornerRadius={45}
@@ -265,6 +273,7 @@ const App = () => {
                 enableArcLabels={false}
                 enableArcLinkLabels={false}
                 animate={true}
+                fit={false}
                 tooltip={({ datum }) => (
                   <Tooltip value={datum.value} label={datum.label as string} />
                 )}
@@ -278,8 +287,10 @@ const App = () => {
           <div className="card chart">
             <p>Graphs and Analysis</p>
             <div className="chart">
-              <ResponsiveBar
+              <Bar
                 data={barData}
+                width={700}
+                height={200}
                 keys={["completed"]}
                 margin={{ top: 20, right: 0, bottom: 30, left: 0 }}
                 padding={0.6}

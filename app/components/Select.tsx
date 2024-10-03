@@ -3,31 +3,44 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { ReactNode, useState } from "react";
 
 interface Option {
-  value: string;
+  value: string | number;
   label: ReactNode;
+  disabled?: boolean;
 }
 
 interface SelectProps {
   options: Option[];
-  onChange: (option: Option | null) => void;
   selectedOption?: Option | null;
+  disabled?: boolean;
+  onChange: (option: Option | null) => void;
 }
 
-const Select = ({ options, onChange, selectedOption }: SelectProps) => {
+const Select = ({
+  options,
+  onChange,
+  selectedOption,
+  disabled = false,
+}: SelectProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [currentSelectedOption, setCurrentSelectedOption] =
     useState<Option | null>(selectedOption || null);
 
-  const toggleDropdown = () => setIsOpen(!isOpen);
+  const toggleDropdown = () => {
+    if (!disabled) setIsOpen(!isOpen);
+  };
 
   const handleOptionClick = (option: Option) => {
+    if (option.disabled) {
+      return;
+    }
+
     setCurrentSelectedOption(option);
     setIsOpen(false);
     onChange(option);
   };
 
   return (
-    <div className="select-container">
+    <div className={`select-container ${disabled && "disabled"}`}>
       <div className="select-header" onClick={toggleDropdown}>
         {currentSelectedOption
           ? currentSelectedOption.label
@@ -38,7 +51,7 @@ const Select = ({ options, onChange, selectedOption }: SelectProps) => {
       </div>
 
       {isOpen && (
-        <ul className="select-options">
+        <ul className="select-options ${}">
           {options.map((option) => (
             <li
               key={option.value}
@@ -48,7 +61,7 @@ const Select = ({ options, onChange, selectedOption }: SelectProps) => {
                 currentSelectedOption.value === option.value
                   ? "selected"
                   : ""
-              }`}
+              } ${option.disabled && "disabled"}`}
             >
               {option.label}
             </li>
