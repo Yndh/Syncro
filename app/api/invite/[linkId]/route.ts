@@ -9,11 +9,16 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
   };
 }
 
+interface reqBody {
+  maxUses?: number;
+  expires?: Date
+}
+
 export function GET(req: Request, res: ResponseInterface) {
   return mGET(req, res);
 }
 
-export function POST(req: Request, res: ResponseInterface) {
+export function POST(req: reqBody, res: ResponseInterface) {
   return mPOST(req, res);
 }
 

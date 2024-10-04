@@ -1,5 +1,5 @@
 import { NextApiResponse } from "next";
-import { mPOST } from "../POST";
+import { mPOST } from "./POST";
 
 interface ResponseInterface<T = any> extends NextApiResponse<T> {
   params: {

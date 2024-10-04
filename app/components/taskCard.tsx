@@ -567,7 +567,7 @@ export const TaskCard = ({
             <span>{task.description}</span>
           </div>
 
-          {task.stages.length > 0 && (
+          {(task.stages && task.stages.length > 0) && (
             <div className="stages">
               <p>Subtasks</p>
               {task.stages.map((stage) => (
@@ -643,7 +643,7 @@ export const TaskCard = ({
           )}
         </div>
 
-        {task.stages.length > 0 && (
+        {(task.stages && task.stages.length) > 0 && (
           <div className="progressContainer">
             <div className="progressText">
               <span>Progress</span>

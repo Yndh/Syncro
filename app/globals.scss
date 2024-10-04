@@ -95,7 +95,7 @@ input[type="checkbox"] {
 
   .select-options {
     position: absolute;
-    top: 100%;
+    top: 120%;
     left: 0;
     width: 100%;
     background-color: $primary-light-font-color;
@@ -103,8 +103,16 @@ input[type="checkbox"] {
     border-radius: 5px;
     max-height: 150px;
     overflow-y: auto;
-    z-index: 100;
+    z-index: 100 !important;
     user-select: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: .3;
+
+    &.visible{
+      opacity: 1;
+      pointer-events: all;
+    }
 
     .select-option {
       display: flex;
@@ -1655,6 +1663,72 @@ main {
               text-align: left;
               font-weight: 600;
               font-size: 12px;
+            }
+          }
+
+          .invites{
+            display: flex;
+            flex-direction: column;
+            max-height: 300px;
+            margin-top: 15px;
+            overflow-y: scroll;
+            gap: 15px;
+
+            .inviteDetails{
+              display: flex;
+              flex-direction: column;
+              border-radius: 10px;
+              border: 1px solid $border-color;
+              width: 450px;
+              padding: 10px;
+              gap: 10px;
+              transition: .3s;
+              user-select: none;
+              -moz-user-select: none;
+              -webkit-user-select: none;
+
+              &.open{
+                .inviteDetailsHeader svg{
+                  rotate: 90deg;
+                }
+                .inviteDetailsContent{
+                  max-height: fit-content;
+                  display: flex;
+                }
+              }
+
+              .inviteDetailsHeader{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                cursor: pointer;
+                color: $primary-font-color;
+                font-weight: 700;
+                font-size: 18px;
+
+                svg{
+                  transition: .3s;
+                }
+              }
+
+              .inviteDetailsContent{
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                gap: 5px;
+                max-height: 0;
+                transition: .3s;
+
+                button{
+                  background: transparent;
+                  transition: .3s;
+
+                  &:hover{
+                    color: $teritiary-font-color;
+                  }
+                }
+              }
             }
           }
         }

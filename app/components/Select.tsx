@@ -12,6 +12,7 @@ interface SelectProps {
   options: Option[];
   selectedOption?: Option | null;
   disabled?: boolean;
+  id?: string;
   onChange: (option: Option | null) => void;
 }
 
@@ -20,6 +21,7 @@ const Select = ({
   onChange,
   selectedOption,
   disabled = false,
+  id = "customSelect"
 }: SelectProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [currentSelectedOption, setCurrentSelectedOption] =
@@ -40,7 +42,7 @@ const Select = ({
   };
 
   return (
-    <div className={`select-container ${disabled && "disabled"}`}>
+    <div className={`select-container ${disabled ? "disabled" : ""}`}>
       <div className="select-header" onClick={toggleDropdown}>
         {currentSelectedOption
           ? currentSelectedOption.label
@@ -50,24 +52,25 @@ const Select = ({
         </span>
       </div>
 
-      {isOpen && (
-        <ul className="select-options ${}">
+        <ul className={`select-options ${isOpen && "visible"}`}>
           {options.map((option) => (
             <li
               key={option.value}
+              data-value={option.value}
               onClick={() => handleOptionClick(option)}
               className={`select-option ${
-                currentSelectedOption &&
+                currentSelectedOption ?
                 currentSelectedOption.value === option.value
                   ? "selected"
                   : ""
-              } ${option.disabled && "disabled"}`}
+               : ""} ${option.disabled ? "disabled" : ""}`}
+              id={currentSelectedOption &&
+                currentSelectedOption.value === option.value ? id : ""}
             >
               {option.label}
             </li>
           ))}
         </ul>
-      )}
     </div>
   );
 };

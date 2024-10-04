@@ -34,6 +34,7 @@ import { useSession } from "next-auth/react";
 import Select from "./Select";
 import getUrl from "@/lib/getUrl";
 import QRCode from "react-qr-code";
+import { useProjects } from "../providers/ProjectsProvider";
 
 interface MembersListProps {
   projectId: number;
@@ -206,10 +207,7 @@ export const MembersList = ({
 }: MembersListProps) => {
   const session = useSession();
   const { setModal } = useModal();
-  const [inviteMaxUses, setInviteMaxUses] = useState<string | number>(1);
-  const [inviteExpirationDate, setInviteExpirationDate] = useState<
-    string | number
-  >(30);
+  const {projects, setProjects} = useProjects()
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleModal = () => {
@@ -228,8 +226,8 @@ export const MembersList = ({
             <Select
               options={usesOptions}
               selectedOption={usesOptions[0]}
+              id="maxUsesSelect"
               onChange={(option) => {
-                setInviteMaxUses(option?.value ?? 1);
               }}
             />
           </div>
@@ -242,8 +240,8 @@ export const MembersList = ({
             <Select
               options={expirationOptions}
               selectedOption={expirationOptions[0]}
+              id="expirationDateSelect"
               onChange={(option) => {
-                setInviteExpirationDate(option?.value ?? 30);
               }}
             />
           </div>
@@ -266,6 +264,9 @@ export const MembersList = ({
   const handleForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const selectedDivUses = document.querySelector("#maxUsesSelect")!
+    const inviteMaxUses = selectedDivUses.getAttribute("data-value") ?? usesOptions[0].value
+
     if (!inviteMaxUses) {
       alert("Select uses");
       return;
@@ -276,10 +277,18 @@ export const MembersList = ({
       uses = parseInt(inviteMaxUses.toString());
     }
 
+    const selectedDivExpiration = document.querySelector("#expirationDateSelect")!
+    const inviteExpirationDate = selectedDivExpiration.getAttribute("data-value") ?? expirationOptions[0].value
+
     if (!inviteExpirationDate) {
       alert("Select expiration date");
       return;
     }
+
+    console.log(inviteExpirationDate);
+    console.log(inviteMaxUses);
+    
+    
 
     let expirationDate: Date | null = null;
     if (inviteExpirationDate !== "never") {
@@ -309,6 +318,19 @@ export const MembersList = ({
         if (data.invite) {
           console.log(data.invite);
           displayInvite(data.invite);
+          setProjects(
+            projects.map((dproject) => 
+              dproject.id === projectId 
+                ? {
+                    ...dproject, 
+                    projectInvitations: [
+                      ...(dproject.projectInvitations || []),
+                      data.invite,
+                    ],
+                  } 
+                : dproject
+            )
+          );        
         }
       });
   };
@@ -338,7 +360,7 @@ export const MembersList = ({
           </div>
 
           <div className="qrCode">
-            <span>or scan QR Code</span>
+            <span>Or Scan QR Code</span>
             <QRCode value={`${getUrl()}/${invite.linkId}`} bgColor="transparent"/>
           </div>
         </>

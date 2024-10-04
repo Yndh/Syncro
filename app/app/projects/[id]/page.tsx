@@ -2,7 +2,7 @@
 
 import ToDo from "@/app/components/todo";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Project, ProjectRole } from "@/app/types/interfaces";
 import { MembersList } from "@/app/components/MembersList";
 import { Notes } from "@/app/components/Notes";
@@ -17,6 +17,10 @@ import {
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import { useProjects } from "@/app/providers/ProjectsProvider";
+import { title } from "process";
+import { useModal } from "@/app/providers/ModalProvider";
+import { InviteDetails } from "@/app/components/inviteDetails";
+import isAdmin from "@/lib/isAdmin";
 
 interface ProjectParams {
   params: {
@@ -26,7 +30,7 @@ interface ProjectParams {
 
 const ProjectPage = ({ params }: ProjectParams) => {
   const { projects, getProjectById } = useProjects();
-
+  const { setModal } = useModal();
   const [role, setRole] = useState<ProjectRole>(ProjectRole.MEMBER);
   const [membershipId, setMembershipId] = useState<number>();
   const [selectedTab, setSelectedTab] = useState<
@@ -34,19 +38,12 @@ const ProjectPage = ({ params }: ProjectParams) => {
   >("tasks");
   const router = useRouter();
   const [project, setProject] = useState<Project>();
+  const projectNameInputRef = useRef<HTMLInputElement>(null)
+  const projectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     const localProject = getProjectById(parseInt(params.id));
     setProject(localProject);
-    console.log(`id ${parseInt(params.id)}`);
-    console.log(`Got project lol => ${project}`);
-    console.log(projects);
-
-    console.log(
-      `Filter => ${projects.find(
-        (project) => project.id === parseInt(params.id)
-      )}`
-    );
   }, [projects]);
 
   useEffect(() => {
@@ -55,8 +52,6 @@ const ProjectPage = ({ params }: ProjectParams) => {
         await fetch(`/api/project/${params.id}`)
           .then((res) => res.json())
           .then((data) => {
-            console.log(data);
-
             if (data.error) {
               alert(data.error);
               router.push("/app/projects");
@@ -74,7 +69,97 @@ const ProjectPage = ({ params }: ProjectParams) => {
     fetchData();
   }, [params.id, router]);
 
+  const openSettings = () => {
+    console.log("settings");
+    
+    console.log(project)
+    setModal({
+      title: "Settings",
+      content: (
+        <form onSubmit={updateProject} id="settingsForm">
+          <div className="formRow">
+            <label htmlFor="projectName">
+              <p>Name</p>
+              <span>Name of the project</span>
+            </label>
+
+            <input type="text" placeholder="Project name..." ref={projectNameInputRef} defaultValue={project?.name} id="projectName"/>
+          </div>
+
+          <div className="formRow">
+            <label htmlFor="projectDescription">
+              <p>Description</p>
+              <span>Description of the project</span>
+            </label>
+
+            <textarea disabled={!(role === "ADMIN" || role === "OWNER")} placeholder="Project name..." ref={projectDescriptionTextAreaRef} defaultValue={project?.description} id="projectDescription"/>
+          </div>
+
+          {(role === "ADMIN" || role === "OWNER") && (
+            <div className="formRow">
+            <label htmlFor="projectDescription">
+              <p>Invites</p>
+              <span>Create and manage project invites</span>
+            </label>
+
+            <div className="invites">
+              {project?.projectInvitations.map(invite => (
+                <InviteDetails invite={invite} key={invite.id}/>
+              ))}
+            </div>
+          </div>
+          )}
+        </form>
+      ),
+      bottom: (
+        <>
+          <button type="submit" form="settingsForm">Save changes</button>
+          <button className="secondary" onClick={() => setModal(null)}>Close</button>
+        </>
+      ),
+      setModal
+    })
+  }
+
+  const updateProject = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const name = projectNameInputRef.current?.value as string;
+    console.log(name);
+    
+    if(name.trim() === ""){
+      alert("Project name cannot be empty")
+      return
+    }
+    const description = projectDescriptionTextAreaRef.current?.value as string;
+
+    await fetch(`/api/project/${project?.id}`, {
+      method: "POST",
+      body: JSON.stringify({
+        name: name,
+        description: description,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        if (data.project) {
+          setProject(data.project);
+          setModal(null)
+          return;
+        }
+      });
+  }
+
   const handleNavChange = (tab: "tasks" | "notes" | "members" | "settings") => {
+    if(tab === "settings"){
+      openSettings()
+      return
+    }
     setSelectedTab(tab);
   };
 
@@ -85,9 +170,9 @@ const ProjectPage = ({ params }: ProjectParams) => {
           <h2>Projects</h2>
 
           <div className="list">
-            <p>All Projects ({projects.length})</p>
+            <p>All Projects ({projects ? (projects.length) : 0})</p>
             <ol>
-              {projects.map((project) => (
+              {projects && projects.map((project) => (
                 <li key={`project${project.id}`}>
                   <span className="min"></span>
                   <a
@@ -196,15 +281,6 @@ const ProjectPage = ({ params }: ProjectParams) => {
                 projectId={project.id}
                 project={project}
                 role={role}
-                setProject={setProject}
-              />
-            )}
-            {selectedTab === "settings" && project && membershipId && (
-              <Settings
-                role={role}
-                membershipId={membershipId}
-                projectId={project.id}
-                project={project}
                 setProject={setProject}
               />
             )}

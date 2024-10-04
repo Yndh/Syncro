@@ -4,7 +4,6 @@ import { joinProject } from "@/lib/joinProject";
 import { prisma } from "@/lib/prisma";
 import { ProjectMembership } from "@prisma/client";
 import { NextApiResponse } from "next";
-import { DateTime } from "next-auth/providers/kakao";
 import { NextResponse } from "next/server";
 
 interface ResponseInterface<T = any> extends NextApiResponse<T> {
@@ -13,12 +12,7 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
   };
 }
 
-interface reqBody {
-    maxUses?: number;
-    expires?: Date
-}
-
-export async function mPOST(req: reqBody, res: ResponseInterface) {
+export async function mPOST(req: Request, res: ResponseInterface) {
   const session = await auth();
   if (!session?.user?.id) {
     return new NextResponse(
@@ -37,23 +31,6 @@ export async function mPOST(req: reqBody, res: ResponseInterface) {
         status: 400,
       }
     );
-  }
-
-  const { maxUses, expires } = req
-
-  if(maxUses && maxUses <= 0){
-    return new NextResponse(JSON.stringify({error: "MaxUses must be greater than 0."}), {
-        status: 400
-    })
-  }
-
-  if(expires && !(expires instanceof Date)){
-    return new NextResponse(
-        JSON.stringify({ error: "expires must be a valid Date." }),
-        {
-          status: 400,
-        }
-      );
   }
 
   try {
@@ -75,15 +52,55 @@ export async function mPOST(req: reqBody, res: ResponseInterface) {
       });
     }
 
-    const updatedInvite = await prisma.projectInvitation.update({
+    const currentDate = new Date();
+    const expiresDate = invite.expires ? new Date(invite.expires) : null;
+
+    if (expiresDate && expiresDate <= currentDate) {
+      return new NextResponse(JSON.stringify({ error: "Invite is expired." }), {
+        status: 410,
+      });
+    }
+
+    if (
+      !(invite.maxUses ?? Infinity) === null ||
+      !(invite.uses < (invite.maxUses ?? Infinity))
+    ) {
+      return new NextResponse(JSON.stringify({ error: "Invite is expired." }), {
+        status: 410,
+      });
+    }
+
+    const isMember = invite.project.members.some(
+      (member) => member.userId === session.user?.id
+    );
+
+    if (isMember) {
+      return new NextResponse(
+        JSON.stringify({ error: "User is already a member of this project." }),
+        {
+          status: 409,
+        }
+      );
+    }
+
+    const membership = joinProject(session.user.id, invite.projectId);
+    if (!membership) {
+      return new NextResponse(
+        JSON.stringify({ error: "Internal server error." }),
+        {
+          status: 500,
+        }
+      );
+    }
+
+    await prisma.projectInvitation.update({
       where: { linkId: linkId },
       data: {
-       maxUses: maxUses ?? invite.maxUses,
-       expires: expires ?? invite.expires
+        uses: invite.uses + 1,
       },
     });
 
-    return new NextResponse(JSON.stringify({ invite:  updatedInvite}), {
+    return new NextResponse(JSON.stringify({ projectId: membership }), {
       status: 200,
     });
   } catch (e) {
