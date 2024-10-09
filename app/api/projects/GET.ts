@@ -23,10 +23,23 @@ export async function mGET(req: Request, res: NextApiResponse) {
           },
         },
       },
-      select: {
-        id: true,
-        name: true,
-        description: true,
+      include: {
+        members: {
+          include: {
+            user: true,
+          },
+        },
+        tasks: {
+          include: {
+            assignedTo: true,
+            stages: true,
+          },
+        },
+        notes: {
+          include: {
+            createdBy: true,
+          },
+        },
       },
     });
 

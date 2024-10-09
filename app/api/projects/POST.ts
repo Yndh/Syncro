@@ -20,7 +20,7 @@ export async function mPOST(req: Request, res: NextApiResponse) {
   }
 
   const body: reqBody = await req.json();
-  if (body.name.trim().length < 1 || !body.description) {
+  if (body.name.trim().length < 1) {
     return new NextResponse(JSON.stringify({ error: "Invalid parameters" }), {
       status: 400,
     });

@@ -3,7 +3,7 @@
 import ToDo from "@/app/components/todo";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Project, ProjectRole } from "@/app/types/interfaces";
+import { Invite, Project, ProjectRole } from "@/app/types/interfaces";
 import { MembersList } from "@/app/components/MembersList";
 import { Notes } from "@/app/components/Notes";
 import { Settings } from "@/app/components/Settings";
@@ -31,6 +31,7 @@ interface ProjectParams {
 const ProjectPage = ({ params }: ProjectParams) => {
   const { projects, getProjectById } = useProjects();
   const { setModal } = useModal();
+  const { fetchProjects } = useProjects();
   const [role, setRole] = useState<ProjectRole>(ProjectRole.MEMBER);
   const [membershipId, setMembershipId] = useState<number>();
   const [selectedTab, setSelectedTab] = useState<
@@ -69,6 +70,15 @@ const ProjectPage = ({ params }: ProjectParams) => {
     fetchData();
   }, [params.id, router]);
 
+  const isExpired = (invite: Invite) => {
+    const now = new Date();
+    return invite.expires && new Date(invite.expires) < now;
+  };
+
+  const nonExpiredInvites = project?.projectInvitations 
+  ? project.projectInvitations.filter((invite) => invite && !isExpired(invite))
+  : [];
+
   const openSettings = () => {
     console.log("settings");
     
@@ -80,7 +90,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
           <div className="formRow">
             <label htmlFor="projectName">
               <p>Name</p>
-              <span>Name of the project</span>
+              <span>Enter the name of your project</span>
             </label>
 
             <input type="text" placeholder="Project name..." ref={projectNameInputRef} defaultValue={project?.name} id="projectName"/>
@@ -89,31 +99,53 @@ const ProjectPage = ({ params }: ProjectParams) => {
           <div className="formRow">
             <label htmlFor="projectDescription">
               <p>Description</p>
-              <span>Description of the project</span>
+              <span>Provide a brief overview of your project</span>
             </label>
 
             <textarea disabled={!(role === "ADMIN" || role === "OWNER")} placeholder="Project name..." ref={projectDescriptionTextAreaRef} defaultValue={project?.description} id="projectDescription"/>
           </div>
 
-          {(role === "ADMIN" || role === "OWNER") && (
+          {(role === "ADMIN" || role === "OWNER") &&  (
             <div className="formRow">
             <label htmlFor="projectDescription">
               <p>Invites</p>
-              <span>Create and manage project invites</span>
+              <span>Manage project invitatuibs</span>
             </label>
 
             <div className="invites">
-              {project?.projectInvitations.map(invite => (
+              {nonExpiredInvites && nonExpiredInvites.map(invite => (
                 <InviteDetails invite={invite} key={invite.id}/>
               ))}
             </div>
+          </div>
+          )}
+
+          {role === "OWNER" ? (
+            <div className="formRow action">
+            <label htmlFor="projectDescription">
+              <p>Delete</p>
+              <span>Permanently remove the project</span>
+            </label>
+
+            <button className="projectLeave" onClick={deleteProjectModal}>Delete Project</button>
+          </div>
+          ) : (
+            <div className="formRow">
+            <label htmlFor="projectDescription">
+              <p>Leave</p>
+              <span>Withdraw from the project</span>
+            </label>
+
+            <button className="projectLeave" onClick={leaveProjectModal}>Leave Project</button>
           </div>
           )}
         </form>
       ),
       bottom: (
         <>
-          <button type="submit" form="settingsForm">Save changes</button>
+          {(role === "ADMIN" || role === "OWNER") && (
+            <button type="submit" form="settingsForm">Save changes</button>
+          )}
           <button className="secondary" onClick={() => setModal(null)}>Close</button>
         </>
       ),
@@ -154,6 +186,85 @@ const ProjectPage = ({ params }: ProjectParams) => {
         }
       });
   }
+
+  const leaveProjectModal = () => {
+    setModal({
+      title: "Leave Project",
+      content: (
+        <div className="header">
+          <h1>Confirm Departure</h1>
+          <p>Are you sure you want to leave the project? You will lose access to all project resources and updates.</p>
+        </div>
+      ),
+      bottom: (
+        <>
+        <button onClick={leaveProject}>Leave Project</button>
+        <button className="secondary" onClick={() => setModal(null)}>Cancel</button>
+        </>
+      ),
+      setModal
+    })
+  }
+
+  const deleteProjectModal = () => {
+    setModal({
+      title: "Delete Project",
+      content: (
+        <div className="header">
+          <h1>Confirm Project Deletion</h1>
+          <p>Are you sure you want to permanently delete this project? This action cannot be undone, and all associated data will be lost.</p>
+        </div>
+      ),
+      bottom: (
+        <>
+        <button onClick={deleteProject}>Delete Project</button>
+        <button className="secondary" onClick={() => setModal(null)}>Cancel</button>
+        </>
+      ),
+      setModal
+    })
+  }
+
+  const leaveProject = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+
+    await fetch(`/api/project/${project?.id}/members/${membershipId}`, {
+      method: "DELETE",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        if (data.project) {
+          router.push("/app/projects");
+          setModal(null)
+          fetchProjects()
+        }
+      });
+  };
+
+  const deleteProject = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+
+    await fetch(`/api/project/${project?.id}`, {
+      method: "DELETE",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        if (data.success) {
+          router.push("/app");
+          setModal(null)
+        }
+      });
+  };
 
   const handleNavChange = (tab: "tasks" | "notes" | "members" | "settings") => {
     if(tab === "settings"){

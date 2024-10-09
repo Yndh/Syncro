@@ -32,12 +32,12 @@ const InvitePage = ({ params }: ProjectParams) => {
           const dataInvite: Invite = data.invite;
           setIsLoading(false);
 
-          const currentDate = new Date();
+          const now = new Date();
           const expiresDate = dataInvite.expires
             ? new Date(dataInvite.expires)
             : null;
 
-          if (expiresDate && expiresDate <= currentDate) {
+          if (expiresDate && expiresDate < now) {
             alert("expired mf");
             setIsValid(false);
             return;
@@ -60,14 +60,14 @@ const InvitePage = ({ params }: ProjectParams) => {
 
   const pluralizeMembers = (count: number) => {
     if (count === 1) {
-      return "członek";
+      return "member";
     } else {
-      return "członków";
+      return "members";
     }
   };
 
   const handleJoin = () => {
-    fetch(`/api/invite/${params.linkId}`, {
+    fetch(`/api/invite/${params.linkId}/join`, {
       method: "POST",
     })
       .then((res) => res.json())
@@ -78,7 +78,7 @@ const InvitePage = ({ params }: ProjectParams) => {
         }
 
         if (data.projectId) {
-          router.push(`/app/projects/${data.projectId as number}`);
+          router.push(`/app/projects/${data.projectId}`);
         }
       });
   };
@@ -88,23 +88,23 @@ const InvitePage = ({ params }: ProjectParams) => {
       {isLoading && isValid && <h1>Loading..</h1>}
       {isValid && !isLoading && (
         <div className="invite">
-          <span>{invite?.createdBy.name} zaprasza cie do dołączenia</span>
+          <span>{invite?.createdBy.name} invites you to join</span>
           <h2>{invite?.project.name}</h2>
           <p>
             {invite?.project.members.length}{" "}
             {pluralizeMembers(invite?.project.members.length ?? 1)}
           </p>
 
-          <button onClick={handleJoin}>Dołącz</button>
+          <button onClick={handleJoin}>Join Project</button>
         </div>
       )}
       {!isValid && !isLoading && (
         <div className="invite">
-          <h2>Nieprawidłowe zaproszenie</h2>
-          <p>To zaproszenie mogło już wygasnąć...</p>
+          <h2>Invalid invite</h2>
+          <p>This invitation has already expired...</p>
 
           <button onClick={() => router.push("/app")}>
-            Wróć do dashboardu
+            Go back to dashboard
           </button>
         </div>
       )}

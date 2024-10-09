@@ -79,7 +79,7 @@ model Project {
 
 model ProjectMembership {
   id        Int         @id @default(autoincrement())
-  project   Project     @relation(fields: [projectId], references: [id])
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId Int
   user      User        @relation(fields: [userId], references: [id])
   userId    String
@@ -93,7 +93,7 @@ model ProjectInvitation {
   linkId      String    @unique
   maxUses     Int? // null is infinity
   uses        Int       @default(0)
-  project     Project   @relation(fields: [projectId], references: [id])
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId   Int
   expires     DateTime?
   createdBy   User      @relation(fields: [createdById], references: [id])
@@ -106,7 +106,7 @@ model Task {
   id          Int        @id @default(autoincrement())
   title       String
   description String?
-  project     Project    @relation(fields: [projectId], references: [id])
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId   Int
   priority    Priority   @default(MEDIUM)
   taskStatus  TaskStatus @default(TO_DO)
@@ -121,7 +121,7 @@ model TaskStage {
   id Int @id @default(autoincrement())
   title String
   isCompleted Boolean @default(false)
-  task Task @relation(fields: [taskId], references: [id])
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
   taskId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -131,7 +131,7 @@ model Notes {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
-  project     Project  @relation(fields: [projectId], references: [id])
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId   Int
   createdBy   User     @relation(fields: [createdById], references: [id])
   createdById String

@@ -8,12 +8,13 @@ import {
   faProjectDiagram,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ResponsiveBar, Bar } from "@nivo/bar";
-import { ResponsivePie, Pie } from "@nivo/pie";
-import { useEffect, useState } from "react";
-import { Project, Task, TaskPriority, TaskStatus } from "../types/interfaces";
+import { Bar } from "@nivo/bar";
+import { Pie } from "@nivo/pie";
+import { useEffect } from "react";
+import { Task, TaskPriority, TaskStatus } from "../types/interfaces";
 import { useTasks } from "../providers/UserTasksProvider";
 import { useProjects } from "../providers/ProjectsProvider";
+import { useSearchParams, useRouter } from "next/navigation";
 
 interface TaskData {
   id: "Completed" | "Uncompleted";
@@ -173,7 +174,7 @@ const App = () => {
             <div className="icon">
               <FontAwesomeIcon icon={faPercent} />
             </div>
-            <p>{((completedTasks / tasks.length) * 100).toFixed(2)}%</p>
+            <p>{completedTasks ? ((completedTasks / tasks.length) * 100).toFixed(2) : 100}%</p>
           </div>
         </div>
       </div>

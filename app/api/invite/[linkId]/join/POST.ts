@@ -100,7 +100,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       },
     });
 
-    return new NextResponse(JSON.stringify({ projectId: membership }), {
+    return new NextResponse(JSON.stringify({ projectId: invite.projectId }), {
       status: 200,
     });
   } catch (e) {

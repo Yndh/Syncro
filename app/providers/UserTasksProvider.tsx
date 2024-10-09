@@ -32,6 +32,31 @@ export const TasksProvider = ({ children }: TasksProviderProps) => {
   const [loading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await fetch("/api/user/tasks", {
+          method: "GET",
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.error) {
+              console.error(data.error)
+            } else {
+              if (data.tasks) {
+                setTasksState(data.tasks);
+                setIsLoading(false)
+              }
+            }
+          });
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    };
+
+    fetchData();
+  },[])
+
+  useEffect(() => {
     try {
       const localProjects = localStorage.getItem("tasks");
       if (!localProjects) {

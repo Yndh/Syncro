@@ -414,21 +414,7 @@ export const MembersList = ({
       });
   };
 
-  const kickUser = async (membershipId: number) => {
-    const prevProject = { ...project };
-
-    setProject((prevProj) => {
-      if (prevProj) {
-        return {
-          ...prevProj,
-          members: prevProj.members.map((member) =>
-            member.id === membershipId ? { ...member, role: role } : member
-          ),
-        };
-      }
-      return undefined;
-    });
-
+  const kickUser = async (membershipId: number) => {    
     await fetch(`/api/project/${projectId}/members/${membershipId}`, {
       method: "DELETE",
     })
@@ -436,7 +422,6 @@ export const MembersList = ({
       .then((data) => {
         if (data.error) {
           alert(data.error);
-          setProject(prevProject);
           return;
         }
 
@@ -447,19 +432,19 @@ export const MembersList = ({
   };
 
 
-  const filteredMembers = project.members.filter(
+  const filteredMembers = project?.members ? project.members.filter(
     (member) =>
       member.user.name.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
       member.user.email.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
       member.role.toLowerCase().includes(searchQuery.toLowerCase().trim())
-  );
+  ) : [];
 
   return (
     <div className="membersContainer">
       <div className="membersHeader">
         <div className="title">
           <h1>Members</h1>
-          <span className="count">{project.members.length}</span>
+          <span className="count">{project?.members ? project.members.length : 0}</span>
         </div>
 
         <div className="buttons">

@@ -131,7 +131,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
       where: { id: membId },
     });
 
-    const project = await prisma.project.findMany({
+    const project = await prisma.project.findFirst({
       where: { id: projectId },
       include: {
         members: {

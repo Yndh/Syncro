@@ -25,5 +25,5 @@ export async function joinProject(userId: string, projectId: number) {
     },
   });
 
-  return membership.projectId;
+  return membership.projectId as number;
 }

@@ -13,6 +13,7 @@ interface Projects {
   projects: Project[];
   setProjects: (projects: Project[]) => void;
   addProject: (project: Project) => void;
+  fetchProjects: () => void
   getProjectById: (id: number) => Project | undefined;
 }
 
@@ -35,6 +36,10 @@ export const ProjectsProvider = ({ children }: ProjectsProviderProps) => {
   const [loading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    if(loading) fetchProjects();
+  }, [loading])
+
+  useEffect(() => {
     try {
       const localProjects = localStorage.getItem("projects");
       if (!projects) {
@@ -55,18 +60,45 @@ export const ProjectsProvider = ({ children }: ProjectsProviderProps) => {
     }
   }, [projects]);
 
-  const setProjects = (projects: Project[]) => setProjectsState(projects);
+  const setProjects = (projects: Project[]) => {
+    setProjectsState(projects);
+    setIsLoading(false)
+  }
 
   const addProject = (project: Project) =>
     setProjectsState((prevProjects) => [...prevProjects, project]);
 
   const getProjectById = (id: number): Project | undefined => {
-    return projects.find((project) => project.id === id);
+    return projects?.find((project) => project.id === id) ?? undefined;
   };
+
+  const fetchProjects = async () => {
+    try {
+      await fetch("/api/projects", {
+        method: "GET",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            console.error(data.error)
+          } else {
+            if (data.projects) {
+              setProjectsState(data.projects);
+              setIsLoading(false)
+              console.log("fetched project provider");
+             console.log(data);
+              
+            }
+          }
+        });
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  }
 
   return (
     <ProjectsContext.Provider
-      value={{ projects, setProjects, addProject, getProjectById }}
+      value={{ projects, setProjects, fetchProjects, addProject, getProjectById }}
     >
       {children}
     </ProjectsContext.Provider>

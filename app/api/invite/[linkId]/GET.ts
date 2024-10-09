@@ -49,6 +49,16 @@ export async function mGET(req: Request, res: ResponseInterface) {
       });
     }
 
+    const now = new Date()
+    if(invite.expires && invite.expires < now){
+      return new NextResponse(
+        JSON.stringify({ error: "The invite has expired." }),
+        {
+          status: 410,
+        }
+      );
+    }
+
     return new NextResponse(JSON.stringify({ invite: invite }), {
       status: 200,
     });

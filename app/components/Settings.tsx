@@ -119,9 +119,9 @@ export const Settings = ({
     return new Date(invite.expires) < currentDate;
   };
 
-  const nonExpiredInvites = project.projectInvitations.filter(
+  const nonExpiredInvites = project?.projectInvitations.filter(
     (invite) => !isExpired(invite)
-  );
+  ) ?? [];
 
   return (
     <div className="settingsContainer">

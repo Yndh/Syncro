@@ -66,7 +66,6 @@ const options = [
 
 const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
   const [tasksList, setTasksList] = useState<Task[]>(project.tasks);
-  const [selectedPriority, setSelectedPriority] = useState<string | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descInputRef = useRef<HTMLTextAreaElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
@@ -88,6 +87,9 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
       alert("There is no assigned members");
       return;
     }
+
+    const priorityDiv = document.querySelector("#prioritySelect")!
+    const priority = priorityDiv.getAttribute("data-value") ?? options[0].value
 
     const stages = getStages();
 
@@ -117,7 +119,7 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
         description: description,
         assignedMembers: assignedMembers,
         dueDate: isoDueDate,
-        priority: selectedPriority,
+        priority: priority,
         stages: stages,
       }),
     })
@@ -276,8 +278,9 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
             </label>
             <Select
               options={options}
+              id="prioritySelect"
               onChange={(option) =>
-                setSelectedPriority(option?.value as string)
+              {}
               }
             />
           </div>
