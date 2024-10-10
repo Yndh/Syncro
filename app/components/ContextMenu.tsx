@@ -20,7 +20,6 @@ const ContextMenu = () => {
         contextMenuRef.current.contains(e.target as Node)
       )
     ) {
-      onClose(); // idk why this shit doesnt work brah
       setContextMenu(null);
     }
   };

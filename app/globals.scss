@@ -192,7 +192,10 @@ input[type="checkbox"] {
   // transition: width 0s;
 
   &:hover {
+    position: absolute;
     width: 300px;
+    height: 100vh;
+    z-index: 99;
     padding-right: 30px;
 
     .logo {
@@ -237,13 +240,11 @@ input[type="checkbox"] {
       }
     }
 
-    &~main .projectPage .projectsList {
-      max-width: 0px;
-      min-width: 0px;
-      width: 0px;
-      transition: opacity 0s;
-      opacity: 0;
-      pointer-events: none;
+    &~main{
+      margin-left: 300px;
+      .projectPage .projectsList {
+        display: none;
+      }
     }
   }
 
@@ -479,6 +480,7 @@ main {
 
     h2 {
       font-size: 42px;
+      max-width: 45%;
       color: $primary-font-color;
       margin: 0;
     }
@@ -486,6 +488,7 @@ main {
     p {
       font-size: 20px;
       font-weight: 500;
+      max-width: 45%;
       color: $secondary-font-color;
       margin: 0;
     }
@@ -493,18 +496,27 @@ main {
     .percentage {
       display: flex;
       align-items: center;
+      width: 35%;
       gap: 10px;
+      margin-top: 10px;
 
-      progress {
+      progress[value] {
+        flex-grow: 1;
+        height: 10px;
+        background-color: $border-color;
+        border-radius: 50px;
 
-        &::-webkit-progress-bar {
-          background-color: $teritiary-font-color;
+        &::-webkit-progress-bar{
+          border-radius: 50px;
+          background: $border-color;
         }
 
-        &::-webkit-progress-value {
-          background: $accent-color;
+        &::-webkit-progress-value{
+          background-color: $accent-color;
+          border-radius: 50px;
         }
       }
+      
     }
   }
 
@@ -547,10 +559,6 @@ main {
       background: $card-color;
       box-shadow: 0 4px 10px rgb(0, 0, 0, .1);
 
-      &.chart {
-        max-height: 380px;
-      }
-
 
       p {
         font-size: 16px;
@@ -591,8 +599,6 @@ main {
         display: flex;
         align-items: center;
         justify-content: center;
-        max-height: 90%;
-        padding: 30px;
         color: $secondary-font-color;
         font-weight: 700;
         font-family: inherit;
@@ -627,6 +633,29 @@ main {
         scrollbar-width: none !important;
         height: 100%;
         max-height: 700px;
+
+        .noTasks{
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 2px;
+          width: 100%;
+          height: 30%;
+          text-align: center;
+
+          svg{
+            height: 50px;
+            color: $success-color;
+            margin-bottom: 8px;
+          }
+
+          span{
+            color: $teritiary-font-color;
+            font-size: 14px;
+            padding: 0px 10px;
+          }
+        }
 
         .uncompletedTask {
           display: flex;
@@ -730,8 +759,8 @@ main {
       min-width: 200px;
       padding-right: 20px;
       padding-top: 50px;
+      margin-left: 0;
       gap: 20px;
-      // transition: .3s;
 
       h2 {
         font-size: 32px;
@@ -2000,10 +2029,13 @@ main {
         }
       }
 
-      &.delete:hover {
-        background: $priorityUrgent;
-        color: $primary-light-font-color;
+      &.delete {
         border-radius: 0 0 10px 10px;
+
+        &:hover{
+          background: $priorityUrgent;
+          color: $primary-light-font-color;
+        }
       }
 
       svg {

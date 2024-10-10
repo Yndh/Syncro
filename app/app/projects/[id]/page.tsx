@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from "react";
 import { Invite, Project, ProjectRole } from "@/app/types/interfaces";
 import { MembersList } from "@/app/components/MembersList";
 import { Notes } from "@/app/components/Notes";
-import { Settings } from "@/app/components/Settings";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCog,
@@ -17,10 +16,9 @@ import {
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import { useProjects } from "@/app/providers/ProjectsProvider";
-import { title } from "process";
 import { useModal } from "@/app/providers/ModalProvider";
 import { InviteDetails } from "@/app/components/inviteDetails";
-import isAdmin from "@/lib/isAdmin";
+import { toast } from "react-toastify";
 
 interface ProjectParams {
   params: {
@@ -54,8 +52,8 @@ const ProjectPage = ({ params }: ProjectParams) => {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              alert(data.error);
-              router.push("/app/projects");
+              alert("Uh-oh! We couldn’t grab the project details. How about a quick refresh?");
+              router.push("/app");
             } else {
               setProject(data.project);
               setRole(data.role);
@@ -80,9 +78,6 @@ const ProjectPage = ({ params }: ProjectParams) => {
   : [];
 
   const openSettings = () => {
-    console.log("settings");
-    
-    console.log(project)
     setModal({
       title: "Settings",
       content: (
@@ -157,13 +152,14 @@ const ProjectPage = ({ params }: ProjectParams) => {
     e.preventDefault();
 
     const name = projectNameInputRef.current?.value as string;
-    console.log(name);
     
     if(name.trim() === ""){
-      alert("Project name cannot be empty")
+      toast.warn("Hold on! A project needs a name. What should we call it?")
       return
     }
     const description = projectDescriptionTextAreaRef.current?.value as string;
+
+    setModal(null)
 
     await fetch(`/api/project/${project?.id}`, {
       method: "POST",
@@ -181,7 +177,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
 
         if (data.project) {
           setProject(data.project);
-          setModal(null)
+          toast.success("Success! Your project has been updated!")
           return;
         }
       });
@@ -208,7 +204,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
 
   const deleteProjectModal = () => {
     setModal({
-      title: "Delete Project",
+      title: "Confirm Project Deletion",
       content: (
         <div className="header">
           <h1>Confirm Project Deletion</h1>
@@ -228,20 +224,23 @@ const ProjectPage = ({ params }: ProjectParams) => {
   const leaveProject = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
 
+    setModal(null)
+
     await fetch(`/api/project/${project?.id}/members/${membershipId}`, {
       method: "DELETE",
     })
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          alert(data.error);
+          toast.error("Oops! Something went wrong while trying to leave the project. Give it another shot!")
           return;
         }
 
         if (data.project) {
-          router.push("/app/projects");
-          setModal(null)
+          router.push("/app");
+
           fetchProjects()
+          toast.success("You've successfully left the project! Onward to new endeavors!")
         }
       });
   };
@@ -249,19 +248,21 @@ const ProjectPage = ({ params }: ProjectParams) => {
   const deleteProject = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
 
+    setModal(null)
+
     await fetch(`/api/project/${project?.id}`, {
       method: "DELETE",
     })
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          alert(data.error);
+          toast.error("Uh-oh! The project didn't want to be deleted just yet. Try again!")
           return;
         }
 
         if (data.success) {
           router.push("/app");
-          setModal(null)
+          toast.success("Project deleted! Time to make room for new adventures!")
         }
       });
   };
@@ -273,6 +274,9 @@ const ProjectPage = ({ params }: ProjectParams) => {
     }
     setSelectedTab(tab);
   };
+
+  const completedTasksPercentage = project?.tasks ? ((project.tasks.filter(task => task.taskStatus == "DONE").length / project.tasks.length) * 100).toFixed(2) : 0
+
 
   return (
     <>
@@ -310,10 +314,10 @@ const ProjectPage = ({ params }: ProjectParams) => {
             </h2>
             <p>{project?.description}</p>
             <div className="percentage">
-              <progress value={72} max={100}>
+              <progress value={completedTasksPercentage} max={100}>
                 {" "}
               </progress>
-              <p>72% completed</p>
+              <p>{completedTasksPercentage}% Completed</p>
             </div>
           </div>
 

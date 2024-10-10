@@ -6,6 +6,7 @@ import { useModal } from "../providers/ModalProvider";
 import { useRef, useState } from "react";
 import { Note, Project } from "../types/interfaces";
 import { NoteCard } from "./noteCard";
+import { toast } from "react-toastify";
 
 interface NotesProps {
   projectId: number;
@@ -69,11 +70,15 @@ export const Notes = ({ isAdmin, projectId, project }: NotesProps) => {
 
     const title = titleInputRef.current?.value.trim() as string;
     if (title.length < 1) {
-      alert("Title is empty");
+      toast.warn("Hold on! The Note needs a tite. What should we call it?")
       return;
     }
 
     const description = descInputRef.current?.value.trim() as string;
+    if(description.length < 1){
+      toast.warn("Oops! A note without any content? What's the point? Please add some words!")
+      return
+    }
 
     setModal(null);
 
@@ -86,16 +91,14 @@ export const Notes = ({ isAdmin, projectId, project }: NotesProps) => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("NEW DATA ALERT");
-        console.log(data);
-
         if (data.error) {
-          alert(data.error);
+          toast.error("Yikes! The note refused to be created. Let’s give it another shot!")
           return;
         }
 
         if (data.note) {
           setNotes([...notes, data.note]);
+          toast.success("Success! Your note has been created and is ready to shine!")
           return;
         }
       });

@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { useDrop } from "react-dnd";
 import { TaskCard } from "./taskCard";
 import { Project, Task, TaskStatus, User } from "../types/interfaces";
+import { toast } from "react-toastify";
 
 interface DragItem {
   id: number;
@@ -46,19 +47,17 @@ export const TaskColumn = ({
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              alert(data.error);
+              toast.error("Oops! We couldn't delete the task. It must be hiding from us!")
               return;
             }
             if (data.tasks) {
-              console.log("data");
-              console.log(data);
-
               setTasks(data.tasks);
+              toast.success("Success! The task has been deleted. Out of sight, out of mind!")
             }
           });
       } catch (error) {
         console.error("Error deleting task:", error);
-        alert("Failed to delete task. Please try again later.");
+        toast.error("Oops! We couldn't delete the task. It must be hiding from us!")
       }
     }
   };

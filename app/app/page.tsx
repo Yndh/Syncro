@@ -2,6 +2,7 @@
 
 import {
   faCheck,
+  faCheckCircle,
   faFlag,
   faListCheck,
   faPercent,
@@ -14,7 +15,7 @@ import { useEffect } from "react";
 import { Task, TaskPriority, TaskStatus } from "../types/interfaces";
 import { useTasks } from "../providers/UserTasksProvider";
 import { useProjects } from "../providers/ProjectsProvider";
-import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 interface TaskData {
   id: "Completed" | "Uncompleted";
@@ -39,8 +40,6 @@ const App = () => {
   const { tasks, setTasks } = useTasks();
   const { projects, setProjects } = useProjects();
 
-  console.log(tasks);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -50,16 +49,17 @@ const App = () => {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              alert(data.error);
-            } else {
-              console.log(data);
+              toast.error("Uh-oh! We couldn’t fetch your user data. Please try again later!")
+              location.reload()
+              return
+            }
               if (data.tasks) {
                 setTasks(data.tasks);
               }
               if (data.projects) {
                 setProjects(data.projects);
               }
-            }
+            
           });
       } catch (error) {
         console.error("Error fetching project:", error);
@@ -77,7 +77,7 @@ const App = () => {
 
   const pieData: TaskData[] = [
     { id: "Completed", label: "Completed", value: completedTasks },
-    { id: "Uncompleted", label: "Uncompleted", value: uncompletedTasksNum },
+    { id: "Uncompleted", label: "Uncompleted", value: uncompletedTasksNum+1 },
   ];
   const colors: { Completed: string; Uncompleted: string } = {
     Completed: "#8BC858",
@@ -126,7 +126,7 @@ const App = () => {
 
   const Tooltip = ({ value, label }: { value: number; label: string }) => (
     <div className="tooltip">
-      <p>{label}:&nbsp;</p> {value}
+      <p>{label}:&nbsp;</p> {label == "Uncompleted" ? value-1 : value}
     </div>
   );
 
@@ -184,7 +184,7 @@ const App = () => {
           <div className="card">
             <p>My Tasks</p>
             <div className="tasksScroll">
-              {uncompletedTasks ? (
+              {uncompletedTasks.length > 0 ? (
                 uncompletedTasks
                   .sort(
                     (a, b) =>
@@ -253,7 +253,11 @@ const App = () => {
                     </div>
                   ))
               ) : (
-                <p>No tasks</p>
+                <div className="noTasks">
+                  <FontAwesomeIcon icon={faCheckCircle} />
+                  <p>You have no tasks</p>
+                  <span>Looks like you're all caught up! No tasks for now—enjoy the break, you deserve it!</span>
+                </div>
               )}
             </div>
           </div>
@@ -264,8 +268,8 @@ const App = () => {
             <div className="chart">
               <Pie
                 data={pieData}
-                width={200}
-                height={200}
+                width={180}
+                height={180}
                 innerRadius={0.8}
                 padAngle={2}
                 cornerRadius={45}
@@ -280,8 +284,10 @@ const App = () => {
                 )}
               />
               <div className="completedChart">
-                <p>{completed}</p>
-                <span>Tasks completed</span>
+                {uncompletedTasksNum > 0 && (
+                  <p>{completed}</p>
+                )}
+                <span>{uncompletedTasksNum > 0 ? "Tasks completed" : "No tasks yet!"}</span>
               </div>
             </div>
           </div>

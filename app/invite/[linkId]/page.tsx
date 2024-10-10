@@ -3,6 +3,7 @@
 import { Invite } from "@/app/types/interfaces";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 interface ProjectParams {
   params: {
@@ -22,7 +23,6 @@ const InvitePage = ({ params }: ProjectParams) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          alert(data.error);
           setIsValid(false);
           setIsLoading(false);
           return;
@@ -38,7 +38,6 @@ const InvitePage = ({ params }: ProjectParams) => {
             : null;
 
           if (expiresDate && expiresDate < now) {
-            alert("expired mf");
             setIsValid(false);
             return;
           }
@@ -47,7 +46,6 @@ const InvitePage = ({ params }: ProjectParams) => {
             !(dataInvite.maxUses ?? Infinity) === null ||
             !(dataInvite.uses < (dataInvite.maxUses ?? Infinity))
           ) {
-            alert("bruh used");
             setIsValid(false);
             return;
           }
@@ -73,12 +71,13 @@ const InvitePage = ({ params }: ProjectParams) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          alert(data.error);
+          toast.error("Uh-oh! We couldn't complete your request to join the project. Please try again!")
           return;
         }
 
         if (data.projectId) {
           router.push(`/app/projects/${data.projectId}`);
+          toast.success("Hooray! You've successfully joined the project! Let's get started!")
         }
       });
   };

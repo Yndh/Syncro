@@ -35,6 +35,7 @@ import Select from "./Select";
 import getUrl from "@/lib/getUrl";
 import QRCode from "react-qr-code";
 import { useProjects } from "../providers/ProjectsProvider";
+import { toast } from "react-toastify";
 
 interface MembersListProps {
   projectId: number;
@@ -267,11 +268,6 @@ export const MembersList = ({
     const selectedDivUses = document.querySelector("#maxUsesSelect")!
     const inviteMaxUses = selectedDivUses.getAttribute("data-value") ?? usesOptions[0].value
 
-    if (!inviteMaxUses) {
-      alert("Select uses");
-      return;
-    }
-
     let uses: number | null = null;
     if (inviteMaxUses !== "never") {
       uses = parseInt(inviteMaxUses.toString());
@@ -279,16 +275,6 @@ export const MembersList = ({
 
     const selectedDivExpiration = document.querySelector("#expirationDateSelect")!
     const inviteExpirationDate = selectedDivExpiration.getAttribute("data-value") ?? expirationOptions[0].value
-
-    if (!inviteExpirationDate) {
-      alert("Select expiration date");
-      return;
-    }
-
-    console.log(inviteExpirationDate);
-    console.log(inviteMaxUses);
-    
-    
 
     let expirationDate: Date | null = null;
     if (inviteExpirationDate !== "never") {
@@ -311,12 +297,11 @@ export const MembersList = ({
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          alert(data.error);
+          toast.error("Oops! The invite didn’t want to be created. Maybe it needs a pep talk?")
           return;
         }
 
         if (data.invite) {
-          console.log(data.invite);
           displayInvite(data.invite);
           setProjects(
             projects.map((dproject) => 
@@ -330,7 +315,8 @@ export const MembersList = ({
                   } 
                 : dproject
             )
-          );        
+          );  
+          toast.success("Success! Your invite has been sent out—let the fun begin!")      
         }
       });
   };
@@ -403,13 +389,14 @@ export const MembersList = ({
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          alert(data.error);
+          toast.error("Oops! We couldn't update the member's role. Please try again!")
           setProject(prevProject);
           return;
         }
 
         if (data.project) {
           setProject(data.project);
+          toast.success("Success! The member's role has been updated!")
         }
       });
   };
@@ -421,12 +408,13 @@ export const MembersList = ({
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          alert(data.error);
+          toast.error("Uh-oh! We couldn't kick the user. Please try again!")
           return;
         }
 
         if (data.project) {
           setProject(data.project);
+          toast.success("Success! The user has been removed from the project!")
         }
       });
   };

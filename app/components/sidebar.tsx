@@ -7,12 +7,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faChevronDown,
   faChevronRight,
-  faChevronUp,
   faCog,
   faDiagramProject,
-  faHouse,
   faList,
   faTable,
   faUser,
@@ -21,6 +18,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useProjects } from "../providers/ProjectsProvider";
 import { useModal } from "../providers/ModalProvider";
 import getUrl from "@/lib/getUrl";
+import { toast } from "react-toastify";
 
 interface ISidebar {
   session: Session;
@@ -143,12 +141,13 @@ const Sidebar = ({ session }: ISidebar) => {
 
     const name = projectNameInputRef.current?.value as string;
     if (name.trim() === "") {
-      alert("Project name cannot be empty");
+      toast.warn("Hold on! A project needs a name. What should we call it?")
       return;
     }
 
     const description = projectDescriptionTextAreaRef.current?.value as string;
     
+    setModal(null)
     
     await fetch("/api/projects", {
       method: "POST",
@@ -157,14 +156,14 @@ const Sidebar = ({ session }: ISidebar) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          alert(data.error);
+          toast.error("Oops! Something went wrong while creating your project. Give it another try!")
           return;
         }
 
         if(data.id){
           router.push(`/app/projects/${data.id}`);
           fetchProjects()
-          setModal(null)
+          toast.success("Congratulations! Your project has been created successfully!")
         }
       });
   }
@@ -178,9 +177,11 @@ const Sidebar = ({ session }: ISidebar) => {
 
 
     if(!code){
-      alert("invalid code")
+      toast.warn("Oops! That invite schema is invalid. Please check the format and try again!")
       return
     }
+
+    setModal(null)
 
     try{
       await fetch(`/api/invite/${code}/join`, {
@@ -189,19 +190,18 @@ const Sidebar = ({ session }: ISidebar) => {
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
-            alert(data.error);
+            toast.error("Uh-oh! We couldn't complete your request to join the project. Please try again!")
             return;
           }
   
           if (data.projectId) {
             router.push(`/app/projects/${data.projectId}`);
-            setModal(null)
             fetchProjects()
+            toast.success("Hooray! You've successfully joined the project! Let's get started!")
           }
         });
     }catch(e){
       console.error(`Error joining project: ${e}`)
-      alert(e)
     }
   }
   

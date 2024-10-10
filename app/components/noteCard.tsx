@@ -8,6 +8,7 @@ import { useRef } from "react";
 import Image from "next/image";
 import { auth } from "@/auth";
 import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
 
 interface NoteCardProps {
   note: Note;
@@ -40,7 +41,7 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
       content: (
         <ol className="contextMenuList">
           <li onClick={handleModal}>Edit</li>
-          <li className="delete" onClick={() => handleDeleteNote(note.id)}>
+          <li className="delete" onClick={deleteNoteModal}>
             Delete
           </li>
         </ol>
@@ -101,7 +102,7 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
 
     const title = titleInputRef.current?.value.trim() as string;
     if (title.length < 1) {
-      alert("Title is empty");
+      toast.warn("Hold on! A note needs a name. What should we call it?")
       return;
     }
 
@@ -117,58 +118,77 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
       )
     );
 
-    await fetch(`/api/project/${note.projectId}/notes`, {
-      method: "POST",
-      body: JSON.stringify({
-        id: note.id,
-        title: title,
-        description: description,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("NEW DATA ALERT");
-        console.log(data);
-
-        if (data.error) {
-          alert(data.error);
-          setNotes(prevNotes);
-          return;
-        }
-
-        if (data.note) {
-          setNotes((prevNotes) =>
-            prevNotes.map((note) =>
-              note.id == data.note.id ? data.note : note
-            )
-          );
-          return;
-        }
-      });
+    try{
+      await fetch(`/api/project/${note.projectId}/notes`, {
+        method: "POST",
+        body: JSON.stringify({
+          id: note.id,
+          title: title,
+          description: description,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            toast.error("Yikes! The note couldn't be created. Even notes have their off days!")
+            setNotes(prevNotes);
+            return;
+          }
+  
+          if (data.note) {
+            setNotes((prevNotes) =>
+              prevNotes.map((note) =>
+                note.id == data.note.id ? data.note : note
+              )
+            );
+            toast.success("Success! Your note has been created and is ready to rock!")
+          }
+        });
+    }catch(err){
+      console.error("Error creating task:", err);
+      toast.error("Yikes! The note couldn't be created. Even notes have their off days!")
+    }
   };
 
-  const handleDeleteNote = async (id: number) => {
-    if (window.confirm(`Do you really want to delete note id ${id}?`)) {
+  const deleteNoteModal = () => {
+    setModal({
+      title: "Confirm Note Deletion",
+      content: (
+        <div className="header">
+          <h1>Confirm Note Deletion</h1>
+          <p>Are you sure you want to delete this note? Once it's gone, it can't be retrieved!.</p>
+        </div>
+      ),
+      bottom: (
+        <>
+        <button onClick={handleDeleteNote}>Delete Note</button>
+        <button className="secondary" onClick={() => setModal(null)}>Cancel</button>
+        </>
+      ),
+      setModal
+    })
+  }
+
+  const handleDeleteNote = async () => {
+    if (window.confirm(`Do you really want to delete note id ${note.id}?`)) {
       try {
-        await fetch(`/api/project/${note.projectId}/note/${id}`, {
+        await fetch(`/api/project/${note.projectId}/note/${note.id}`, {
           method: "DELETE",
         })
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              alert(data.error);
+              toast.error("Oops! The note didn't want to say goodbye. Let's try that again!")
               return;
             }
             if (data.notes) {
-              console.log("data");
-              console.log(data);
-
               setNotes(data.notes);
+              toast.success("Success! The note has been deleted. Out of sight, out of mind!")
             }
           });
-      } catch (error) {
-        console.error("Error deleting task:", error);
-        alert("Failed to delete task. Please try again later.");
+      } catch (err) {
+        console.error("Error deleting task:", err);
+        toast.error("Oops! The note didn't want to say goodbye. Let's try that again!")
       }
     }
   };

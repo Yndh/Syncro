@@ -14,6 +14,7 @@ import {
 import Select from "./Select";
 import { useProjects } from "../providers/ProjectsProvider";
 import { useModal } from "../providers/ModalProvider";
+import { toast } from "react-toastify";
 
 interface InviteDetailsProps {
   invite: Invite;
@@ -163,15 +164,14 @@ export const InviteDetails = ({ invite }: InviteDetailsProps) => {
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
-            alert(data.error);
+            toast.error("Oops! We couldn’t delete the invite. Please try again!")
             return;
           }
 
           if (data.project) {
             const dataProject = data.project[0]
             setProjects(projects.map(project => project.id == dataProject.id ? dataProject : project))
-            setModal(null)
-            
+            toast.success("Success! The invite has been deleted!")
           }
         });
     }
@@ -186,6 +186,8 @@ export const InviteDetails = ({ invite }: InviteDetailsProps) => {
       uses = parseInt(inviteMaxUses.toString())
     }
 
+    setModal(null)
+
     await fetch(`/api/invite/${invite.linkId}`, {
       method: "POST",
       body: JSON.stringify({
@@ -195,7 +197,8 @@ export const InviteDetails = ({ invite }: InviteDetailsProps) => {
     .then(res => res.json())
     .then((data) => {
       if(data.error){
-        alert(data.error)
+        toast.error("Oops! We couldn't update the invite. Please try again!")
+        return
       }
 
       if(data.invite){
@@ -212,7 +215,7 @@ export const InviteDetails = ({ invite }: InviteDetailsProps) => {
               : dproject
           )
         ); 
-        setModal(null)
+        toast.success("Success! The invite has been updated!")
       }
     })
   }
@@ -225,12 +228,12 @@ export const InviteDetails = ({ invite }: InviteDetailsProps) => {
     if (expires) {
       const date = new Date(expires);
       if (isNaN(date.getTime())) {
-        alert("Invalid due date");
+        toast.warn("Oops! That due date is invalid. Please choose a future date!")
         return;
       }
 
       if (date < new Date()) {
-        alert("Time traveling is not allowed");
+        toast.warn("Uh-oh! Time travel isn't allowed here. Please pick a valid due date!")
         return;
       }
 
@@ -246,7 +249,7 @@ export const InviteDetails = ({ invite }: InviteDetailsProps) => {
     .then(res => res.json())
     .then((data) => {
       if(data.error){
-        alert(data.error)
+        toast.error("Oops! We couldn't retrieve the invite details!")
       }
 
       if(data.invite){

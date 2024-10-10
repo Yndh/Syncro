@@ -25,6 +25,7 @@ import { useSession } from "next-auth/react";
 import { createRoot } from "react-dom/client";
 import Select from "./Select";
 import Image from "next/image";
+import { toast } from "react-toastify";
 
 interface TaskCardProps {
   task: Task;
@@ -41,15 +42,6 @@ const taskStatuses: TaskStatus[] = [
   TaskStatus.ON_GOING,
   TaskStatus.REVIEWING,
   TaskStatus.DONE,
-];
-
-type Priority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-
-const priorities: TaskPriority[] = [
-  TaskPriority.LOW,
-  TaskPriority.MEDIUM,
-  TaskPriority.HIGH,
-  TaskPriority.URGENT,
 ];
 
 const options = [
@@ -160,7 +152,7 @@ export const TaskCard = ({
               ))}
             </ol>
           </li>
-          <li className="delete" onClick={() => handleDeleteTask(task.id)}>
+          <li className="delete" onClick={deleteTaskModal}>
             Delete
           </li>
         </ol>
@@ -169,19 +161,38 @@ export const TaskCard = ({
     });
   };
 
+  const deleteTaskModal = () => {
+    setModal({
+      title: "Confirm Task Deletion",
+      content: (
+        <div className="header">
+          <h1>Confirm Task Deletion</h1>
+          <p>Are you sure you want to delete this task? Once it's gone, it can't be retrieved!.</p>
+        </div>
+      ),
+      bottom: (
+        <>
+        <button onClick={() =>  handleDeleteTask(task.id)}>Delete Note</button>
+        <button className="secondary" onClick={() => setModal(null)}>Cancel</button>
+        </>
+      ),
+      setModal
+    })
+  }
+
   const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const title = titleInputRef.current?.value.trim() as string;
     if (title.length < 1) {
-      alert("Title is empty");
+      toast.warn("Hold on! The task needs a name. What should we call it?")
       return;
     }
 
     const description = descInputRef.current?.value.trim() as string;
     const assignedMembers = getCheckedMemberIds();
     if (assignedMembers.length < 1) {
-      alert("There is no assigned members");
+      toast.warn("Hold up! A task needs a team! Please assign at least one member to get things rolling!")
       return;
     }
 
@@ -190,12 +201,12 @@ export const TaskCard = ({
     if (dueDate) {
       const date = new Date(dueDate);
       if (isNaN(date.getTime())) {
-        alert("Invalid due date");
+        toast.warn("Oops! That due date is invalid. Please choose a future date!")
         return;
       }
 
       if (date < new Date()) {
-        alert("Time traveling is not allowed");
+        toast.warn("Uh-oh! Time travel isn't allowed here. Please pick a valid due date!")
         return;
       }
 
@@ -221,8 +232,6 @@ export const TaskCard = ({
       )
     );
 
-    console.log(selectedPriority);
-
     await fetch(`/api/project/${task.projectId}/tasks`, {
       method: "POST",
       body: JSON.stringify({
@@ -238,17 +247,18 @@ export const TaskCard = ({
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          alert(data.error);
+          toast.error("Oops! We couldn’t update the task. It seems to be stuck in its old ways!")
           setTasks(prevTask);
           return;
         }
 
-        if (data.task as Task) {
+        if (data.task) {
           setTasks((prevTasks) =>
             prevTasks.map((prevTask) =>
               prevTask.id == data.task.id ? data.task : prevTask
             )
           );
+          toast.success("Success! The task has been updated and is ready to shine!")
         }
       });
   };
@@ -504,12 +514,8 @@ export const TaskCard = ({
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("updat?");
-
-        console.log(data);
-
         if (data.error) {
-          alert(data.error);
+          toast.error("Uh-oh! We couldn't update the task stage. It seems to be stuck in limbo!")
           setTasks(prevTask);
           e.target.checked = !check;
           return;

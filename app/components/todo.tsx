@@ -18,6 +18,7 @@ import Image from "next/image";
 import ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
 import Select from "./Select";
+import { toast } from "react-toastify";
 
 interface ToDoProps {
   projectId: number;
@@ -77,14 +78,14 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
 
     const title = titleInputRef.current?.value.trim() as string;
     if (title.length < 1) {
-      alert("Title is empty");
+      toast.warn("Hold on! The task needs a name. What should we call it?")
       return;
     }
 
     const description = descInputRef.current?.value.trim() as string;
     const assignedMembers = getCheckedMemberIds();
     if (assignedMembers.length < 1) {
-      alert("There is no assigned members");
+      toast.warn("Hold up! A task needs a team! Please assign at least one member to get things rolling!")
       return;
     }
 
@@ -98,12 +99,12 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
     if (dueDate) {
       const date = new Date(dueDate);
       if (isNaN(date.getTime())) {
-        alert("Invalid due date");
+        toast.warn("Oops! That due date is invalid. Please choose a future date!")
         return;
       }
 
       if (date < new Date()) {
-        alert("Time traveling is not allowed");
+        toast.warn("Uh-oh! Time travel isn’t allowed here. Please pick a valid due date!")
         return;
       }
 
@@ -126,12 +127,13 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          alert(data.error);
+          toast.error("Yikes! We couldn’t create the task. It seems to be playing hard to get!")
           return;
         }
 
         if (data.task) {
           setTasksList([...tasksList, data.task]);
+          toast.success("Success! Your task has been created and is ready to tackle!")
         }
       });
   };
@@ -320,7 +322,7 @@ const ToDo = ({ projectId, isAdmin, project }: ToDoProps) => {
       .then((data) => {
         if (data.error) {
           setTasksList(prevTasksList);
-          alert(data.error);
+          console.error("Uh-oh! We couldn't move the task. It seems to have a mind of its own!")
           return;
         }
 
