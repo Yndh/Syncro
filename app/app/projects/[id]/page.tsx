@@ -9,7 +9,6 @@ import { Notes } from "@/app/components/Notes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCog,
-  faList,
   faListCheck,
   faNoteSticky,
   faPlus,
@@ -37,8 +36,8 @@ const ProjectPage = ({ params }: ProjectParams) => {
   >("tasks");
   const router = useRouter();
   const [project, setProject] = useState<Project>();
-  const projectNameInputRef = useRef<HTMLInputElement>(null)
-  const projectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null)
+  const projectNameInputRef = useRef<HTMLInputElement>(null);
+  const projectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const localProject = getProjectById(parseInt(params.id));
@@ -52,7 +51,9 @@ const ProjectPage = ({ params }: ProjectParams) => {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              alert("Uh-oh! We couldn’t grab the project details. How about a quick refresh?");
+              alert(
+                "Uh-oh! We couldn’t grab the project details. How about a quick refresh?"
+              );
               router.push("/app");
             } else {
               setProject(data.project);
@@ -73,9 +74,11 @@ const ProjectPage = ({ params }: ProjectParams) => {
     return invite.expires && new Date(invite.expires) < now;
   };
 
-  const nonExpiredInvites = project?.projectInvitations 
-  ? project.projectInvitations.filter((invite) => invite && !isExpired(invite))
-  : [];
+  const nonExpiredInvites = project?.projectInvitations
+    ? project.projectInvitations.filter(
+        (invite) => invite && !isExpired(invite)
+      )
+    : [];
 
   const openSettings = () => {
     setModal({
@@ -88,7 +91,13 @@ const ProjectPage = ({ params }: ProjectParams) => {
               <span>Enter the name of your project</span>
             </label>
 
-            <input type="text" placeholder="Project name..." ref={projectNameInputRef} defaultValue={project?.name} id="projectName"/>
+            <input
+              type="text"
+              placeholder="Project name..."
+              ref={projectNameInputRef}
+              defaultValue={project?.name}
+              id="projectName"
+            />
           </div>
 
           <div className="formRow">
@@ -97,69 +106,98 @@ const ProjectPage = ({ params }: ProjectParams) => {
               <span>Provide a brief overview of your project</span>
             </label>
 
-            <textarea disabled={!(role === "ADMIN" || role === "OWNER")} placeholder="Project name..." ref={projectDescriptionTextAreaRef} defaultValue={project?.description} id="projectDescription"/>
+            <textarea
+              disabled={!(role === "ADMIN" || role === "OWNER")}
+              placeholder="Project name..."
+              ref={projectDescriptionTextAreaRef}
+              defaultValue={project?.description}
+              id="projectDescription"
+            />
           </div>
 
-          {(role === "ADMIN" || role === "OWNER") &&  (
+          {(role === "ADMIN" || role === "OWNER") && (
             <div className="formRow">
-            <label htmlFor="projectDescription">
-              <p>Invites</p>
-              <span>Manage project invitatuibs</span>
-            </label>
+              <label htmlFor="projectDescription">
+                <p>Invites</p>
+                <span>Manage project invitatuibs</span>
+              </label>
 
-            <div className="invites">
-              {nonExpiredInvites && nonExpiredInvites.map(invite => (
-                <InviteDetails invite={invite} key={invite.id}/>
-              ))}
+              <div className="invites">
+                {nonExpiredInvites &&
+                  nonExpiredInvites.map((invite) => (
+                    <InviteDetails invite={invite} key={invite.id} />
+                  ))}
+              </div>
             </div>
-          </div>
           )}
 
           {role === "OWNER" ? (
             <div className="formRow action">
-            <label htmlFor="projectDescription">
-              <p>Delete</p>
-              <span>Permanently remove the project</span>
-            </label>
+              <label htmlFor="projectDescription">
+                <p>Delete</p>
+                <span>Permanently remove the project</span>
+              </label>
 
-            <button className="projectLeave" onClick={deleteProjectModal}>Delete Project</button>
-          </div>
+              <button className="projectLeave" onClick={deleteProjectModal}>
+                Delete Project
+              </button>
+            </div>
           ) : (
             <div className="formRow">
-            <label htmlFor="projectDescription">
-              <p>Leave</p>
-              <span>Withdraw from the project</span>
-            </label>
+              <label htmlFor="projectDescription">
+                <p>Leave</p>
+                <span>Withdraw from the project</span>
+              </label>
 
-            <button className="projectLeave" onClick={leaveProjectModal}>Leave Project</button>
-          </div>
+              <button className="projectLeave" onClick={leaveProjectModal}>
+                Leave Project
+              </button>
+            </div>
           )}
         </form>
       ),
       bottom: (
         <>
           {(role === "ADMIN" || role === "OWNER") && (
-            <button type="submit" form="settingsForm">Save changes</button>
+            <button type="submit" form="settingsForm">
+              Save changes
+            </button>
           )}
-          <button className="secondary" onClick={() => setModal(null)}>Close</button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Close
+          </button>
         </>
       ),
-      setModal
-    })
-  }
+      setModal,
+    });
+  };
 
   const updateProject = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const name = projectNameInputRef.current?.value as string;
-    
-    if(name.trim() === ""){
-      toast.warn("Hold on! A project needs a name. What should we call it?")
-      return
-    }
-    const description = projectDescriptionTextAreaRef.current?.value as string;
+    const name = (projectNameInputRef.current?.value as string).trim();
 
-    setModal(null)
+    if (name === "") {
+      toast.warn("Hold on! A project needs a name. What should we call it?");
+      return;
+    }
+    if (name.length > 100) {
+      toast.warn(
+        "Heads up! The project name is a bit too lengthy. Try shortening it to keep things concise!"
+      );
+      return;
+    }
+    const description = (
+      projectDescriptionTextAreaRef.current?.value as string
+    ).trim();
+    if (description.length > 400) {
+      toast.warn(
+        "Warning! The project description is getting too wordy. Let's trim it down a bit!"
+      );
+      return;
+    }
+
+    setModal(null);
 
     await fetch(`/api/project/${project?.id}`, {
       method: "POST",
@@ -177,11 +215,11 @@ const ProjectPage = ({ params }: ProjectParams) => {
 
         if (data.project) {
           setProject(data.project);
-          toast.success("Success! Your project has been updated!")
+          toast.success("Success! Your project has been updated!");
           return;
         }
       });
-  }
+  };
 
   const leaveProjectModal = () => {
     setModal({
@@ -189,18 +227,23 @@ const ProjectPage = ({ params }: ProjectParams) => {
       content: (
         <div className="header">
           <h1>Confirm Departure</h1>
-          <p>Are you sure you want to leave the project? You will lose access to all project resources and updates.</p>
+          <p>
+            Are you sure you want to leave the project? You will lose access to
+            all project resources and updates.
+          </p>
         </div>
       ),
       bottom: (
         <>
-        <button onClick={leaveProject}>Leave Project</button>
-        <button className="secondary" onClick={() => setModal(null)}>Cancel</button>
+          <button onClick={leaveProject}>Leave Project</button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
         </>
       ),
-      setModal
-    })
-  }
+      setModal,
+    });
+  };
 
   const deleteProjectModal = () => {
     setModal({
@@ -208,23 +251,28 @@ const ProjectPage = ({ params }: ProjectParams) => {
       content: (
         <div className="header">
           <h1>Confirm Project Deletion</h1>
-          <p>Are you sure you want to permanently delete this project? This action cannot be undone, and all associated data will be lost.</p>
+          <p>
+            Are you sure you want to permanently delete this project? This
+            action cannot be undone, and all associated data will be lost.
+          </p>
         </div>
       ),
       bottom: (
         <>
-        <button onClick={deleteProject}>Delete Project</button>
-        <button className="secondary" onClick={() => setModal(null)}>Cancel</button>
+          <button onClick={deleteProject}>Delete Project</button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
         </>
       ),
-      setModal
-    })
-  }
+      setModal,
+    });
+  };
 
   const leaveProject = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    setModal(null)
+    setModal(null);
 
     await fetch(`/api/project/${project?.id}/members/${membershipId}`, {
       method: "DELETE",
@@ -232,23 +280,27 @@ const ProjectPage = ({ params }: ProjectParams) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          toast.error("Oops! Something went wrong while trying to leave the project. Give it another shot!")
+          toast.error(
+            "Oops! Something went wrong while trying to leave the project. Give it another shot!"
+          );
           return;
         }
 
         if (data.project) {
           router.push("/app");
 
-          fetchProjects()
-          toast.success("You've successfully left the project! Onward to new endeavors!")
+          fetchProjects();
+          toast.success(
+            "You've successfully left the project! Onward to new endeavors!"
+          );
         }
       });
   };
 
   const deleteProject = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    setModal(null)
+    setModal(null);
 
     await fetch(`/api/project/${project?.id}`, {
       method: "DELETE",
@@ -256,27 +308,36 @@ const ProjectPage = ({ params }: ProjectParams) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          toast.error("Uh-oh! The project didn't want to be deleted just yet. Try again!")
+          toast.error(
+            "Uh-oh! The project didn't want to be deleted just yet. Try again!"
+          );
           return;
         }
 
         if (data.success) {
           router.push("/app");
-          toast.success("Project deleted! Time to make room for new adventures!")
+          toast.success(
+            "Project deleted! Time to make room for new adventures!"
+          );
         }
       });
   };
 
   const handleNavChange = (tab: "tasks" | "notes" | "members" | "settings") => {
-    if(tab === "settings"){
-      openSettings()
-      return
+    if (tab === "settings") {
+      openSettings();
+      return;
     }
     setSelectedTab(tab);
   };
 
-  const completedTasksPercentage = project?.tasks ? ((project.tasks.filter(task => task.taskStatus == "DONE").length / project.tasks.length) * 100).toFixed(2) : 0
-
+  const completedTasksPercentage = project?.tasks?.length
+    ? (
+        (project.tasks.filter((task) => task.taskStatus === "DONE").length /
+          project.tasks.length) *
+        100
+      ).toFixed(2)
+    : "0.00";
 
   return (
     <>
@@ -285,21 +346,22 @@ const ProjectPage = ({ params }: ProjectParams) => {
           <h2>Projects</h2>
 
           <div className="list">
-            <p>All Projects ({projects ? (projects.length) : 0})</p>
+            <p>All Projects ({projects ? projects.length : 0})</p>
             <ol>
-              {projects && projects.map((project) => (
-                <li key={`project${project.id}`}>
-                  <span className="min"></span>
-                  <a
-                    href={`/app/projects/${project.id}`}
-                    className={
-                      parseInt(params.id) === project.id ? "active" : ""
-                    }
-                  >
-                    {project.name}
-                  </a>
-                </li>
-              ))}
+              {projects &&
+                projects.map((project) => (
+                  <li key={`project${project.id}`}>
+                    <span className="min"></span>
+                    <a
+                      href={`/app/projects/${project.id}`}
+                      className={
+                        parseInt(params.id) === project.id ? "active" : ""
+                      }
+                    >
+                      {project.name}
+                    </a>
+                  </li>
+                ))}
             </ol>
             <button>
               <FontAwesomeIcon icon={faPlus} />
@@ -381,7 +443,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
               <ToDo
                 projectId={project?.id as number}
                 isAdmin={role === "OWNER" || role === "ADMIN"}
-                project={project}
+                tasks={project.tasks}
               />
             )}
             {selectedTab === "notes" && project && (

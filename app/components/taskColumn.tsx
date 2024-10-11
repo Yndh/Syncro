@@ -3,64 +3,40 @@
 import { useRef } from "react";
 import { useDrop } from "react-dnd";
 import { TaskCard } from "./taskCard";
-import { Project, Task, TaskStatus, User } from "../types/interfaces";
-import { toast } from "react-toastify";
+import { Project, Task, TaskStatus } from "../types/interfaces";
 
 interface DragItem {
-  id: number;
+  task: Task;
   type: string;
 }
 
 interface TaskColumnProps {
   status: TaskStatus;
   tasks: Task[];
-  project: Project;
   isAdmin: boolean;
+  showProject?: boolean
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-  moveTask: (id: number, status: TaskStatus) => void;
+  moveTask: (task: Task, status: TaskStatus) => void;
 }
 
 export const TaskColumn = ({
   status,
   tasks,
-  project,
   isAdmin,
   moveTask,
   setTasks,
+  showProject = false
 }: TaskColumnProps) => {
   const divRef = useRef<HTMLDivElement>(null);
   const [, drop] = useDrop(
     () => ({
       accept: "TASK",
-      drop: (item: DragItem) => moveTask(item.id, status),
+      drop: (item: DragItem) => moveTask(item.task, status),
     }),
     [status]
   );
   drop(divRef);
 
-  const handleDeleteTask = async (taskId: number) => {
-    if (window.confirm(`Do you really want to delete task id ${taskId}?`)) {
-      try {
-        await fetch(`/api/project/${project.id}/task/${taskId}`, {
-          method: "DELETE",
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.error) {
-              toast.error("Oops! We couldn't delete the task. It must be hiding from us!")
-              return;
-            }
-            if (data.tasks) {
-              setTasks(data.tasks);
-              toast.success("Success! The task has been deleted. Out of sight, out of mind!")
-            }
-          });
-      } catch (error) {
-        console.error("Error deleting task:", error);
-        toast.error("Oops! We couldn't delete the task. It must be hiding from us!")
-      }
-    }
-  };
 
   return (
     <div className="cardCol" ref={divRef}>
@@ -74,11 +50,10 @@ export const TaskColumn = ({
             key={task.id}
             task={task}
             tasksList={tasks}
-            project={project}
             isAdmin={isAdmin}
             moveTask={moveTask}
-            handleDeleteTask={handleDeleteTask}
             setTasks={setTasks}
+            showProject={showProject}
           />
         ))}
       </div>

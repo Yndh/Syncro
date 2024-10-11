@@ -20,10 +20,23 @@ export async function mPOST(req: Request, res: NextApiResponse) {
   }
 
   const body: reqBody = await req.json();
-  if (body.name.trim().length < 1) {
-    return new NextResponse(JSON.stringify({ error: "Invalid parameters" }), {
-      status: 400,
-    });
+  if (body.name.trim().length < 1 || body.name.trim().length > 100) {
+    return new NextResponse(
+      JSON.stringify({
+        error: "Project name must be between 1 and 100 characters",
+      }),
+      {
+        status: 400,
+      }
+    );
+  }
+  if (body.description.trim().length > 400) {
+    return new NextResponse(
+      JSON.stringify({ error: "Description must be at most 400 characters" }),
+      {
+        status: 400,
+      }
+    );
   }
 
   try {

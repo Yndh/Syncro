@@ -61,6 +61,24 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       }
     );
   }
+  if (body.name.trim().length > 100) {
+    return new NextResponse(
+      JSON.stringify({
+        error: "Project name must be at most 100 characters",
+      }),
+      {
+        status: 400,
+      }
+    );
+  }
+  if (body.description.trim().length > 400) {
+    return new NextResponse(
+      JSON.stringify({ error: "Description must be at most 400 characters" }),
+      {
+        status: 400,
+      }
+    );
+  }
 
   try {
     const project = await prisma.project.update({

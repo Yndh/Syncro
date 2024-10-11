@@ -9,7 +9,7 @@ import { SessionProvider } from "next-auth/react";
 import { ProjectsProvider } from "../providers/ProjectsProvider";
 import { TasksProvider } from "../providers/UserTasksProvider";
 import { ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
 export default async function Home({
   children,
@@ -17,7 +17,7 @@ export default async function Home({
   children: React.ReactNode;
 }>) {
   const session = await auth();
-  if (!session) redirect("../signIn");
+  if (!session) redirect("/signIn");
 
   return (
     <div className="app__container">
@@ -39,7 +39,7 @@ export default async function Home({
             </ModalProvider>
           </TasksProvider>
         </ProjectsProvider>
-        <ToastContainer/>
+        <ToastContainer />
       </SessionProvider>
     </div>
   );

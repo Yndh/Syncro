@@ -26,9 +26,9 @@ interface ISidebar {
 
 const Sidebar = ({ session }: ISidebar) => {
   const [projectId, setProjectId] = useState<number | boolean>(false);
-  const projectNameInputRef = useRef<HTMLInputElement>(null)
-  const projectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null)
-  const inviteInputRef = useRef<HTMLInputElement>(null)
+  const projectNameInputRef = useRef<HTMLInputElement>(null);
+  const projectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null);
+  const inviteInputRef = useRef<HTMLInputElement>(null);
   const { projects, fetchProjects } = useProjects();
   const { setModal } = useModal();
   const router = useRouter();
@@ -37,11 +37,10 @@ const Sidebar = ({ session }: ISidebar) => {
   useEffect(() => {
     if (projects != null && projects.length > 0 && !projectId) {
       setProjectId(projects[0].id);
-    }else{
-      setProjectId(false)
+    } else {
+      setProjectId(false);
     }
-  }, [projects])
-
+  }, [projects]);
 
   const projectModal = () => {
     if (projectId) return;
@@ -68,7 +67,9 @@ const Sidebar = ({ session }: ISidebar) => {
       ),
       bottom: (
         <>
-        <button className="secondary" onClick={() => setModal(null)}>Cancel</button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
         </>
       ),
       setModal,
@@ -86,7 +87,12 @@ const Sidebar = ({ session }: ISidebar) => {
               <span>Enter the name of your project</span>
             </label>
 
-            <input type="text" placeholder="Project name..." ref={projectNameInputRef} id="projectName"/>
+            <input
+              type="text"
+              placeholder="Project name..."
+              ref={projectNameInputRef}
+              id="projectName"
+            />
           </div>
 
           <div className="formRow">
@@ -95,19 +101,27 @@ const Sidebar = ({ session }: ISidebar) => {
               <span>Provide a brief overview of your project</span>
             </label>
 
-            <textarea  placeholder="Project name..." ref={projectDescriptionTextAreaRef} id="projectDescription"/>
+            <textarea
+              placeholder="Project name..."
+              ref={projectDescriptionTextAreaRef}
+              id="projectDescription"
+            />
           </div>
         </form>
       ),
       bottom: (
         <>
-        <button type="submit" form="createProjectForm">Create Project</button>
-        <button className="secondary" onClick={() => setModal(null)}>Cancel</button>
+          <button type="submit" form="createProjectForm">
+            Create Project
+          </button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
         </>
       ),
-      setModal
-    })
-  }
+      setModal,
+    });
+  };
 
   const joinProjectModal = () => {
     setModal({
@@ -120,35 +134,56 @@ const Sidebar = ({ session }: ISidebar) => {
               <span>Enter the invite URL or code</span>
             </label>
 
-            <input type="text" placeholder={`${getUrl()}/join/ABC123`} ref={inviteInputRef} id="projectInviteUrl"/>
+            <input
+              type="text"
+              placeholder={`${getUrl()}/join/ABC123`}
+              ref={inviteInputRef}
+              id="projectInviteUrl"
+            />
           </div>
         </form>
       ),
       bottom: (
         <>
-          <button type="submit" form="joinProjectForm">Join</button>
+          <button type="submit" form="joinProjectForm">
+            Join
+          </button>
           <button className="secondary" onClick={() => setModal(null)}>
             Cancel
           </button>
         </>
       ),
-      setModal
-    })
-  }
+      setModal,
+    });
+  };
 
   const createProject = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const name = projectNameInputRef.current?.value as string;
-    if (name.trim() === "") {
-      toast.warn("Hold on! A project needs a name. What should we call it?")
+    const name = (projectNameInputRef.current?.value as string).trim();
+    if (name === "") {
+      toast.warn("Hold on! A project needs a name. What should we call it?");
+      return;
+    }
+    if (name.length > 100) {
+      toast.warn(
+        "Heads up! The project name is a bit too lengthy. Try shortening it to keep things concise!"
+      );
       return;
     }
 
-    const description = projectDescriptionTextAreaRef.current?.value as string;
-    
-    setModal(null)
-    
+    const description = (
+      projectDescriptionTextAreaRef.current?.value as string
+    ).trim();
+    if (description.length > 400) {
+      toast.warn(
+        "Warning! The project description is getting too wordy. Let's trim it down a bit!"
+      );
+      return;
+    }
+
+    setModal(null);
+
     await fetch("/api/projects", {
       method: "POST",
       body: JSON.stringify({ name, description }),
@@ -156,55 +191,63 @@ const Sidebar = ({ session }: ISidebar) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          toast.error("Oops! Something went wrong while creating your project. Give it another try!")
+          toast.error(
+            "Oops! Something went wrong while creating your project. Give it another try!"
+          );
           return;
         }
 
-        if(data.id){
+        if (data.id) {
           router.push(`/app/projects/${data.id}`);
-          fetchProjects()
-          toast.success("Congratulations! Your project has been created successfully!")
+          fetchProjects();
+          toast.success(
+            "Congratulations! Your project has been created successfully!"
+          );
         }
       });
-  }
+  };
 
   const joinProject = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const inviteUrl = inviteInputRef.current?.value as string
+    const inviteUrl = inviteInputRef.current?.value as string;
     const codeMatch = inviteUrl.match(/invite\/([^/]+)/);
-    const code = codeMatch ? codeMatch[1] : inviteUrl.trim()
+    const code = codeMatch ? codeMatch[1] : inviteUrl.trim();
 
-
-    if(!code){
-      toast.warn("Oops! That invite schema is invalid. Please check the format and try again!")
-      return
+    if (!code) {
+      toast.warn(
+        "Oops! That invite schema is invalid. Please check the format and try again!"
+      );
+      return;
     }
 
-    setModal(null)
+    setModal(null);
 
-    try{
+    try {
       await fetch(`/api/invite/${code}/join`, {
         method: "POST",
       })
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
-            toast.error("Uh-oh! We couldn't complete your request to join the project. Please try again!")
+            toast.error(
+              "Uh-oh! We couldn't complete your request to join the project. Please try again!"
+            );
             return;
           }
-  
+
           if (data.projectId) {
             router.push(`/app/projects/${data.projectId}`);
-            fetchProjects()
-            toast.success("Hooray! You've successfully joined the project! Let's get started!")
+            fetchProjects();
+            toast.success(
+              "Hooray! You've successfully joined the project! Let's get started!"
+            );
           }
         });
-    }catch(e){
-      console.error(`Error joining project: ${e}`)
+    } catch (e) {
+      console.error(`Error joining project: ${e}`);
     }
-  }
-  
+  };
 
   return (
     <div className="sidebar">
@@ -242,7 +285,7 @@ const Sidebar = ({ session }: ISidebar) => {
             </Link>
           </li>
           <li className={pathname == "/app/tasks" ? "active" : ""}>
-            <Link href={"/app/projects"}>
+            <Link href={"/app/tasks"}>
               <div className={"navElement"}>
                 <div className="icon">
                   <FontAwesomeIcon icon={faList} />

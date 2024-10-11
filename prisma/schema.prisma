@@ -103,28 +103,28 @@ model ProjectInvitation {
 }
 
 model Task {
-  id          Int        @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   title       String
   description String?
-  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId   Int
-  priority    Priority   @default(MEDIUM)
-  taskStatus  TaskStatus @default(TO_DO)
+  priority    Priority    @default(MEDIUM)
+  taskStatus  TaskStatus  @default(TO_DO)
   dueTime     DateTime?
-  stages TaskStage[]
-  assignedTo  User[]     @relation(name: "TaskAssignments")
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  stages      TaskStage[]
+  assignedTo  User[]      @relation(name: "TaskAssignments")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model TaskStage {
-  id Int @id @default(autoincrement())
-  title String
-  isCompleted Boolean @default(false)
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  taskId Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  title       String
+  isCompleted Boolean  @default(false)
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId      Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Notes {

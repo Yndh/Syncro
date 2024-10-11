@@ -49,7 +49,7 @@ const App = () => {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              toast.error("Uh-oh! We couldn’t fetch your user data. Please try again later!")
+              toast.error("Uh-oh! We couldn't fetch your user data. Please try again later!")
               location.reload()
               return
             }
@@ -62,7 +62,7 @@ const App = () => {
             
           });
       } catch (error) {
-        console.error("Error fetching project:", error);
+        console.error("Error fetching user data:", error);
       }
     };
 
