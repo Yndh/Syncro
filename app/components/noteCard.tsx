@@ -102,11 +102,23 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
 
     const title = titleInputRef.current?.value.trim() as string;
     if (title.length < 1) {
-      toast.warn("Hold on! A note needs a name. What should we call it?")
+      toast.warn("Hold on! A note needs a name. What should we call it?");
+      return;
+    }
+    if (title.length > 100) {
+      toast.warn(
+        "Heads up! The task name is a bit too lengthy. Consider making it more concise!"
+      );
       return;
     }
 
     const description = descInputRef.current?.value.trim() as string;
+    if (description.length > 400) {
+      toast.warn(
+        "Heads up! The task description is a bit too long. Try to keep it brief!"
+      );
+      return;
+    }
 
     setModal(null);
 
@@ -118,11 +130,10 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
       )
     );
 
-    try{
-      await fetch(`/api/project/${note.projectId}/notes`, {
+    try {
+      await fetch(`/api/project/${note.projectId}/note/${note.id}`, {
         method: "POST",
         body: JSON.stringify({
-          id: note.id,
           title: title,
           description: description,
         }),
@@ -130,23 +141,30 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
-            toast.error("Yikes! The note couldn't be created. Even notes have their off days!")
+            toast.error(
+              "Yikes! The note couldn't be created. Even notes have their off days!"
+            );
             setNotes(prevNotes);
             return;
           }
-  
+
           if (data.note) {
             setNotes((prevNotes) =>
               prevNotes.map((note) =>
                 note.id == data.note.id ? data.note : note
               )
             );
-            toast.success("Success! Your note has been created and is ready to rock!")
+            toast.success(
+              "Success! Your note has been created and is ready to rock!"
+            );
           }
         });
-    }catch(err){
+    } catch (err) {
       console.error("Error creating task:", err);
-      toast.error("Yikes! The note couldn't be created. Even notes have their off days!")
+      setNotes(prevNotes);
+      toast.error(
+        "Yikes! The note couldn't be created. Even notes have their off days!"
+      );
     }
   };
 
@@ -156,18 +174,23 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
       content: (
         <div className="header">
           <h1>Confirm Note Deletion</h1>
-          <p>Are you sure you want to delete this note? Once it's gone, it can't be retrieved!.</p>
+          <p>
+            Are you sure you want to delete this note? Once it's gone, it can't
+            be retrieved!.
+          </p>
         </div>
       ),
       bottom: (
         <>
-        <button onClick={handleDeleteNote}>Delete Note</button>
-        <button className="secondary" onClick={() => setModal(null)}>Cancel</button>
+          <button onClick={handleDeleteNote}>Delete Note</button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
         </>
       ),
-      setModal
-    })
-  }
+      setModal,
+    });
+  };
 
   const handleDeleteNote = async () => {
     if (window.confirm(`Do you really want to delete note id ${note.id}?`)) {
@@ -178,17 +201,23 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              toast.error("Oops! The note didn't want to say goodbye. Let's try that again!")
+              toast.error(
+                "Oops! The note didn't want to say goodbye. Let's try that again!"
+              );
               return;
             }
             if (data.notes) {
               setNotes(data.notes);
-              toast.success("Success! The note has been deleted. Out of sight, out of mind!")
+              toast.success(
+                "Success! The note has been deleted. Out of sight, out of mind!"
+              );
             }
           });
       } catch (err) {
         console.error("Error deleting task:", err);
-        toast.error("Oops! The note didn't want to say goodbye. Let's try that again!")
+        toast.error(
+          "Oops! The note didn't want to say goodbye. Let's try that again!"
+        );
       }
     }
   };

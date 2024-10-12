@@ -70,14 +70,28 @@ export const Notes = ({ isAdmin, projectId, project }: NotesProps) => {
 
     const title = titleInputRef.current?.value.trim() as string;
     if (title.length < 1) {
-      toast.warn("Hold on! The Note needs a tite. What should we call it?")
+      toast.warn("Hold on! The Note needs a tite. What should we call it?");
+      return;
+    }
+    if (title.length > 100) {
+      toast.warn(
+        "Heads up! The note title is a bit too lengthy. Consider making it more concise!"
+      );
       return;
     }
 
     const description = descInputRef.current?.value.trim() as string;
-    if(description.length < 1){
-      toast.warn("Oops! A note without any content? What's the point? Please add some words!")
-      return
+    if (description.length < 1) {
+      toast.warn(
+        "Oops! A note without any content? What's the point? Please add some words!"
+      );
+      return;
+    }
+    if (description.length > 400) {
+      toast.warn(
+        "Heads up! The note description is a bit too long. Try to keep it brief!"
+      );
+      return;
     }
 
     setModal(null);
@@ -92,13 +106,17 @@ export const Notes = ({ isAdmin, projectId, project }: NotesProps) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          toast.error("Yikes! The note refused to be created. Let’s give it another shot!")
+          toast.error(
+            "Yikes! The note refused to be created. Let’s give it another shot!"
+          );
           return;
         }
 
         if (data.note) {
           setNotes([...notes, data.note]);
-          toast.success("Success! Your note has been created and is ready to shine!")
+          toast.success(
+            "Success! Your note has been created and is ready to shine!"
+          );
           return;
         }
       });

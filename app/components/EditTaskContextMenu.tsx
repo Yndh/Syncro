@@ -3,9 +3,19 @@
 import { useEffect, useRef, useState } from "react";
 import { useModal } from "../providers/ModalProvider";
 import { toast } from "react-toastify";
-import { Project, Task, TaskPriority, TaskStatus } from "@/app/types/interfaces";
+import {
+  Project,
+  Task,
+  TaskPriority,
+  TaskStatus,
+} from "@/app/types/interfaces";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronRight, faFlag, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronRight,
+  faFlag,
+  faPlus,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import Select from "@/app/components/Select";
 import { createRoot } from "react-dom/client";
 import { useProjects } from "../providers/ProjectsProvider";
@@ -63,19 +73,24 @@ const taskStatuses: TaskStatus[] = [
   TaskStatus.DONE,
 ];
 
-const EditTaskContextMenu = ({ task, tasksList, setTasks, moveTask }: EditTaskProps) => {
+const EditTaskContextMenu = ({
+  task,
+  tasksList,
+  setTasks,
+  moveTask,
+}: EditTaskProps) => {
   const { setModal } = useModal();
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descInputRef = useRef<HTMLTextAreaElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
   const membersListRef = useRef<HTMLDivElement>(null);
-  const { getProjectById } = useProjects()
-  const [project, setProject] = useState<Project>()
+  const { getProjectById } = useProjects();
+  const [project, setProject] = useState<Project>();
 
   useEffect(() => {
-    const proj = getProjectById(task.projectId)
-    setProject(proj)
-  }, [])
+    const proj = getProjectById(task.projectId);
+    setProject(proj);
+  }, []);
 
   const handleModal = () => {
     setModal({
@@ -143,7 +158,8 @@ const EditTaskContextMenu = ({ task, tasksList, setTasks, moveTask }: EditTaskPr
               <span>Asign task to members of the project</span>
             </label>
             <div className="membersList" ref={membersListRef}>
-              {project && project?.members &&
+              {project &&
+                project?.members &&
                 project.members.map((member) => (
                   <div>
                     <input
@@ -201,8 +217,7 @@ const EditTaskContextMenu = ({ task, tasksList, setTasks, moveTask }: EditTaskPr
             </label>
             <Select
               options={options}
-              onChange={(option) => {}
-              }
+              onChange={(option) => {}}
               id="prioritySelect"
               selectedOption={options.find(
                 (option) => option.value == task.priority
@@ -233,8 +248,20 @@ const EditTaskContextMenu = ({ task, tasksList, setTasks, moveTask }: EditTaskPr
       toast.warn("Hold on! The task needs a name. What should we call it?");
       return;
     }
+    if (title.length > 100) {
+      toast.warn(
+        "Heads up! The task name is a bit too lengthy. Consider making it more concise!"
+      );
+      return;
+    }
 
     const description = descInputRef.current?.value.trim() as string;
+    if (description.length > 400) {
+      toast.warn(
+        "Heads up! The task description is a bit too long. Try to keep it brief!"
+      );
+      return;
+    }
     const assignedMembers = getCheckedMemberIds();
     if (assignedMembers.length < 1) {
       toast.warn(
@@ -243,9 +270,16 @@ const EditTaskContextMenu = ({ task, tasksList, setTasks, moveTask }: EditTaskPr
       return;
     }
 
-    const priorityDiv = document.querySelector("#prioritySelect")!;
-    const priority = priorityDiv.getAttribute("data-value") ?? options[0].value;
-
+    let priority = "";
+    try {
+      const priorityDiv = document.querySelector("#prioritySelect")!;
+      priority = priorityDiv.getAttribute("data-value") ?? options[0].value;
+    } catch (err) {
+      toast.warn(
+        "Oops! Every task needs a priority. Pick one to keep things on track!"
+      );
+      return;
+    }
 
     const dueDate = dateInputRef.current?.value;
     let isoDueDate;
@@ -287,39 +321,45 @@ const EditTaskContextMenu = ({ task, tasksList, setTasks, moveTask }: EditTaskPr
       )
     );
 
-    await fetch(`/api/project/${task.projectId}/tasks`, {
-      method: "POST",
-      body: JSON.stringify({
-        id: task.id,
-        title: title,
-        description: description,
-        assignedMembers: assignedMembers,
-        dueDate: isoDueDate,
-        priority: priority,
-        stages: stages,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          toast.error(
-            "Oops! We couldn't update the task. It seems to be stuck in its old ways!"
-          );
-          setTasks(prevTask);
-          return;
-        }
+    try {
+      await fetch(`/api/project/${task.projectId}/task/${task.id}`, {
+        method: "POST",
+        body: JSON.stringify({
+          title: title,
+          description: description,
+          assignedMembers: assignedMembers,
+          dueDate: isoDueDate,
+          priority: priority,
+          stages: stages,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            toast.error(
+              "Oops! We couldn't update the task. It seems to be stuck in its old ways!"
+            );
+            setTasks(prevTask);
+            return;
+          }
 
-        if (data.task) {
-          setTasks((prevTasks) =>
-            prevTasks.map((prevTask) =>
-              prevTask.id == data.task.id ? data.task : prevTask
-            )
-          );
-          toast.success(
-            "Success! The task has been updated and is ready to shine!"
-          );
-        }
-      });
+          if (data.task) {
+            setTasks((prevTasks) =>
+              prevTasks.map((prevTask) =>
+                prevTask.id == data.task.id ? data.task : prevTask
+              )
+            );
+            toast.success(
+              "Success! The task has been updated and is ready to shine!"
+            );
+          }
+        });
+    } catch (err) {
+      toast.error(
+        "Oops! We couldn't update the task. It seems to be stuck in its old ways!"
+      );
+      setTasks(prevTask);
+    }
   };
 
   const getCheckedMemberIds = (): string[] => {
@@ -399,18 +439,23 @@ const EditTaskContextMenu = ({ task, tasksList, setTasks, moveTask }: EditTaskPr
       content: (
         <div className="header">
           <h1>Confirm Task Deletion</h1>
-          <p>Are you sure you want to delete this task? Once it's gone, it can't be retrieved!.</p>
+          <p>
+            Are you sure you want to delete this task? Once it's gone, it can't
+            be retrieved!.
+          </p>
         </div>
       ),
       bottom: (
         <>
-        <button onClick={() =>  handleDeleteTask(task.id)}>Delete Note</button>
-        <button className="secondary" onClick={() => setModal(null)}>Cancel</button>
+          <button onClick={() => handleDeleteTask(task.id)}>Delete Note</button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
         </>
       ),
-      setModal
-    })
-  }
+      setModal,
+    });
+  };
 
   const handleDeleteTask = async (taskId: number) => {
     if (window.confirm(`Do you really want to delete task id ${taskId}?`)) {
@@ -421,40 +466,45 @@ const EditTaskContextMenu = ({ task, tasksList, setTasks, moveTask }: EditTaskPr
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              toast.error("Oops! We couldn't delete the task. It must be hiding from us!")
+              toast.error(
+                "Oops! We couldn't delete the task. It must be hiding from us!"
+              );
               return;
             }
             if (data.tasks) {
               setTasks(data.tasks);
-              toast.success("Success! The task has been deleted. Out of sight, out of mind!")
+              toast.success(
+                "Success! The task has been deleted. Out of sight, out of mind!"
+              );
             }
           });
       } catch (error) {
         console.error("Error deleting task:", error);
-        toast.error("Oops! We couldn't delete the task. It must be hiding from us!")
+        toast.error(
+          "Oops! We couldn't delete the task. It must be hiding from us!"
+        );
       }
     }
   };
 
-
   return (
     <ol className="contextMenuList">
-          <li onClick={handleModal}>Edit</li>
-          <li>
-            Move <FontAwesomeIcon icon={faChevronRight} size="xs" />
-            <ol>
-              {taskStatuses.map((status) => (
-                <li onClick={() => moveTask(task, status)} key={status}>
-                  {status.replace("_", " ")}
-                </li>
-              ))}
-            </ol>
-          </li>
-          <li className="delete" onClick={deleteTaskModal}>
-            Delete
-          </li>
+      <li onClick={handleModal}>Edit</li>
+      <li>
+        Move <FontAwesomeIcon icon={faChevronRight} size="xs" />
+        <ol>
+          {taskStatuses.map((status) => (
+            <li onClick={() => moveTask(task, status)} key={status}>
+              {status.replace("_", " ")}
+            </li>
+          ))}
         </ol>
-  )
+      </li>
+      <li className="delete" onClick={deleteTaskModal}>
+        Delete
+      </li>
+    </ol>
+  );
 };
 
 export default EditTaskContextMenu;

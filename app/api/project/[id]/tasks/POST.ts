@@ -13,17 +13,6 @@ interface CreateTaskReqBody {
   stages: string[];
 }
 
-interface UpdateTaskReqBody {
-  id: number;
-  title?: string;
-  description?: string;
-  assignedMembers?: string[];
-  dueDate?: Date;
-  taskStatus?: "TO_DO" | "ON_GOING" | "REVIEWING" | "DONE";
-  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-  stages?: { id?: number; title?: string; isCompleted?: boolean }[];
-}
-
 interface ResponseInterface<T = any> extends NextApiResponse<T> {
   params: {
     id: string;
@@ -58,165 +47,108 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     });
   }
 
-  const body: CreateTaskReqBody | UpdateTaskReqBody = await req.json();
+  const body: CreateTaskReqBody = await req.json();
+  const {
+    stages = [],
+    assignedMembers = [],
+    title,
+    description = "",
+    dueDate,
+    priority,
+  } = body;
+
+  if (title.trim().length < 1 || title.trim().length > 100) {
+    return new NextResponse(
+      JSON.stringify({
+        error: "Task title must be between 1 and 100 characters",
+      }),
+      {
+        status: 400,
+      }
+    );
+  }
+
+  if (description.trim().length > 400) {
+    return new NextResponse(
+      JSON.stringify({ error: "Description must be at most 400 characters" }),
+      {
+        status: 400,
+      }
+    );
+  }
+
+  if (assignedMembers.length < 1) {
+    return new NextResponse(
+      JSON.stringify({ error: "No members assigned to task" }),
+      {
+        status: 400,
+      }
+    );
+  }
 
   try {
-    if ("id" in body) {
-      const admin = await isAdmin(projectId);
-      if (!admin && body.taskStatus == "DONE") {
-        return new NextResponse(
-          JSON.stringify({ error: "Unauthorized access to task." }),
-          {
-            status: 403,
-          }
-        );
-      }
+    const admin = await isAdmin(projectId);
 
-      const existingTask = await prisma.task.findUnique({
-        where: { id: body.id },
-        include: { assignedTo: true, stages: true },
-      });
-
-      if (!existingTask) {
-        return new NextResponse(JSON.stringify({ error: "Task not found." }), {
-          status: 404,
-        });
-      }
-
-      if (
-        !existingTask.assignedTo.some((user) => user.id === session.user?.id) &&
-        !admin
-      ) {
-        return new NextResponse(
-          JSON.stringify({ error: "Unauthorized access to task." }),
-          {
-            status: 403,
-          }
-        );
-      }
-
-      const providedStages = body.stages ?? [];
-      const providedMembers = body.assignedMembers ?? [];
-
-      const stageCreate = providedStages
-        .filter((stage) => stage.id == null)
-        .map((stage) => ({
-          title: stage.title?.trim() as string,
-          isCompleted: stage.isCompleted ?? false,
-        }));
-
-      const stageUpdate = providedStages
-        .filter((stage) => stage.id != null)
-        .map((stage) => ({
-          where: { id: stage.id },
-          data: {
-            title: stage.title,
-            isCompleted: stage.isCompleted ?? false,
-          },
-        }));
-
-      const stageDelete = existingTask.stages
-        .filter((stage) => !providedStages.some((ps) => ps.id === stage.id))
-        .map((stage) => ({ id: stage.id as number }));
-
-      console.log(body.dueDate);
-
-      const updatedTask = await prisma.task.update({
-        where: { id: body.id },
-        data: {
-          title: body.title?.trim(),
-          description: body.description?.trim(),
-          dueTime: body.dueDate,
-          taskStatus: body.taskStatus ?? undefined,
-          priority: body.priority,
-          assignedTo: providedMembers?.length
-            ? {
-                set: providedMembers.map((memberId) => ({ id: memberId })),
-              }
-            : undefined,
-          stages: {
-            create: stageCreate,
-            update: stageUpdate,
-            deleteMany: stageDelete,
-          },
-        },
-        include: {
-          assignedTo: true,
-          stages: true,
-        },
-      });
-
+    if (!admin) {
       return new NextResponse(
-        JSON.stringify({
-          task: updatedTask,
-        }),
-        { status: 200 }
-      );
-    } else {
-      const admin = await isAdmin(projectId);
-
-      if (!admin) {
-        return new NextResponse(
-          JSON.stringify({ error: "Unauthorized access to project." }),
-          {
-            status: 403,
-          }
-        );
-      }
-
-      const existingUsers = await prisma.user.findMany({
-        where: {
-          id: { in: body.assignedMembers },
-        },
-      });
-
-      const validUserIds = new Set(existingUsers.map((user) => user.id));
-      const invalidUserIds = body.assignedMembers.filter(
-        (id) => !validUserIds.has(id)
-      );
-
-      if (invalidUserIds.length > 0) {
-        return new NextResponse(
-          JSON.stringify({
-            error: `Invalid user IDs: ${invalidUserIds.join(", ")}`,
-          }),
-          { status: 400 }
-        );
-      }
-
-      const newTask = await prisma.task.create({
-        data: {
-          title: body.title.trim(),
-          description: body.description?.trim(),
-          dueTime: body.dueDate,
-          priority: body.priority,
-          assignedTo: {
-            connect: body.assignedMembers.map((memberId) => ({ id: memberId })),
-          },
-          project: {
-            connect: { id: projectId },
-          },
-          stages: {
-            create: body.stages.map((title) => ({
-              title: title.trim() as string,
-              isCompleted: false,
-            })),
-          },
-        },
-        include: {
-          assignedTo: true,
-          stages: true,
-        },
-      });
-      return new NextResponse(
-        JSON.stringify({
-          task: newTask,
-        }),
-        { status: 201 }
+        JSON.stringify({ error: "Unauthorized access to project." }),
+        {
+          status: 403,
+        }
       );
     }
+
+    const projectMembers = await prisma.projectMembership.findMany({
+      where: { projectId: projectId },
+    });
+
+    const validMembers = projectMembers.map((member) => member.userId);
+    const invalidMembers = assignedMembers.filter(
+      (memberId) => !validMembers.includes(memberId)
+    );
+
+    if (invalidMembers.length > 0) {
+      return new NextResponse(
+        JSON.stringify({
+          error: "Some assigned members are not part of the project.",
+          invalidMembers,
+        }),
+        { status: 400 }
+      );
+    }
+
+    const newTask = await prisma.task.create({
+      data: {
+        title: title.trim(),
+        description: description?.trim(),
+        dueTime: dueDate,
+        priority: priority,
+        assignedTo: {
+          connect: assignedMembers.map((memberId) => ({ id: memberId })),
+        },
+        project: {
+          connect: { id: projectId },
+        },
+        stages: {
+          create: body.stages.map((title) => ({
+            title: title.trim() as string,
+            isCompleted: false,
+          })),
+        },
+      },
+      include: {
+        assignedTo: true,
+        stages: true,
+      },
+    });
+    return new NextResponse(
+      JSON.stringify({
+        task: newTask,
+      }),
+      { status: 201 }
+    );
   } catch (e) {
-    console.error(`Error creating/updating task: ${e}`);
+    console.error(`Error creating task: ${e}`);
     return new NextResponse(
       JSON.stringify({ error: "Internal server error" }),
       {

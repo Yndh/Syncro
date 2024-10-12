@@ -126,7 +126,7 @@ const NewTask = ({ projectId, tasksList, setTasksList }: NewTaskProps) => {
               {project &&
                 project.members &&
                 project.members.map((member) => (
-                  <div>
+                  <div key={`member${member.id}`}>
                     <input
                       type="checkbox"
                       className="member"
@@ -216,8 +216,16 @@ const NewTask = ({ projectId, tasksList, setTasksList }: NewTaskProps) => {
       return;
     }
 
-    const priorityDiv = document.querySelector("#prioritySelect")!;
-    const priority = priorityDiv.getAttribute("data-value") ?? options[0].value;
+    let priority = "";
+    try {
+      const priorityDiv = document.querySelector("#prioritySelect")!;
+      priority = priorityDiv.getAttribute("data-value") ?? options[0].value;
+    } catch (err) {
+      toast.warn(
+        "Oops! Every task needs a priority. Pick one to keep things on track!"
+      );
+      return;
+    }
 
     const stages = getStages();
 

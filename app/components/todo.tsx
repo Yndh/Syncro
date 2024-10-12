@@ -10,24 +10,27 @@ import { toast } from "react-toastify";
 
 interface ToDoProps {
   projectId?: number;
-  tasks: Task[]
+  tasks: Task[];
   isAdmin: boolean;
-  showProject?: boolean
+  showProject?: boolean;
 }
 
-const ToDo = ({ projectId, isAdmin, tasks, showProject = false }: ToDoProps) => {
+const ToDo = ({
+  projectId,
+  isAdmin,
+  tasks,
+  showProject = false,
+}: ToDoProps) => {
   const [tasksList, setTasksList] = useState<Task[]>(tasks);
-
-  console.log("IN todo");
-  console.log(tasksList);
-  
 
   const moveTask = async (task: Task, newStatus: TaskStatus) => {
     const prevTasksList = [...tasksList];
 
     setTasksList((prevTasks) =>
       prevTasks.map((prevTask) =>
-        prevTask.id === task.id ? { ...prevTask, taskStatus: newStatus } : prevTask
+        prevTask.id === task.id
+          ? { ...prevTask, taskStatus: newStatus }
+          : prevTask
       )
     );
 
@@ -42,7 +45,9 @@ const ToDo = ({ projectId, isAdmin, tasks, showProject = false }: ToDoProps) => 
       .then((data) => {
         if (data.error) {
           setTasksList(prevTasksList);
-          toast.error("Uh-oh! We couldn't move the task. It seems to have a mind of its own!")
+          toast.error(
+            "Uh-oh! We couldn't move the task. It seems to have a mind of its own!"
+          );
           return;
         }
 
@@ -94,7 +99,11 @@ const ToDo = ({ projectId, isAdmin, tasks, showProject = false }: ToDoProps) => 
         />
 
         {isAdmin && projectId && (
-          <NewTask projectId={projectId} setTasksList={setTasksList} tasksList={tasksList} />
+          <NewTask
+            projectId={projectId}
+            setTasksList={setTasksList}
+            tasksList={tasksList}
+          />
         )}
       </div>
     </DndProvider>

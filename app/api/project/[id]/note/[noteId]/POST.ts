@@ -4,15 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
 
-interface CreateNoteReqBody {
-  title: string;
-  description: string;
-}
-
 interface ResponseInterface<T = any> extends NextApiResponse<T> {
   params: {
     id: string;
+    noteId: string;
   };
+}
+
+interface UpdateNoteReqBody {
+  title: string;
+  description: string;
 }
 
 export async function mPOST(req: Request, res: ResponseInterface) {
@@ -43,6 +44,28 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     });
   }
 
+  const noteIdPar = res.params.noteId;
+  if (!noteIdPar) {
+    return new NextResponse(
+      JSON.stringify({
+        error: "No note id is provided in the URL parameters.",
+      }),
+      {
+        status: 400,
+      }
+    );
+  }
+
+  const noteId = parseInt(noteIdPar);
+  if (isNaN(noteId)) {
+    return new NextResponse(
+      JSON.stringify({ error: "Invalid note id format." }),
+      {
+        status: 400,
+      }
+    );
+  }
+
   const membership = isMember(projectId);
   if (!membership) {
     return new NextResponse(JSON.stringify({ error: "Access denied." }), {
@@ -50,7 +73,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     });
   }
 
-  const body: CreateNoteReqBody = await req.json();
+  const body: UpdateNoteReqBody = await req.json();
   const { title, description = "" } = body;
 
   if (title.trim().length < 1 || title.trim().length > 100) {
@@ -74,16 +97,22 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   }
 
   try {
-    const newNote = await prisma.notes.create({
+    const existingNote = await prisma.notes.findUnique({
+      where: { id: noteId },
+      include: { createdBy: true },
+    });
+
+    if (!existingNote) {
+      return new NextResponse(JSON.stringify({ error: "Note not found." }), {
+        status: 404,
+      });
+    }
+
+    const updatedNote = await prisma.notes.update({
+      where: { id: noteId },
       data: {
-        title: body.title.trim(),
-        description: body.description?.trim(),
-        project: {
-          connect: { id: projectId },
-        },
-        createdBy: {
-          connect: { id: session.user.id },
-        },
+        title: title?.trim(),
+        description: description.trim(),
       },
       include: {
         createdBy: true,
@@ -91,12 +120,12 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     });
     return new NextResponse(
       JSON.stringify({
-        note: newNote,
+        note: updatedNote,
       }),
-      { status: 201 }
+      { status: 200 }
     );
   } catch (e) {
-    console.error(`Error creating note: ${e}`);
+    console.error(`Error updating note: ${e}`);
     return new NextResponse(
       JSON.stringify({ error: "Internal server error" }),
       {
