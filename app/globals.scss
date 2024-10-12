@@ -49,6 +49,10 @@ textarea {
   &::placeholder {
     color: $teritiary-font-color;
   }
+
+  &:disabled {
+    opacity: .7;
+  }
 }
 
 input[type="checkbox"] {
@@ -94,7 +98,7 @@ input[type="checkbox"] {
     }
   }
 
-  .select-options {
+  ul.select-options {
     position: absolute;
     top: 120%;
     left: 0;
@@ -104,7 +108,7 @@ input[type="checkbox"] {
     border-radius: 5px;
     max-height: 150px;
     overflow-y: auto;
-    z-index: 100 !important;
+    z-index: 99 !important;
     user-select: none;
     opacity: 0;
     pointer-events: none;
@@ -115,7 +119,7 @@ input[type="checkbox"] {
       pointer-events: all;
     }
 
-    .select-option {
+    li.select-option {
       display: flex;
       align-items: center;
       gap: 7px;
@@ -1325,12 +1329,12 @@ main {
             height: 100%;
             gap: 30px;
 
-            ul {
+            ul.membersUl {
               display: flex;
               flex-direction: column;
               gap: 0px;
               width: 100%;
-              height: fit-content;
+              height: 100%;
               max-height: 90%;
               border: 1px solid $border-color;
               border-inline-width: 0px;
@@ -1340,7 +1344,7 @@ main {
               scrollbar-width: none !important;
 
 
-              li {
+              li.membersLi {
                 display: flex;
                 align-items: center;
                 gap: 10px;
@@ -1720,6 +1724,15 @@ main {
             overflow-y: scroll;
             scrollbar-width: none !important;
             gap: 15px;
+
+            p.noInvites {
+              width: 300px;
+              padding: 5px;
+              font-size: 14px;
+              border: 1px solid $border-color;
+              border-radius: 10px;
+              text-align: center;
+            }
 
             .inviteDetails {
               display: flex;

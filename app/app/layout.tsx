@@ -25,7 +25,7 @@ export default async function Home({
         <ProjectsProvider>
           <TasksProvider>
             <ModalProvider>
-              <Sidebar session={session} />
+              <Sidebar />
               <ContextMenuProvider>
                 <main>
                   <ContextMenu />

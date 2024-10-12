@@ -208,7 +208,7 @@ export const MembersList = ({
 }: MembersListProps) => {
   const session = useSession();
   const { setModal } = useModal();
-  const {projects, setProjects} = useProjects()
+  const { projects, setProjects } = useProjects();
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleModal = () => {
@@ -228,8 +228,7 @@ export const MembersList = ({
               options={usesOptions}
               selectedOption={usesOptions[0]}
               id="maxUsesSelect"
-              onChange={(option) => {
-              }}
+              onChange={(option) => {}}
             />
           </div>
 
@@ -242,8 +241,7 @@ export const MembersList = ({
               options={expirationOptions}
               selectedOption={expirationOptions[0]}
               id="expirationDateSelect"
-              onChange={(option) => {
-              }}
+              onChange={(option) => {}}
             />
           </div>
         </form>
@@ -265,16 +263,37 @@ export const MembersList = ({
   const handleForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const selectedDivUses = document.querySelector("#maxUsesSelect")!
-    const inviteMaxUses = selectedDivUses.getAttribute("data-value") ?? usesOptions[0].value
+    let inviteMaxUses;
+    try {
+      const selectedDivUses = document.querySelector("#maxUsesSelect")!;
+      inviteMaxUses =
+        selectedDivUses.getAttribute("data-value") ?? usesOptions[0].value;
+    } catch (err) {
+      toast.warn(
+        "Hold on! You need to specify the maximum number of uses for this invite."
+      );
+      return;
+    }
 
     let uses: number | null = null;
     if (inviteMaxUses !== "never") {
       uses = parseInt(inviteMaxUses.toString());
     }
 
-    const selectedDivExpiration = document.querySelector("#expirationDateSelect")!
-    const inviteExpirationDate = selectedDivExpiration.getAttribute("data-value") ?? expirationOptions[0].value
+    let inviteExpirationDate;
+    try {
+      const selectedDivExpiration = document.querySelector(
+        "#expirationDateSelect"
+      )!;
+      inviteExpirationDate =
+        selectedDivExpiration.getAttribute("data-value") ??
+        expirationOptions[0].value;
+    } catch (err) {
+      toast.warn(
+        "Oops! Don’t forget to set an expiration date for the invite."
+      );
+      return;
+    }
 
     let expirationDate: Date | null = null;
     if (inviteExpirationDate !== "never") {
@@ -297,26 +316,30 @@ export const MembersList = ({
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          toast.error("Oops! The invite didn’t want to be created. Maybe it needs a pep talk?")
+          toast.error(
+            "Oops! The invite didn’t want to be created. Maybe it needs a pep talk?"
+          );
           return;
         }
 
         if (data.invite) {
           displayInvite(data.invite);
           setProjects(
-            projects.map((dproject) => 
-              dproject.id === projectId 
+            projects.map((dproject) =>
+              dproject.id === projectId
                 ? {
-                    ...dproject, 
+                    ...dproject,
                     projectInvitations: [
                       ...(dproject.projectInvitations || []),
                       data.invite,
                     ],
-                  } 
+                  }
                 : dproject
             )
-          );  
-          toast.success("Success! Your invite has been sent out—let the fun begin!")      
+          );
+          toast.success(
+            "Success! Your invite has been sent out—let the fun begin!"
+          );
         }
       });
   };
@@ -336,9 +359,11 @@ export const MembersList = ({
               <input
                 type="text"
                 disabled={true}
-                value={`${getUrl()}/${invite.linkId}`}
+                value={`${getUrl()}/invite/${invite.linkId}`}
               />
-              <button>
+              <button
+                onClick={() => copyLink(`${getUrl()}/invite/${invite.linkId}`)}
+              >
                 <FontAwesomeIcon icon={faCopy} />
                 Copy
               </button>
@@ -347,7 +372,10 @@ export const MembersList = ({
 
           <div className="qrCode">
             <span>Or Scan QR Code</span>
-            <QRCode value={`${getUrl()}/${invite.linkId}`} bgColor="transparent"/>
+            <QRCode
+              value={`${getUrl()}/${invite.linkId}`}
+              bgColor="transparent"
+            />
           </div>
         </>
       ),
@@ -360,6 +388,32 @@ export const MembersList = ({
       ),
       setModal,
     });
+  };
+
+  const copyLink = async (link: string) => {
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.success(
+        "Success! The invite link has been copied to your clipboard!"
+      );
+    } catch (err) {
+      copyToClipboardFallback(link);
+    }
+  };
+  const copyToClipboardFallback = (link: string) => {
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = link;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      alert("Text copied to clipboard!");
+    } catch (err) {
+      toast.error(
+        "Uh-oh! We couldn't copy the invite link. Give it another try!"
+      );
+    }
   };
 
   const updateRole = async (membershipId: number, role: "ADMIN" | "MEMBER") => {
@@ -389,55 +443,68 @@ export const MembersList = ({
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          toast.error("Oops! We couldn't update the member's role. Please try again!")
+          toast.error(
+            "Oops! We couldn't update the member's role. Please try again!"
+          );
           setProject(prevProject);
           return;
         }
 
         if (data.project) {
           setProject(data.project);
-          toast.success("Success! The member's role has been updated!")
+          toast.success("Success! The member's role has been updated!");
         }
       });
   };
 
-  const kickUser = async (membershipId: number) => {    
+  const kickUser = async (membershipId: number) => {
     await fetch(`/api/project/${projectId}/members/${membershipId}`, {
       method: "DELETE",
     })
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          toast.error("Uh-oh! We couldn't kick the user. Please try again!")
+          toast.error("Uh-oh! We couldn't kick the user. Please try again!");
           return;
         }
 
         if (data.project) {
           setProject(data.project);
-          toast.success("Success! The user has been removed from the project!")
+          toast.success("Success! The user has been removed from the project!");
         }
       });
   };
 
-
-  const filteredMembers = project?.members ? project.members.filter(
-    (member) =>
-      member.user.name.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-      member.user.email.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-      member.role.toLowerCase().includes(searchQuery.toLowerCase().trim())
-  ) : [];
+  const filteredMembers = project?.members
+    ? project.members.filter(
+        (member) =>
+          member.user.name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase().trim()) ||
+          member.user.email
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase().trim()) ||
+          member.role.toLowerCase().includes(searchQuery.toLowerCase().trim())
+      )
+    : [];
 
   return (
     <div className="membersContainer">
       <div className="membersHeader">
         <div className="title">
           <h1>Members</h1>
-          <span className="count">{project?.members ? project.members.length : 0}</span>
+          <span className="count">
+            {project?.members ? project.members.length : 0}
+          </span>
         </div>
 
         <div className="buttons">
-          <input type="text" placeholder="🔎 Search for members..." value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}/>
+          <input
+            type="text"
+            placeholder="🔎 Search for members..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
           {(role == "ADMIN" || role == "OWNER") && (
             <button onClick={handleModal}>
               <FontAwesomeIcon icon={faPlus} />
@@ -447,9 +514,9 @@ export const MembersList = ({
         </div>
       </div>
       <div className="membersContent">
-        <ul>
+        <ul className="membersUl">
           {filteredMembers.map((member) => (
-            <li key={member.id}>
+            <li key={member.id} className="membersLi">
               <Image
                 src={member.user.image}
                 alt={member.user.name}
@@ -486,7 +553,9 @@ export const MembersList = ({
                   onChange={(option) => {
                     updateRole(
                       member.id,
-                      option?.value.toString().toUpperCase() as "ADMIN" | "MEMBER"
+                      option?.value.toString().toUpperCase() as
+                        | "ADMIN"
+                        | "MEMBER"
                     );
                   }}
                 />

@@ -1,6 +1,6 @@
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 
 interface Option {
   value: string | number;
@@ -21,11 +21,30 @@ const Select = ({
   onChange,
   selectedOption,
   disabled = false,
-  id = "customSelect"
+  id = "customSelect",
 }: SelectProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [currentSelectedOption, setCurrentSelectedOption] =
     useState<Option | null>(selectedOption || null);
+  const selectContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (
+      selectContainerRef.current &&
+      !selectContainerRef.current.contains(e.target as Node)
+    ) {
+      console.log("close");
+
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
 
   const toggleDropdown = () => {
     if (!disabled) setIsOpen(!isOpen);
@@ -42,7 +61,10 @@ const Select = ({
   };
 
   return (
-    <div className={`select-container ${disabled ? "disabled" : ""}`}>
+    <div
+      className={`select-container ${disabled ? "disabled" : ""}`}
+      ref={selectContainerRef}
+    >
       <div className="select-header" onClick={toggleDropdown}>
         {currentSelectedOption
           ? currentSelectedOption.label
@@ -52,25 +74,30 @@ const Select = ({
         </span>
       </div>
 
-        <ul className={`select-options ${isOpen && "visible"}`}>
-          {options.map((option) => (
-            <li
-              key={option.value}
-              data-value={option.value}
-              onClick={() => handleOptionClick(option)}
-              className={`select-option ${
-                currentSelectedOption ?
-                currentSelectedOption.value === option.value
+      <ul className={`select-options ${isOpen && "visible"}`}>
+        {options.map((option) => (
+          <li
+            key={option.value}
+            data-value={option.value}
+            onClick={() => handleOptionClick(option)}
+            className={`select-option ${
+              currentSelectedOption
+                ? currentSelectedOption.value === option.value
                   ? "selected"
                   : ""
-               : ""} ${option.disabled ? "disabled" : ""}`}
-              id={currentSelectedOption &&
-                currentSelectedOption.value === option.value ? id : ""}
-            >
-              {option.label}
-            </li>
-          ))}
-        </ul>
+                : ""
+            } ${option.disabled ? "disabled" : ""}`}
+            id={
+              currentSelectedOption &&
+              currentSelectedOption.value === option.value
+                ? id
+                : ""
+            }
+          >
+            {option.label}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

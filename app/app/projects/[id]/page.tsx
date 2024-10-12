@@ -2,7 +2,7 @@
 
 import ToDo from "@/app/components/todo";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Invite, Project, ProjectRole } from "@/app/types/interfaces";
 import { MembersList } from "@/app/components/MembersList";
 import { Notes } from "@/app/components/Notes";
@@ -18,6 +18,8 @@ import { useProjects } from "@/app/providers/ProjectsProvider";
 import { useModal } from "@/app/providers/ModalProvider";
 import { InviteDetails } from "@/app/components/inviteDetails";
 import { toast } from "react-toastify";
+import { useContextMenu } from "@/app/providers/ContextMenuProvider";
+import Link from "next/link";
 
 interface ProjectParams {
   params: {
@@ -28,6 +30,7 @@ interface ProjectParams {
 const ProjectPage = ({ params }: ProjectParams) => {
   const { projects, getProjectById } = useProjects();
   const { setModal } = useModal();
+  const { setContextMenu } = useContextMenu();
   const { fetchProjects } = useProjects();
   const [role, setRole] = useState<ProjectRole>(ProjectRole.MEMBER);
   const [membershipId, setMembershipId] = useState<number>();
@@ -38,6 +41,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
   const [project, setProject] = useState<Project>();
   const projectNameInputRef = useRef<HTMLInputElement>(null);
   const projectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null);
+  const isAdmin: boolean = role === "OWNER" || role === "ADMIN";
 
   useEffect(() => {
     const localProject = getProjectById(parseInt(params.id));
@@ -123,10 +127,17 @@ const ProjectPage = ({ params }: ProjectParams) => {
               </label>
 
               <div className="invites">
-                {nonExpiredInvites &&
-                  nonExpiredInvites.map((invite) => (
-                    <InviteDetails invite={invite} key={invite.id} />
-                  ))}
+                {nonExpiredInvites ? (
+                  nonExpiredInvites.length > 0 ? (
+                    nonExpiredInvites.map((invite) => (
+                      <InviteDetails invite={invite} key={invite.id} />
+                    ))
+                  ) : (
+                    <p className="noInvites">There is no active invites</p>
+                  )
+                ) : (
+                  <p className="noInvites">There is no active invites</p>
+                )}
               </div>
             </div>
           )}
@@ -149,7 +160,12 @@ const ProjectPage = ({ params }: ProjectParams) => {
                 <span>Withdraw from the project</span>
               </label>
 
-              <button className="projectLeave" onClick={leaveProjectModal}>
+              <button
+                className="projectLeave"
+                onClick={() => {
+                  project && leaveProjectModal(project?.id);
+                }}
+              >
                 Leave Project
               </button>
             </div>
@@ -221,7 +237,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
       });
   };
 
-  const leaveProjectModal = () => {
+  const leaveProjectModal = (projectId: number) => {
     setModal({
       title: "Leave Project",
       content: (
@@ -235,7 +251,9 @@ const ProjectPage = ({ params }: ProjectParams) => {
       ),
       bottom: (
         <>
-          <button onClick={leaveProject}>Leave Project</button>
+          <button onClick={(e) => leaveProject(e, projectId)}>
+            Leave Project
+          </button>
           <button className="secondary" onClick={() => setModal(null)}>
             Cancel
           </button>
@@ -269,12 +287,15 @@ const ProjectPage = ({ params }: ProjectParams) => {
     });
   };
 
-  const leaveProject = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const leaveProject = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    projectId: number
+  ) => {
     e.preventDefault();
 
     setModal(null);
 
-    await fetch(`/api/project/${project?.id}/members/${membershipId}`, {
+    await fetch(`/api/project/${projectId}/members/${membershipId}`, {
       method: "DELETE",
     })
       .then((res) => res.json())
@@ -339,6 +360,30 @@ const ProjectPage = ({ params }: ProjectParams) => {
       ).toFixed(2)
     : "0.00";
 
+  const handleContextMenu = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    projectId: number
+  ) => {
+    e.preventDefault();
+
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      onClose: () => {
+        setContextMenu(null);
+      },
+      content: (
+        <ol className="contextMenuList">
+          {isAdmin && <li onClick={openSettings}>Project Settings</li>}
+          {role != "OWNER" && (
+            <li onClick={() => leaveProjectModal(projectId)}>Leave</li>
+          )}
+        </ol>
+      ),
+      setContextMenu,
+    });
+  };
+
   return (
     <>
       <div className="projectPage">
@@ -352,14 +397,17 @@ const ProjectPage = ({ params }: ProjectParams) => {
                 projects.map((project) => (
                   <li key={`project${project.id}`}>
                     <span className="min"></span>
-                    <a
+                    <Link
                       href={`/app/projects/${project.id}`}
                       className={
                         parseInt(params.id) === project.id ? "active" : ""
                       }
+                      onContextMenu={(e) => {
+                        handleContextMenu(e, project.id);
+                      }}
                     >
                       {project.name}
-                    </a>
+                    </Link>
                   </li>
                 ))}
             </ol>
@@ -442,13 +490,13 @@ const ProjectPage = ({ params }: ProjectParams) => {
             {selectedTab === "tasks" && project && (
               <ToDo
                 projectId={project?.id as number}
-                isAdmin={role === "OWNER" || role === "ADMIN"}
+                isAdmin={isAdmin}
                 tasks={project.tasks}
               />
             )}
             {selectedTab === "notes" && project && (
               <Notes
-                isAdmin={role === "OWNER" || role === "ADMIN"}
+                isAdmin={isAdmin}
                 projectId={project?.id as number}
                 project={project}
               />

@@ -14,25 +14,63 @@ import {
   faTable,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
+import { faGithub, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useProjects } from "../providers/ProjectsProvider";
 import { useModal } from "../providers/ModalProvider";
 import getUrl from "@/lib/getUrl";
 import { toast } from "react-toastify";
+import Select from "./Select";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { useSession } from "next-auth/react";
 
-interface ISidebar {
-  session: Session;
-}
+const providersOptions = [
+  {
+    value: "Google",
+    label: (
+      <div className="roleSelect">
+        <FontAwesomeIcon icon={faGoogle as IconProp} />
+        <span>Google</span>
+      </div>
+    ),
+  },
+  {
+    value: "Github",
+    label: (
+      <div className="roleSelect">
+        <FontAwesomeIcon icon={faGithub as IconProp} />
+        <span>Github</span>
+      </div>
+    ),
+  },
+];
 
-const Sidebar = ({ session }: ISidebar) => {
+const Sidebar = () => {
   const [projectId, setProjectId] = useState<number | boolean>(false);
   const projectNameInputRef = useRef<HTMLInputElement>(null);
   const projectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null);
   const inviteInputRef = useRef<HTMLInputElement>(null);
+  const usernameInputRef = useRef<HTMLInputElement>(null);
   const { projects, fetchProjects } = useProjects();
   const { setModal } = useModal();
   const router = useRouter();
   const pathname = usePathname();
+  const { data: session, update } = useSession();
+
+  console.log(session);
+
+  useEffect(() => {
+    const interval = setInterval(() => update(), 1000 * 60 * 60);
+    return () => clearInterval(interval);
+  }, [update]);
+
+  useEffect(() => {
+    const visibilityHandler = () =>
+      document.visibilityState === "visible" && update();
+    window.addEventListener("visibilitychange", visibilityHandler, false);
+    return () =>
+      window.removeEventListener("visibilitychange", visibilityHandler, false);
+  }, [update]);
 
   useEffect(() => {
     if (projects != null && projects.length > 0 && !projectId) {
@@ -249,6 +287,110 @@ const Sidebar = ({ session }: ISidebar) => {
     }
   };
 
+  const handleUserModal = () => {
+    setModal({
+      title: "User",
+      content: (
+        <form onSubmit={updateUser} id="userForm">
+          <div className="formRow">
+            <label htmlFor="userNameInput">
+              <p>Username</p>
+              <span>Name of account</span>
+            </label>
+
+            <input
+              type="text"
+              defaultValue={session?.user?.name as string}
+              id="userNameInput"
+              ref={usernameInputRef}
+            />
+          </div>
+          <div className="formRow">
+            <label>
+              <p>Email</p>
+              <span>Email linked to your account</span>
+            </label>
+
+            <input
+              type="text"
+              defaultValue={session?.user?.email as string}
+              disabled={true}
+            />
+          </div>
+          <div className="formRow">
+            <label>
+              <p>Provider</p>
+              <span>Your auth provider</span>
+            </label>
+
+            <Select
+              disabled={true}
+              options={providersOptions}
+              selectedOption={providersOptions.find(
+                (option) =>
+                  option.value.toLowerCase() ===
+                  session?.user.provider?.toLowerCase()
+              )}
+              onChange={() => {}}
+            />
+          </div>
+        </form>
+      ),
+      bottom: (
+        <>
+          <button type="submit" form="userForm">
+            Save Changes
+          </button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
+        </>
+      ),
+      setModal,
+    });
+  };
+
+  const updateUser = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const username = (usernameInputRef.current?.value as string).trim();
+    if (username == "") {
+      toast.warn("Oops! The username cannot be empty. Please enter a new one!");
+      return;
+    }
+    if (username.length > 39) {
+      toast.warn("Heads up! The username is too lengthy. Try a shorter name!");
+      return;
+    }
+
+    setModal(null);
+
+    try {
+      await fetch("/api/user", {
+        method: "POST",
+        body: JSON.stringify({
+          username: username,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            toast.error(
+              "Uh-oh! We couldn't update your profile. Please try again!"
+            );
+            return;
+          }
+
+          if (data.success) {
+            toast.success("Success! Your profile has been updated!");
+            update();
+          }
+        });
+    } catch (err) {
+      toast.error("Uh-oh! We couldn't update your profile. Please try again!");
+    }
+  };
+
   return (
     <div className="sidebar">
       <div className="logo">
@@ -298,7 +440,7 @@ const Sidebar = ({ session }: ISidebar) => {
         </ol>
         <p>Other</p>
         <ol>
-          <li>
+          <li onClick={handleUserModal}>
             <div className={"navElement"}>
               <div className="icon">
                 <FontAwesomeIcon icon={faUser} />
