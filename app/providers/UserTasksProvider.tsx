@@ -29,7 +29,6 @@ interface TasksProviderProps {
 
 export const TasksProvider = ({ children }: TasksProviderProps) => {
   const [tasks, setTasksState] = useState<Task[]>([]);
-  const [loading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,11 +39,10 @@ export const TasksProvider = ({ children }: TasksProviderProps) => {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              console.error(data.error)
+              console.error(data.error);
             } else {
               if (data.tasks) {
                 setTasksState(data.tasks);
-                setIsLoading(false)
               }
             }
           });
@@ -54,28 +52,7 @@ export const TasksProvider = ({ children }: TasksProviderProps) => {
     };
 
     fetchData();
-  },[])
-
-  useEffect(() => {
-    try {
-      const localProjects = localStorage.getItem("tasks");
-      if (!localProjects) {
-        return;
-      }
-      setTasksState(JSON.parse(localProjects!));
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Failed to get tasks");
-    }
   }, []);
-
-  useEffect(() => {
-    try {
-      if (!loading) localStorage.setItem("tasks", JSON.stringify(tasks));
-    } catch (error) {
-      console.error("Failed to save tasks");
-    }
-  }, [tasks]);
 
   const setTasks = (tasks: Task[]) => setTasksState(tasks);
 

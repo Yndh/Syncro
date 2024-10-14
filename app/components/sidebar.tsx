@@ -11,6 +11,8 @@ import {
   faCog,
   faDiagramProject,
   faList,
+  faMoon,
+  faSun,
   faTable,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
@@ -22,7 +24,8 @@ import getUrl from "@/lib/getUrl";
 import { toast } from "react-toastify";
 import Select from "./Select";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
+import { useTheme } from "../providers/ThemeProvider";
 
 const providersOptions = [
   {
@@ -45,6 +48,27 @@ const providersOptions = [
   },
 ];
 
+const themeOptions = [
+  {
+    value: "light",
+    label: (
+      <div className="roleSelect">
+        <FontAwesomeIcon icon={faSun} />
+        <span>Light</span>
+      </div>
+    ),
+  },
+  {
+    value: "dark",
+    label: (
+      <div className="roleSelect">
+        <FontAwesomeIcon icon={faMoon} />
+        <span>Dark</span>
+      </div>
+    ),
+  },
+];
+
 const Sidebar = () => {
   const [projectId, setProjectId] = useState<number | boolean>(false);
   const projectNameInputRef = useRef<HTMLInputElement>(null);
@@ -53,11 +77,12 @@ const Sidebar = () => {
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const { projects, fetchProjects } = useProjects();
   const { setModal } = useModal();
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, update } = useSession();
 
-  console.log(session);
+  console.log(projects);
 
   useEffect(() => {
     const interval = setInterval(() => update(), 1000 * 60 * 60);
@@ -73,9 +98,9 @@ const Sidebar = () => {
   }, [update]);
 
   useEffect(() => {
-    if (projects != null && projects.length > 0 && !projectId) {
+    if (projects != null && projects.length > 0) {
       setProjectId(projects[0].id);
-    } else {
+    } else if (projects == null) {
       setProjectId(false);
     }
   }, [projects]);
@@ -391,6 +416,45 @@ const Sidebar = () => {
     }
   };
 
+  const handleSettingsModal = () => {
+    setModal({
+      title: "Settings",
+      content: (
+        <form onSubmit={updateUser} id="userForm">
+          <div className="formRow">
+            <label htmlFor="userNameInput">
+              <p>Theme</p>
+              <span>
+                Choose your preferred theme to personalize your experience!
+              </span>
+            </label>
+
+            <Select
+              options={themeOptions}
+              selectedOption={themeOptions.find(
+                (option) => option.value.toLowerCase() == theme.toLowerCase()
+              )}
+              onChange={(option) => updateTheme(option)}
+            />
+          </div>
+        </form>
+      ),
+      bottom: (
+        <>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Close
+          </button>
+        </>
+      ),
+      setModal,
+    });
+  };
+
+  const updateTheme = (option: any) => {
+    console.log(option);
+    setTheme(option.value);
+  };
+
   return (
     <div className="sidebar">
       <div className="logo">
@@ -412,7 +476,7 @@ const Sidebar = () => {
               </div>
             </Link>
           </li>
-          <li className={pathname == "/app/projects" ? "active" : ""}>
+          <li className={pathname.startsWith("/app/projects") ? "active" : ""}>
             <Link
               href={projectId ? `/app/projects/${projectId}` : ""}
               onClick={projectModal}
@@ -449,7 +513,7 @@ const Sidebar = () => {
               <FontAwesomeIcon icon={faChevronRight} />
             </div>
           </li>
-          <li>
+          <li onClick={handleSettingsModal}>
             <div className={"navElement"}>
               <div className="icon">
                 <FontAwesomeIcon icon={faCog} />

@@ -11,14 +11,8 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
   };
 }
 
-interface UpdateTaskReqBody {
-  title: string;
-  description: string;
-  assignedMembers: string[];
-  dueDate: Date;
+interface UpdateStatusReq {
   taskStatus: "TO_DO" | "ON_GOING" | "REVIEWING" | "DONE";
-  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-  stages: { id?: number; title?: string; isCompleted?: boolean }[];
 }
 
 export async function mPOST(req: Request, res: ResponseInterface) {
@@ -71,16 +65,8 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const body: UpdateTaskReqBody = await req.json();
-  const {
-    stages = [],
-    assignedMembers = [],
-    title = "",
-    description = "",
-    dueDate,
-    taskStatus,
-    priority,
-  } = body;
+  const body: UpdateStatusReq = await req.json();
+  const { taskStatus } = body;
 
   const admin = await isAdmin(projectId);
   if (!admin && body.taskStatus == "DONE") {
@@ -88,35 +74,6 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       JSON.stringify({ error: "Unauthorized access to task." }),
       {
         status: 403,
-      }
-    );
-  }
-
-  if (title.trim().length < 1 || title.trim().length > 100) {
-    return new NextResponse(
-      JSON.stringify({
-        error: "Task title must be between 1 and 100 characters",
-      }),
-      {
-        status: 400,
-      }
-    );
-  }
-
-  if (description.trim().length > 400) {
-    return new NextResponse(
-      JSON.stringify({ error: "Description must be at most 400 characters" }),
-      {
-        status: 400,
-      }
-    );
-  }
-
-  if (assignedMembers.length < 1) {
-    return new NextResponse(
-      JSON.stringify({ error: "No members assigned to task" }),
-      {
-        status: 400,
       }
     );
   }
@@ -148,21 +105,6 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     where: { projectId: projectId },
   });
 
-  const validMembers = projectMembers.map((member) => member.userId);
-  const invalidMembers = assignedMembers.filter(
-    (memberId) => !validMembers.includes(memberId)
-  );
-
-  if (invalidMembers.length > 0) {
-    return new NextResponse(
-      JSON.stringify({
-        error: "Some assigned members are not part of the project.",
-        invalidMembers,
-      }),
-      { status: 400 }
-    );
-  }
-
   if (
     !existingTask.assignedTo.some((user) => user.id === session.user?.id) &&
     !admin
@@ -174,45 +116,10 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   }
 
   try {
-    const stageCreate = stages
-      .filter((stage) => stage.id == null)
-      .map((stage) => ({
-        title: stage.title?.trim() as string,
-        isCompleted: stage.isCompleted ?? false,
-      }));
-
-    const stageUpdate = stages
-      .filter((stage) => stage.id != null)
-      .map((stage) => ({
-        where: { id: stage.id },
-        data: {
-          title: stage.title,
-          isCompleted: stage.isCompleted ?? false,
-        },
-      }));
-
-    const stageDelete = existingTask.stages
-      .filter((stage) => !stages.some((ps) => ps.id === stage.id))
-      .map((stage) => ({ id: stage.id as number }));
-
     const updatedTask = await prisma.task.update({
       where: { id: taskId },
       data: {
-        title: title.trim(),
-        description: description.trim(),
-        dueTime: dueDate,
-        taskStatus: taskStatus ?? undefined,
-        priority: priority,
-        assignedTo: assignedMembers?.length
-          ? {
-              set: assignedMembers.map((memberId) => ({ id: memberId })),
-            }
-          : undefined,
-        stages: {
-          create: stageCreate,
-          update: stageUpdate,
-          deleteMany: stageDelete,
-        },
+        taskStatus: taskStatus,
       },
       include: {
         assignedTo: true,
@@ -226,9 +133,10 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       }),
       { status: 200 }
     );
-  } catch (e) {
+  } catch (err) {
+    console.error("Error updating user:", err);
     return new NextResponse(
-      JSON.stringify({ error: "Failed to update task" }),
+      JSON.stringify({ error: "Failed to update task status" }),
       {
         status: 500,
       }

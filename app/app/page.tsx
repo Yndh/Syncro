@@ -16,6 +16,7 @@ import { Task, TaskPriority, TaskStatus } from "../types/interfaces";
 import { useTasks } from "../providers/UserTasksProvider";
 import { useProjects } from "../providers/ProjectsProvider";
 import { toast } from "react-toastify";
+import { useTheme } from "../providers/ThemeProvider";
 
 interface TaskData {
   id: "Completed" | "Uncompleted";
@@ -39,6 +40,7 @@ const priorityOrder = [
 const App = () => {
   const { tasks, setTasks } = useTasks();
   const { projects, setProjects } = useProjects();
+  const { theme } = useTheme();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,17 +51,18 @@ const App = () => {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              toast.error("Uh-oh! We couldn't fetch your user data. Please try again later!")
-              location.reload()
-              return
+              toast.error(
+                "Uh-oh! We couldn't fetch your user data. Please try again later!"
+              );
+              location.reload();
+              return;
             }
-              if (data.tasks) {
-                setTasks(data.tasks);
-              }
-              if (data.projects) {
-                setProjects(data.projects);
-              }
-            
+            if (data.tasks) {
+              setTasks(data.tasks);
+            }
+            if (data.projects) {
+              setProjects(data.projects);
+            }
           });
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -77,7 +80,7 @@ const App = () => {
 
   const pieData: TaskData[] = [
     { id: "Completed", label: "Completed", value: completedTasks },
-    { id: "Uncompleted", label: "Uncompleted", value: uncompletedTasksNum+1 },
+    { id: "Uncompleted", label: "Uncompleted", value: uncompletedTasksNum + 1 },
   ];
   const colors: { Completed: string; Uncompleted: string } = {
     Completed: "#8BC858",
@@ -126,7 +129,7 @@ const App = () => {
 
   const Tooltip = ({ value, label }: { value: number; label: string }) => (
     <div className="tooltip">
-      <p>{label}:&nbsp;</p> {label == "Uncompleted" ? value-1 : value}
+      <p>{label}:&nbsp;</p> {label == "Uncompleted" ? value - 1 : value}
     </div>
   );
 
@@ -174,7 +177,12 @@ const App = () => {
             <div className="icon">
               <FontAwesomeIcon icon={faPercent} />
             </div>
-            <p>{completedTasks ? ((completedTasks / tasks.length) * 100).toFixed(2) : 100}%</p>
+            <p>
+              {completedTasks
+                ? ((completedTasks / tasks.length) * 100).toFixed(2)
+                : 100}
+              %
+            </p>
           </div>
         </div>
       </div>
@@ -256,7 +264,10 @@ const App = () => {
                 <div className="noTasks">
                   <FontAwesomeIcon icon={faCheckCircle} />
                   <p>You have no tasks</p>
-                  <span>Looks like you're all caught up! No tasks for now—enjoy the break, you deserve it!</span>
+                  <span>
+                    Looks like you're all caught up! No tasks for now—enjoy the
+                    break, you deserve it!
+                  </span>
                 </div>
               )}
             </div>
@@ -284,10 +295,12 @@ const App = () => {
                 )}
               />
               <div className="completedChart">
-                {uncompletedTasksNum > 0 && (
-                  <p>{completed}</p>
-                )}
-                <span>{uncompletedTasksNum > 0 ? "Tasks completed" : "No tasks yet!"}</span>
+                {uncompletedTasksNum > 0 && <p>{completed}</p>}
+                <span>
+                  {uncompletedTasksNum > 0
+                    ? "Tasks completed"
+                    : "No tasks yet!"}
+                </span>
               </div>
             </div>
           </div>
@@ -325,6 +338,7 @@ const App = () => {
                     ticks: {
                       text: {
                         fontSize: 12,
+                        fill: theme == "light" ? "#141515b3" : "#FFFFFFb3",
                       },
                     },
                   },

@@ -34,10 +34,9 @@ const ToDo = ({
       )
     );
 
-    await fetch(`/api/project/${task.projectId}/tasks`, {
+    await fetch(`/api/project/${task.projectId}/task/${task.id}/status`, {
       method: "POST",
       body: JSON.stringify({
-        id: task.id,
         taskStatus: newStatus,
       }),
     })

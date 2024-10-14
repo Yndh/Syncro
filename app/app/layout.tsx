@@ -10,6 +10,7 @@ import { ProjectsProvider } from "../providers/ProjectsProvider";
 import { TasksProvider } from "../providers/UserTasksProvider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ThemeProvider } from "../providers/ThemeProvider";
 
 export default async function Home({
   children,
@@ -22,23 +23,25 @@ export default async function Home({
   return (
     <div className="app__container">
       <SessionProvider session={session}>
-        <ProjectsProvider>
-          <TasksProvider>
-            <ModalProvider>
-              <Sidebar />
-              <ContextMenuProvider>
-                <main>
-                  <ContextMenu />
-                  {children}
-                </main>
-              </ContextMenuProvider>
-              <div className="blurCircle"></div>
-              <div className="blurCircle"></div>
-              <div className="blurCircle"></div>
-              <Modal />
-            </ModalProvider>
-          </TasksProvider>
-        </ProjectsProvider>
+        <ThemeProvider>
+          <ProjectsProvider>
+            <TasksProvider>
+              <ModalProvider>
+                <Sidebar />
+                <ContextMenuProvider>
+                  <main>
+                    <ContextMenu />
+                    {children}
+                  </main>
+                </ContextMenuProvider>
+                <div className="blurCircle"></div>
+                <div className="blurCircle"></div>
+                <div className="blurCircle"></div>
+                <Modal />
+              </ModalProvider>
+            </TasksProvider>
+          </ProjectsProvider>
+        </ThemeProvider>
         <ToastContainer />
       </SessionProvider>
     </div>

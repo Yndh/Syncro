@@ -14,12 +14,70 @@ body {
 }
 
 body {
-  background: $background-color;
-  color: $primary-font-color;
+  color: var(--primary-font-color);
 
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
+
+.app__container,
+.themeContainer {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+.themeContainer {
+  transition: .3s;
+  background: var(--background-color);
+  z-index: 0;
+
+  &.light {
+    --background-color: #{$background-color};
+    --card-color: #{$card-color};
+    --secondary-card-color: #{$secondary-card-color};
+    --background-color-secondary: #{$background-color-secondary};
+
+    --primary-font-color: #{$primary-font-color};
+    --secondary-font-color: #{$secondary-font-color};
+    --tertiary-font-color: #{$tertiary-font-color};
+    --primary-light-font-color: #{$primary-light-font-color};
+    --secondary-light-font-color: #{$secondary-light-font-color};
+
+    --accent-color: #{$accent-color};
+    --secondary-accent-color: #{$secondary-accent-color};
+    --border-color: #{$border-color};
+
+    --success-color: #{$success-color};
+    --warning-color: #{$warning-color};
+    --high-color: #{$high-color};
+    --error-color: #{$error-color};
+  }
+
+  &.dark {
+    --background-color: #{$dark-background-color};
+    --card-color: #{$dark-card-color};
+    --secondary-card-color: #{$dark-secondary-card-color};
+    --background-color-secondary: #{$dark-background-color-secondary};
+
+    --primary-font-color: #{$dark-primary-font-color};
+    --secondary-font-color: #{$dark-secondary-font-color};
+    --tertiary-font-color: #{$dark-tertiary-font-color};
+    --primary-light-font-color: #{$dark-primary-light-font-color};
+    --secondary-light-font-color: #{$dark-secondary-light-font-color};
+
+    --accent-color: #{$dark-accent-color};
+    --secondary-accent-color: #{$dark-secondary-accent-color};
+    --border-color: #{$dark-border-color};
+
+    --success-color: #{$dark-success-color};
+    --warning-color: #{$dark-warning-color};
+    --high-color: #{$dark-high-color};
+    --error-color: #{$dark-error-color};
+  }
+}
+
 
 a {
   color: inherit;
@@ -28,8 +86,8 @@ a {
 
 button {
   padding: 10px;
-  background: $secondary-accent-color;
-  color: $secondary-font-color;
+  background: var(--secondary-accent-color);
+  color: var(--secondary-font-color);
   border-radius: 10px;
 
   cursor: pointer;
@@ -41,13 +99,13 @@ input,
 textarea {
   padding: 2px 10px;
   border-radius: 10px;
-  border: 1px solid $border-color;
-  color: $secondary-font-color;
+  border: 1px solid var(--border-color);
+  color: var(--secondary-font-color);
   background: transparent;
   outline: none;
 
   &::placeholder {
-    color: $teritiary-font-color;
+    color: var(--tertiary-font-color);
   }
 
   &:disabled {
@@ -58,7 +116,7 @@ textarea {
 input[type="checkbox"] {
   background: transparent;
   accent-color: transparent;
-  color: $secondary-font-color;
+  color: var(--secondary-font-color);
   height: 18px;
   width: 18px;
 
@@ -79,8 +137,8 @@ input[type="checkbox"] {
     align-items: center;
     padding: 10px;
     border-radius: 10px;
-    border: 1px solid $border-color;
-    color: $secondary-font-color;
+    border: 1px solid var(--border-color);
+    color: var(--secondary-font-color);
     background: transparent;
     cursor: pointer;
     transition: .3s;
@@ -103,8 +161,8 @@ input[type="checkbox"] {
     top: 120%;
     left: 0;
     width: 100%;
-    background-color: $primary-light-font-color;
-    border: 1px solid $border-color;
+    background-color: var(--primary-light-font-color);
+    border: 1px solid var(--border-color);
     border-radius: 5px;
     max-height: 150px;
     overflow-y: auto;
@@ -132,7 +190,7 @@ input[type="checkbox"] {
       }
 
       &.selected {
-        background: $card-color;
+        background: var(--card-color);
       }
 
       &.disabled {
@@ -149,37 +207,31 @@ input[type="checkbox"] {
     gap: 7px;
 
     &.low svg {
-      color: $success-color;
+      color: var(--success-color);
     }
 
     &.medium svg {
-      color: $warning-color;
+      color: var(--warning-color);
     }
 
     &.high svg {
-      color: $high-color;
+      color: var(--high-color);
     }
 
     &.urgent svg {
-      color: $error-color;
+      color: var(--error-color);
     }
 
     &.member {
-      color: $secondary-font-color;
+      color: var(--secondary-font-color);
     }
 
     &.admin,
     &.owner {
-      color: $high-color;
+      color: var(--high-color);
     }
   }
 
-}
-
-.app__container {
-  display: flex;
-  width: 100%;
-  height: 100vh;
 }
 
 .sidebar {
@@ -207,6 +259,7 @@ input[type="checkbox"] {
 
       h1 {
         display: block;
+        color: var(--primary-font-color);
       }
     }
 
@@ -278,7 +331,7 @@ input[type="checkbox"] {
     p {
       font-size: 18px;
       font-weight: 600;
-      color: $secondary-font-color;
+      color: var(--secondary-font-color);
       opacity: 0;
     }
 
@@ -298,21 +351,21 @@ input[type="checkbox"] {
         width: 60px;
 
         border-radius: 10px;
-        color: $secondary-font-color;
+        color: var(--secondary-font-color);
 
         cursor: pointer;
         transition: .3s;
 
         &.active {
-          background: $accent-color;
+          background: var(--accent-color);
 
           .navElement {
             .icon {
-              background: $background-color;
+              background: var(--background-color);
             }
 
             span {
-              color: $secondary-light-font-color;
+              color: var(--secondary-light-font-color);
             }
           }
 
@@ -346,7 +399,7 @@ input[type="checkbox"] {
 
             svg:first-child {
               height: 19px;
-              color: $accent-color !important;
+              color: var(--accent-color) !important;
             }
 
           }
@@ -402,7 +455,7 @@ input[type="checkbox"] {
 
         span {
           font-size: 10px;
-          color: $secondary-font-color;
+          color: var(--secondary-font-color);
         }
       }
     }
@@ -423,8 +476,8 @@ input[type="checkbox"] {
         height: 35px;
         width: 35px;
         aspect-ratio: 1/1;
-        background: $primary-font-color;
-        color: $secondary-light-font-color;
+        background: var(--primary-font-color);
+        color: var(--secondary-light-font-color);
         border-radius: 5px;
 
         svg {
@@ -439,7 +492,7 @@ input[type="checkbox"] {
   position: absolute;
   width: 400px;
   height: 400px;
-  background: $accent-color;
+  background: var(--accent-color);
   filter: blur(100px);
   opacity: .15;
   z-index: -1;
@@ -474,21 +527,21 @@ main {
   padding: 50px 30px;
   box-sizing: border-box;
 
-  color: $secondary-font-color;
+  color: var(--secondary-font-color);
 
   .header {
     width: 100%;
 
     h1 {
       font-size: 68px;
-      color: $primary-font-color;
+      color: var(--primary-font-color);
       margin: 0;
     }
 
     h2 {
       font-size: 42px;
       max-width: 100%;
-      color: $primary-font-color;
+      color: var(--primary-font-color);
       margin: 0;
     }
 
@@ -496,7 +549,7 @@ main {
       font-size: 20px;
       font-weight: 500;
       max-width: 45%;
-      color: $secondary-font-color;
+      color: var(--secondary-font-color);
       margin: 0;
     }
 
@@ -510,16 +563,16 @@ main {
       progress[value] {
         flex-grow: 1;
         height: 10px;
-        background-color: $border-color;
+        background-color: var(--border-color);
         border-radius: 50px;
 
         &::-webkit-progress-bar {
           border-radius: 50px;
-          background: $border-color;
+          background: var(--tertiary-font-color);
         }
 
         &::-webkit-progress-value {
-          background-color: $accent-color;
+          background-color: var(--accent-color);
           border-radius: 50px;
         }
       }
@@ -563,14 +616,14 @@ main {
       width: 100%;
       max-height: 100%;
       border-radius: 10px;
-      background: $card-color;
+      background: var(--card-color);
       box-shadow: 0 4px 10px rgb(0, 0, 0, .1);
 
 
       p {
         font-size: 16px;
         font-weight: bold;
-        color: $secondary-font-color;
+        color: var(--secondary-font-color);
       }
 
       .num {
@@ -582,22 +635,22 @@ main {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: $primary-light-font-color;
-          border: 1px solid $teritiary-font-color;
+          background: var(--primary-light-font-color);
+          border: 1px solid var(--tertiary-font-color);
           padding: 10px;
           aspect-ratio: 1/1 !important;
           border-radius: 50%;
 
           svg {
             font-size: 14px;
-            color: $teritiary-font-color;
+            color: var(--tertiary-font-color);
           }
         }
 
         p {
           font-size: 27px;
           font-weight: 700;
-          color: $primary-font-color;
+          color: var(--primary-font-color);
         }
       }
 
@@ -606,7 +659,7 @@ main {
         display: flex;
         align-items: center;
         justify-content: center;
-        color: $secondary-font-color;
+        color: var(--secondary-font-color);
         font-weight: 700;
         font-family: inherit;
 
@@ -623,12 +676,12 @@ main {
           p {
             font-size: 36px;
             font-weight: 700;
-            color: $primary-font-color;
+            color: var(--primary-font-color);
           }
 
           span {
             font-size: 14px;
-            color: $secondary-font-color;
+            color: var(--secondary-font-color);
           }
         }
       }
@@ -653,12 +706,12 @@ main {
 
           svg {
             height: 50px;
-            color: $success-color;
+            color: var(--success-color);
             margin-bottom: 8px;
           }
 
           span {
-            color: $teritiary-font-color;
+            color: var(--tertiary-font-color);
             font-size: 14px;
             padding: 0px 10px;
           }
@@ -669,27 +722,27 @@ main {
           width: 100%;
           padding: 10px;
           gap: 10px;
-          // border: 1px solid $border-color;
+          // border: 1px solid var(--border-color);
           // border-radius: 5px;
 
           &.low .icon {
-            background: rgba($success-color, .8);
-            box-shadow: 0px 2px 10px $success-color;
+            background: rgba(var(--success-color), .8);
+            box-shadow: 0px 2px 10px var(--success-color);
           }
 
           &.medium .icon {
-            background: rgba($warning-color, .8);
-            box-shadow: 0px 2px 10px $warning-color;
+            background: rgba(var(--warning-color), .8);
+            box-shadow: 0px 2px 10px var(--warning-color);
           }
 
           &.high .icon {
-            background: rgba($high-color, .8);
-            box-shadow: 0px 2px 10px $high-color;
+            background: rgba(var(--high-color), .8);
+            box-shadow: 0px 2px 10px var(--high-color);
           }
 
           &.urgent .icon {
-            background: rgba($error-color, .8);
-            box-shadow: 0px 2px 10px $error-color;
+            background: rgba(var(--error-color), .8);
+            box-shadow: 0px 2px 10px var(--error-color);
           }
 
           .icon {
@@ -700,9 +753,9 @@ main {
             aspect-ratio: 1/1;
             width: 50px;
             height: 50px;
-            background: $error-color;
-            color: $teritiary-font-color;
-            border: 1px solid $teritiary-font-color;
+            background: var(--error-color);
+            color: var(--tertiary-font-color);
+            border: 1px solid var(--tertiary-font-color);
 
             svg {
               font-size: 18px;
@@ -718,12 +771,12 @@ main {
             .detailsHeader {
               h2 {
                 font-size: 22px;
-                color: $primary-font-color;
+                color: var(--primary-font-color);
               }
 
               p {
                 font-size: 14px;
-                columns: $secondary-font-color;
+                columns: var(--secondary-font-color);
               }
             }
 
@@ -751,7 +804,7 @@ main {
     align-items: center;
     justify-content: center;
     padding: 5px 10px;
-    background: $background-color;
+    background: var(--background-color);
     border-radius: 5px;
     box-shadow: 0 4px 10px rgb(0, 0, 0, .1);
   }
@@ -770,9 +823,9 @@ main {
       position: relative;
       display: flex;
       flex-direction: column;
-      background: $card-color;
+      background: var(--card-color);
       border-radius: 10px;
-      border: 1px dashed $teritiary-font-color;
+      border: 1px dashed var(--tertiary-font-color);
       padding: 20px;
       height: 100%;
       gap: 15px;
@@ -783,15 +836,15 @@ main {
         gap: 7px;
 
         h1 {
-          color: $primary-font-color;
+          color: var(--primary-font-color);
           font-weight: 600;
           font-size: 28px;
           text-transform: capitalize;
         }
 
         .count {
-          background: $secondary-font-color;
-          color: $primary-light-font-color;
+          background: var(--secondary-font-color);
+          color: var(--primary-light-font-color);
           font-weight: 500;
           font-size: 14px;
           padding: 3px 7px;
@@ -816,8 +869,8 @@ main {
           gap: 5px;
           border-radius: 10px;
 
-          color: $secondary-font-color;
-          background: $card-color;
+          color: var(--secondary-font-color);
+          background: var(--card-color);
           box-shadow: 0px 2px 10px rgb(0, 0, 0, .1);
           cursor: pointer;
 
@@ -828,19 +881,19 @@ main {
             border-bottom-left-radius: 10px;
 
             &.LOW {
-              background: $success-color;
+              background: var(--success-color);
             }
 
             &.MEDIUM {
-              background: $warning-color;
+              background: var(--warning-color);
             }
 
             &.HIGH {
-              background: $high-color;
+              background: var(--high-color);
             }
 
             &.URGENT {
-              background: $error-color;
+              background: var(--error-color);
             }
           }
 
@@ -876,17 +929,17 @@ main {
               p {
                 font-size: 20px;
                 font-weight: 500;
-                color: $primary-font-color;
+                color: var(--primary-font-color);
               }
 
               span {
                 font-size: 16px;
                 font-weight: 400;
-                color: $secondary-font-color;
+                color: var(--secondary-font-color);
 
                 &.projectName {
                   font-size: 14px;
-                  color: $teritiary-font-color;
+                  color: var(--tertiary-font-color);
                 }
               }
             }
@@ -903,7 +956,7 @@ main {
                 font-size: 14px;
 
                 p {
-                  color: $primary-font-color;
+                  color: var(--primary-font-color);
                   font-weight: 500;
                 }
               }
@@ -921,7 +974,7 @@ main {
                   height: 5px;
 
                   &.completed {
-                    background: $priorityLow;
+                    background: var(--success-color);
                   }
                 }
               }
@@ -938,15 +991,15 @@ main {
               span.dueTime {
                 font-size: 14px;
                 padding: 4px 8px;
-                background: rgba($error-color, .2);
-                color: $error-color;
+                background: rgba(var(--error-color), .2);
+                color: var(--error-color);
                 border-radius: 5px;
               }
             }
 
 
             a {
-              color: $accent-color;
+              color: var(--accent-color);
             }
 
             .stages {
@@ -1010,7 +1063,7 @@ main {
 
       h2 {
         font-size: 32px;
-        color: $primary-font-color;
+        color: var(--primary-font-color);
       }
 
       .list {
@@ -1021,7 +1074,7 @@ main {
 
         p {
           font-size: 16px;
-          color: $secondary-font-color;
+          color: var(--secondary-font-color);
         }
 
         ol {
@@ -1030,7 +1083,7 @@ main {
 
           list-style-type: none;
           gap: 10px;
-          border-left: 1px solid $teritiary-font-color;
+          border-left: 1px solid var(--tertiary-font-color);
 
           li {
             display: flex;
@@ -1039,7 +1092,7 @@ main {
 
             .min {
               height: 1px;
-              background: $teritiary-font-color;
+              background: var(--tertiary-font-color);
               width: 10px;
             }
 
@@ -1048,7 +1101,7 @@ main {
               padding: 7px 15px;
               border-radius: 5px;
               font-weight: 500;
-              color: $secondary-font-color;
+              color: var(--secondary-font-color);
               font-size: 14px;
               transition: .3s;
 
@@ -1057,8 +1110,8 @@ main {
               }
 
               &.active {
-                background: $accent-color;
-                color: $primary-light-font-color;
+                background: var(--accent-color);
+                color: var(--primary-light-font-color);
               }
             }
           }
@@ -1069,8 +1122,8 @@ main {
           width: 100%;
           justify-content: space-between;
           padding: 10px 15px;
-          background: $card-color;
-          color: $secondary-font-color;
+          background: var(--card-color);
+          color: var(--secondary-font-color);
           box-shadow: 0px 2px 10px rgb(0, 0, 0, .1);
 
           span {
@@ -1098,7 +1151,7 @@ main {
         gap: 10px;
         padding: 7px;
         width: fit-content;
-        background: $secondary-accent-color;
+        background: var(--secondary-accent-color);
         border-radius: 15px;
 
 
@@ -1114,7 +1167,7 @@ main {
             padding: 10px 0px;
             width: 120px;
             border-radius: 10px;
-            color: $secondary-font-color;
+            color: var(--secondary-font-color);
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
@@ -1124,8 +1177,8 @@ main {
             display: none;
 
             &:checked~label {
-              background: $card-color;
-              color: $primary-font-color;
+              background: var(--card-color);
+              color: var(--primary-font-color);
 
             }
           }
@@ -1148,9 +1201,9 @@ main {
           gap: 15px;
           width: 100%;
           padding: 20px;
-          background: $card-color;
+          background: var(--card-color);
           border-radius: 10px;
-          border: 1px dashed $teritiary-font-color;
+          border: 1px dashed var(--tertiary-font-color);
 
           .notesheader {
             display: flex;
@@ -1158,15 +1211,15 @@ main {
             gap: 7px;
 
             h1 {
-              color: $primary-font-color;
+              color: var(--primary-font-color);
               font-weight: 600;
               font-size: 28px;
               text-transform: capitalize;
             }
 
             .count {
-              background: $secondary-font-color;
-              color: $primary-light-font-color;
+              background: var(--secondary-font-color);
+              color: var(--primary-light-font-color);
               font-weight: 500;
               font-size: 14px;
               padding: 3px 7px;
@@ -1194,9 +1247,9 @@ main {
               border-radius: 10px;
               padding: 10px;
               word-wrap: break-word;
-              background: $card-color;
+              background: var(--card-color);
               box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-              color: $secondary-font-color;
+              color: var(--secondary-font-color);
 
 
               .content {
@@ -1215,13 +1268,13 @@ main {
                   p {
                     font-size: 20px;
                     font-weight: 500;
-                    color: $primary-font-color;
+                    color: var(--primary-font-color);
                   }
 
                   span {
                     font-size: 16px;
                     font-weight: 400;
-                    color: $secondary-font-color;
+                    color: var(--secondary-font-color);
                   }
                 }
 
@@ -1235,8 +1288,8 @@ main {
                     font-size: 14px;
                     padding: 4px 8px;
                     border-radius: 5px;
-                    background: rgba($success-color, .2);
-                    color: $success-color;
+                    background: rgba(var(--success-color), .2);
+                    color: var(--success-color);
 
 
                     img {
@@ -1260,7 +1313,8 @@ main {
           position: relative;
           display: flex;
           flex-direction: column;
-          background: $card-color;
+          background: var(--card-color);
+          border-radius: 10px;
           width: 100%;
           height: 100%;
           padding: 20px;
@@ -1280,15 +1334,15 @@ main {
               gap: 7px;
 
               h1 {
-                color: $primary-font-color;
+                color: var(--primary-font-color);
                 font-weight: 600;
                 font-size: 28px;
                 text-transform: capitalize;
               }
 
               .count {
-                background: $secondary-font-color;
-                color: $primary-light-font-color;
+                background: var(--secondary-font-color);
+                color: var(--primary-light-font-color);
                 font-weight: 500;
                 font-size: 14px;
                 padding: 3px 7px;
@@ -1311,8 +1365,8 @@ main {
                 align-items: center;
                 justify-content: center;
                 gap: 7px;
-                background: $primary-font-color;
-                color: $secondary-light-font-color;
+                background: var(--primary-font-color);
+                color: var(--secondary-light-font-color);
                 font-size: 12px;
                 font-weight: 600;
                 padding: 10px 15px;
@@ -1336,7 +1390,7 @@ main {
               width: 100%;
               height: 100%;
               max-height: 90%;
-              border: 1px solid $border-color;
+              border: 1px solid var(--border-color);
               border-inline-width: 0px;
               gap: 20px;
               padding: 15px 0;
@@ -1368,11 +1422,11 @@ main {
                   gap: 5px;
                   font-weight: 600;
                   font-size: 18px;
-                  color: $primary-font-color;
+                  color: var(--primary-font-color);
                 }
 
                 span {
-                  color: $secondary-font-color;
+                  color: var(--secondary-font-color);
                   font-size: 14px;
                   min-width: fit-content;
                 }
@@ -1388,22 +1442,22 @@ main {
 
                   button {
                     background: none;
-                    color: $primary-font-color;
+                    color: var(--primary-font-color);
                     padding: 5px;
                     height: 100%;
                     font-size: 18px;
                     transition: .3s;
 
                     &:hover {
-                      color: $secondary-font-color;
+                      color: var(--secondary-font-color);
                     }
 
                     &.admin svg {
-                      color: $priorityMedium
+                      color: var(--warning-color)
                     }
 
                     &:disabled {
-                      color: $teritiary-font-color;
+                      color: var(--tertiary-font-color);
                       cursor: not-allowed;
                     }
                   }
@@ -1417,11 +1471,11 @@ main {
               gap: 15px;
               padding: 10px 0px;
               width: 400px;
-              color: $secondary-font-color;
+              color: var(--secondary-font-color);
 
               h2 {
                 font-size: 26px;
-                color: $secondary-font-color;
+                color: var(--secondary-font-color);
               }
 
               .roleDescription {
@@ -1463,10 +1517,10 @@ main {
 //   padding: 2rem;
 
 //   border-radius: 15px;
-//   background: $background-color-secondary;
+//   background: var(--background-color)-secondary;
 
 //   button {
-//     background: $background-color-secondary;
+//     background: var(--background-color)-secondary;
 //     color: inherit;
 //     margin-top: 15px;
 //     width: 100%;
@@ -1482,7 +1536,7 @@ main {
 // //   width: 150px;
 // //   border-radius: 5px;
 
-// //   background: $background-color;
+// //   background: var(--background-color);
 // //   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 
 // //   aspect-ratio: 1/1;
@@ -1518,8 +1572,8 @@ main {
     flex-direction: column;
     gap: 15px;
     padding: 15px 20px;
-    background: $background-color;
-    color: $secondary-font-color;
+    background: var(--background-color);
+    color: var(--secondary-font-color);
     box-shadow: 0px 2px 100px rgb(0, 0, 0, .1);
     border-radius: 10px;
     width: 800px;
@@ -1529,7 +1583,7 @@ main {
       justify-content: space-between;
       align-items: center;
       text-transform: capitalize;
-      color: $primary-font-color;
+      color: var(--primary-font-color);
       font-size: 20px;
 
 
@@ -1538,7 +1592,7 @@ main {
         border: none;
         padding: none;
         font-size: 22px;
-        color: $primary-font-color;
+        color: var(--primary-font-color);
       }
     }
 
@@ -1549,7 +1603,7 @@ main {
       width: 100%;
       gap: 15px;
       padding: 20px 0;
-      border: 1px solid $border-color;
+      border: 1px solid var(--border-color);
       border-left: none;
       border-right: none;
 
@@ -1559,12 +1613,12 @@ main {
         h2 {
           font-size: 26px;
           font-weight: 600;
-          color: $primary-font-color;
+          color: var(--primary-font-color);
         }
 
         span {
           font-size: 16px;
-          color: $secondary-font-color;
+          color: var(--secondary-font-color);
           word-break: break-all;
         }
       }
@@ -1575,7 +1629,7 @@ main {
         gap: 5px;
 
         p {
-          color: $secondary-font-color;
+          color: var(--secondary-font-color);
           font-weight: 700;
           font-size: 18px;
         }
@@ -1605,13 +1659,13 @@ main {
           border-radius: 5px;
 
           &.dueTime {
-            background: rgba($error-color, .2);
-            color: $error-color;
+            background: rgba(var(--error-color), .2);
+            color: var(--error-color);
           }
 
           &.createdTime {
-            background: rgba($success-color, .2);
-            color: $success-color;
+            background: rgba(var(--success-color), .2);
+            color: var(--success-color);
           }
         }
 
@@ -1648,12 +1702,12 @@ main {
             flex-direction: column;
 
             p {
-              color: $secondary-font-color;
+              color: var(--secondary-font-color);
               font-weight: 600;
             }
 
             span {
-              color: $teritiary-font-color;
+              color: var(--tertiary-font-color);
             }
           }
 
@@ -1695,11 +1749,11 @@ main {
 
                 button {
                   background: none;
-                  color: $teritiary-font-color;
+                  color: var(--tertiary-font-color);
                   transition: .3s;
 
                   &:hover {
-                    color: $error-color;
+                    color: var(--error-color);
                   }
                 }
               }
@@ -1729,7 +1783,7 @@ main {
               width: 300px;
               padding: 5px;
               font-size: 14px;
-              border: 1px solid $border-color;
+              border: 1px solid var(--border-color);
               border-radius: 10px;
               text-align: center;
             }
@@ -1738,7 +1792,7 @@ main {
               display: flex;
               flex-direction: column;
               border-radius: 10px;
-              border: 1px solid $border-color;
+              border: 1px solid var(--border-color);
               width: 450px;
               padding: 10px;
               gap: 10px;
@@ -1764,7 +1818,7 @@ main {
                 align-items: center;
                 width: 100%;
                 cursor: pointer;
-                color: $primary-font-color;
+                color: var(--primary-font-color);
                 font-weight: 700;
                 font-size: 18px;
 
@@ -1786,7 +1840,7 @@ main {
                   transition: .3s;
 
                   &:hover {
-                    color: $teritiary-font-color;
+                    color: var(--tertiary-font-color);
                   }
                 }
               }
@@ -1797,11 +1851,11 @@ main {
             width: 300px;
             font-weight: 600;
             background: transparent;
-            border: 1px solid $border-color;
+            border: 1px solid var(--border-color);
             transition: .3s;
 
             &:hover {
-              background: $error-color;
+              background: var(--error-color);
               border-color: transparent;
               font-weight: bold !important;
             }
@@ -1815,7 +1869,7 @@ main {
         align-items: center;
         gap: 10px;
         width: 100%;
-        color: $teritiary-font-color;
+        color: var(--tertiary-font-color);
 
         &::before,
         &::after {
@@ -1823,7 +1877,7 @@ main {
           content: "";
           width: 45%;
           height: 1px;
-          background: $border-color;
+          background: var(--border-color);
         }
       }
 
@@ -1835,7 +1889,7 @@ main {
 
         button {
           background: transparent;
-          border: 1px solid $border-color;
+          border: 1px solid var(--border-color);
           font-weight: 600px;
         }
       }
@@ -1851,12 +1905,12 @@ main {
         flex-direction: column;
 
         p {
-          color: $secondary-font-color;
+          color: var(--secondary-font-color);
           font-weight: 600;
         }
 
         span {
-          color: $teritiary-font-color;
+          color: var(--tertiary-font-color);
         }
       }
 
@@ -1877,7 +1931,7 @@ main {
           justify-content: center;
           gap: 7px;
           background: transparent;
-          border: 1px solid $border-color;
+          border: 1px solid var(--border-color);
           padding: 10px 15px;
         }
       }
@@ -1905,7 +1959,7 @@ main {
           content: "";
           width: 35%;
           height: 1px;
-          background: $border-color;
+          background: var(--border-color);
         }
       }
 
@@ -1920,8 +1974,8 @@ main {
       gap: 7px;
 
       button {
-        background: $secondary-accent-color;
-        color: $primary-font-color;
+        background: var(--secondary-accent-color);
+        color: var(--primary-font-color);
         padding: 15px 20px;
         font-size: 14px;
         font-weight: 700;
@@ -1932,7 +1986,7 @@ main {
 
         &.secondary {
           background: none;
-          color: $teritiary-font-color;
+          color: var(--tertiary-font-color);
           box-shadow: none;
         }
       }
@@ -1965,7 +2019,7 @@ main {
   }
 
   input:checked~label img {
-    border-color: $accent-color;
+    border-color: var(--accent-color);
   }
 }
 
@@ -1977,10 +2031,10 @@ main {
 
   label {
     padding: 5px 10px;
-    background: $background-color-secondary;
-    border: 1px solid $primary-font-color;
+    background: var(--background-color)-secondary;
+    border: 1px solid var(--primary-font-color);
     border-radius: 5px;
-    color: $primary-font-color;
+    color: var(--primary-font-color);
     transition: .3s;
   }
 
@@ -1993,19 +2047,19 @@ main {
   }
 
   input#priorityLOW:checked~label {
-    background: $priorityLow;
+    background: var(--success-color);
   }
 
   input#priorityMEDIUM:checked~label {
-    background: $priorityMedium;
+    background: var(--warning-color);
   }
 
   input#priorityHIGH:checked~label {
-    background: $priorityHigh;
+    background: var(--high-color);
   }
 
   input#priorityURGENT:checked~label {
-    background: $priorityUrgent;
+    background: var(--error-color);
   }
 }
 
@@ -2021,9 +2075,9 @@ main {
   gap: 5px;
   flex-direction: column;
 
-  background: $background-color;
-  border: 1px solid $border-color;
-  color: $secondary-font-color;
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  color: var(--secondary-font-color);
   border-radius: 10px;
   cursor: pointer;
   box-shadow: 0px 2px 10px rgb(0, 0, 0, .1);
@@ -2044,7 +2098,7 @@ main {
       transition: .3s;
 
       &:hover {
-        color: $teritiary-font-color;
+        color: var(--tertiary-font-color);
 
         ol {
           display: flex;
@@ -2055,8 +2109,8 @@ main {
         border-radius: 0 0 10px 10px;
 
         &:hover {
-          background: $priorityUrgent;
-          color: $primary-light-font-color;
+          background: var(--error-color);
+          color: var(--primary-light-font-color);
         }
       }
 
@@ -2072,9 +2126,9 @@ main {
         flex-direction: column;
         gap: 5px;
 
-        background: $background-color;
-        border: 1px solid $border-color;
-        color: $primary-font-color;
+        background: var(--background-color);
+        border: 1px solid var(--border-color);
+        color: var(--primary-font-color);
         border-radius: 0px 10px 10px 10px;
         list-style-type: none;
         box-shadow: 5px 2px 10px rgb(0, 0, 0, .1);
@@ -2097,7 +2151,7 @@ main {
   justify-content: center;
   width: 100%;
   height: 100vh;
-  background: $background-color;
+  background: var(--background-color);
 }
 
 .projectDetails {
@@ -2148,7 +2202,7 @@ main {
   width: 300px;
   gap: 5px;
   padding: 1rem 2rem;
-  background: $background-color-secondary;
+  background: var(--background-color)-secondary;
   border-radius: 10px;
   text-align: center;
 
