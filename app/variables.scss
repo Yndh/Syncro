@@ -19,13 +19,17 @@ $success-color: #74D048;
 $warning-color: #FFCC00;
 $high-color: #FFA500;
 $error-color: #FF4D4D;
+$error-color-transparent: #ff4d4d33;
+$warning-color-transparent: #FFCC0033;
+$high-color-transparent: #FFA50033;
+$success-color-transparent: #74D04833;
 
 
 
 
 // $dark-background-color: #1C1C1C;
 $dark-background-color: linear-gradient(120deg, #1C1C1C 0%, #1C1C1C 100%);
-$dark-card-color: #2A2A2A;
+$dark-card-color: #2a2a2a73;
 $dark-secondary-card-color: #D9D9D9;
 $dark-background-color-secondary: #fffefe;
 
@@ -37,9 +41,13 @@ $dark-secondary-light-font-color: #141515b3;
 
 $dark-accent-color: #6DA34D;
 $dark-secondary-accent-color: rgb(20, 21, 21, .9);
-$dark-border-color: #1415151a;
+$dark-border-color: #ffffff1a;
 
 $dark-success-color: #4A9833;
 $dark-warning-color: #FFBB33;
 $dark-high-color: #FF8800;
 $dark-error-color: #D63C3C;
+$dark-error-color-transparent: #D63C3C33;
+$dark-warning-color-transparent: #FFBB3333;
+$dark-high-color-transparent: #FF880033;
+$dark-success-color-transparent: #4A983333;

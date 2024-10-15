@@ -1,10 +1,6 @@
-import { Project } from "@/app/types/interfaces";
 import { auth } from "@/auth";
-import { joinProject } from "@/lib/joinProject";
 import { prisma } from "@/lib/prisma";
-import { ProjectMembership } from "@prisma/client";
 import { NextApiResponse } from "next";
-import { DateTime } from "next-auth/providers/kakao";
 import { NextResponse } from "next/server";
 
 interface ResponseInterface<T = any> extends NextApiResponse<T> {
@@ -14,11 +10,10 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
 }
 
 interface reqBody {
-    maxUses?: number;
-    expires?: Date
+  maxUses?: number;
 }
 
-export async function mPOST(req: reqBody, res: ResponseInterface) {
+export async function mPOST(req: Request, res: ResponseInterface) {
   const session = await auth();
   if (!session?.user?.id) {
     return new NextResponse(
@@ -39,21 +34,16 @@ export async function mPOST(req: reqBody, res: ResponseInterface) {
     );
   }
 
-  const { maxUses, expires } = req
+  const body: reqBody = await req.json();
+  const { maxUses } = body;
 
-  if(maxUses && maxUses <= 0){
-    return new NextResponse(JSON.stringify({error: "MaxUses must be greater than 0."}), {
-        status: 400
-    })
-  }
-
-  if(expires && !(expires instanceof Date)){
+  if (maxUses && maxUses <= 0) {
     return new NextResponse(
-        JSON.stringify({ error: "expires must be a valid Date." }),
-        {
-          status: 400,
-        }
-      );
+      JSON.stringify({ error: "MaxUses must be greater than 0." }),
+      {
+        status: 400,
+      }
+    );
   }
 
   try {
@@ -75,15 +65,44 @@ export async function mPOST(req: reqBody, res: ResponseInterface) {
       });
     }
 
+    console.log(maxUses);
+
     const updatedInvite = await prisma.projectInvitation.update({
       where: { linkId: linkId },
       data: {
-       maxUses: maxUses ?? invite.maxUses,
-       expires: expires ?? invite.expires
+        maxUses: maxUses ? maxUses : invite.maxUses,
       },
     });
 
-    return new NextResponse(JSON.stringify({ invite:  updatedInvite}), {
+    const project = await prisma.project.findFirst({
+      where: { id: updatedInvite.projectId },
+      include: {
+        members: {
+          include: {
+            user: true,
+          },
+        },
+        tasks: {
+          include: {
+            assignedTo: true,
+            stages: true,
+          },
+        },
+        notes: {
+          include: {
+            createdBy: true,
+          },
+        },
+        projectInvitations: {
+          include: {
+            project: true,
+            createdBy: true,
+          },
+        },
+      },
+    });
+
+    return new NextResponse(JSON.stringify({ project: project }), {
       status: 200,
     });
   } catch (e) {

@@ -84,7 +84,7 @@ const App = () => {
   ];
   const colors: { Completed: string; Uncompleted: string } = {
     Completed: "#8BC858",
-    Uncompleted: "#E3E3E3",
+    Uncompleted: theme == "light" ? "#E3E3E3" : "#ffffff66",
   };
   const completed = pieData.find((task) => task.id == "Completed")?.value || 0;
 
@@ -283,8 +283,8 @@ const App = () => {
                 height={180}
                 innerRadius={0.8}
                 padAngle={2}
-                cornerRadius={45}
                 borderWidth={0}
+                cornerRadius={45}
                 colors={({ id }) => colors[id as keyof typeof colors]}
                 enableArcLabels={false}
                 enableArcLinkLabels={false}

@@ -1,4 +1,4 @@
-import { signOut } from "@/auth";
+import { signOut } from "next-auth/react";
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 

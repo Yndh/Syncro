@@ -10,16 +10,6 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
 }
 
 export async function mGET(req: Request, res: ResponseInterface) {
-  const session = await auth();
-  if (!session || !session.user) {
-    return new NextResponse(
-      JSON.stringify({ error: "The user is not authenticated" }),
-      {
-        status: 401,
-      }
-    );
-  }
-
   const linkId = res.params.linkId;
   if (!linkId) {
     return new NextResponse(
@@ -49,8 +39,8 @@ export async function mGET(req: Request, res: ResponseInterface) {
       });
     }
 
-    const now = new Date()
-    if(invite.expires && invite.expires < now){
+    const now = new Date();
+    if (invite.expires && invite.expires < now) {
       return new NextResponse(
         JSON.stringify({ error: "The invite has expired." }),
         {

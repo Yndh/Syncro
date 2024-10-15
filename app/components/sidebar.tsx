@@ -1,6 +1,5 @@
 "use client";
 
-import { Session } from "next-auth";
 import { useEffect, useRef, useState } from "react";
 import SignOutButton from "./signOut";
 import Image from "next/image";

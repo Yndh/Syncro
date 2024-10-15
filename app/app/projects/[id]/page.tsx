@@ -20,6 +20,7 @@ import { InviteDetails } from "@/app/components/inviteDetails";
 import { toast } from "react-toastify";
 import { useContextMenu } from "@/app/providers/ContextMenuProvider";
 import Link from "next/link";
+import Image from "next/image";
 
 interface ProjectParams {
   params: {
@@ -41,12 +42,14 @@ const ProjectPage = ({ params }: ProjectParams) => {
   const [project, setProject] = useState<Project>();
   const projectNameInputRef = useRef<HTMLInputElement>(null);
   const projectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null);
+  const newProjectNameInputRef = useRef<HTMLInputElement>(null);
+  const newProjectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null);
   const isAdmin: boolean = role === "OWNER" || role === "ADMIN";
 
   useEffect(() => {
     const localProject = getProjectById(parseInt(params.id));
     setProject(localProject);
-  }, [projects]);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -130,7 +133,11 @@ const ProjectPage = ({ params }: ProjectParams) => {
                 {nonExpiredInvites ? (
                   nonExpiredInvites.length > 0 ? (
                     nonExpiredInvites.map((invite) => (
-                      <InviteDetails invite={invite} key={invite.id} />
+                      <InviteDetails
+                        invite={invite}
+                        key={invite.id}
+                        setProject={setProject}
+                      />
                     ))
                   ) : (
                     <p className="noInvites">There is no active invites</p>
@@ -384,6 +391,125 @@ const ProjectPage = ({ params }: ProjectParams) => {
     });
   };
 
+  const displayMembers = () => {
+    if (!project) return;
+    const MAX_NUM_OF_MEMBERS = 3;
+    const remainingMembers = project?.members.length - MAX_NUM_OF_MEMBERS;
+
+    return (
+      <div className="projectMembers">
+        {project.members.slice(0, MAX_NUM_OF_MEMBERS).map((member) => (
+          <Image
+            key={member.id}
+            src={member.user.image}
+            alt={member.user.name}
+            className="memberAvatar"
+            width={40}
+            height={40}
+          />
+        ))}
+        {remainingMembers > 0 && <span>+{remainingMembers}</span>}
+      </div>
+    );
+  };
+
+  const createProjectModal = () => {
+    setModal({
+      title: "Create Project",
+      content: (
+        <form onSubmit={createProject} id="createProjectForm">
+          <div className="formRow">
+            <label htmlFor="projectName">
+              <p>Name</p>
+              <span>Enter the name of your project</span>
+            </label>
+
+            <input
+              type="text"
+              placeholder="Project name..."
+              ref={newProjectNameInputRef}
+              id="projectName"
+            />
+          </div>
+
+          <div className="formRow">
+            <label htmlFor="projectDescription">
+              <p>Description</p>
+              <span>Provide a brief overview of your project</span>
+            </label>
+
+            <textarea
+              placeholder="Project name..."
+              ref={newProjectDescriptionTextAreaRef}
+              id="projectDescription"
+            />
+          </div>
+        </form>
+      ),
+      bottom: (
+        <>
+          <button type="submit" form="createProjectForm">
+            Create Project
+          </button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
+        </>
+      ),
+      setModal,
+    });
+  };
+
+  const createProject = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const name = (newProjectNameInputRef.current?.value as string).trim();
+    if (name === "") {
+      toast.warn("Hold on! A project needs a name. What should we call it?");
+      return;
+    }
+    if (name.length > 100) {
+      toast.warn(
+        "Heads up! The project name is a bit too lengthy. Try shortening it to keep things concise!"
+      );
+      return;
+    }
+
+    const description = (
+      newProjectDescriptionTextAreaRef.current?.value as string
+    ).trim();
+    if (description.length > 400) {
+      toast.warn(
+        "Warning! The project description is getting too wordy. Let's trim it down a bit!"
+      );
+      return;
+    }
+
+    setModal(null);
+
+    await fetch("/api/projects", {
+      method: "POST",
+      body: JSON.stringify({ name, description }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          toast.error(
+            "Oops! Something went wrong while creating your project. Give it another try!"
+          );
+          return;
+        }
+
+        if (data.id) {
+          router.push(`/app/projects/${data.id}`);
+          fetchProjects();
+          toast.success(
+            "Congratulations! Your project has been created successfully!"
+          );
+        }
+      });
+  };
+
   return (
     <>
       <div className="projectPage">
@@ -411,7 +537,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
                   </li>
                 ))}
             </ol>
-            <button>
+            <button onClick={createProjectModal}>
               <FontAwesomeIcon icon={faPlus} />
               <span>Create Project</span>
             </button>
@@ -428,6 +554,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
                 {" "}
               </progress>
               <p>{completedTasksPercentage}% Completed</p>
+              {displayMembers()}
             </div>
           </div>
 
