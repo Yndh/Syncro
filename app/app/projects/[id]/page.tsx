@@ -8,6 +8,7 @@ import { MembersList } from "@/app/components/MembersList";
 import { Notes } from "@/app/components/Notes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faBars,
   faCog,
   faListCheck,
   faNoteSticky,
@@ -513,6 +514,13 @@ const ProjectPage = ({ params }: ProjectParams) => {
   return (
     <>
       <div className="projectPage">
+        <label
+          htmlFor="projectMenuCheckbox"
+          className="projectMenuCheckboxLabel"
+        >
+          <FontAwesomeIcon icon={faBars} />
+        </label>
+        <input type="checkbox" id="projectMenuCheckbox" />
         <div className="projectsList">
           <h2>Projects</h2>
 

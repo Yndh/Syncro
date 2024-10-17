@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import SignOutButton from "./signOut";
 import Image from "next/image";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,6 +10,7 @@ import {
   faDiagramProject,
   faList,
   faMoon,
+  faRightFromBracket,
   faSun,
   faTable,
   faUser,
@@ -23,8 +23,9 @@ import getUrl from "@/lib/getUrl";
 import { toast } from "react-toastify";
 import Select from "./Select";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useTheme } from "../providers/ThemeProvider";
+import { signOut } from "next-auth/react";
 
 const providersOptions = [
   {
@@ -358,6 +359,17 @@ const Sidebar = () => {
               onChange={() => {}}
             />
           </div>
+
+          <div className="formRow">
+            <label>
+              <p>Logout</p>
+              <span>Sign out of your account</span>
+            </label>
+
+            <button onClick={logoutModal} className="signOut">
+              Logout
+            </button>
+          </div>
         </form>
       ),
       bottom: (
@@ -365,6 +377,30 @@ const Sidebar = () => {
           <button type="submit" form="userForm">
             Save Changes
           </button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
+        </>
+      ),
+      setModal,
+    });
+  };
+
+  const logoutModal = () => {
+    setModal({
+      title: "Logout",
+      content: (
+        <div className="header">
+          <h1> Are you sure you want to log out?</h1>
+          <p>
+            This action will end your session, and you will need to sign in
+            again to access your account.
+          </p>
+        </div>
+      ),
+      bottom: (
+        <>
+          <button onClick={() => signOut()}>Logout</button>
           <button className="secondary" onClick={() => setModal(null)}>
             Cancel
           </button>
@@ -538,7 +574,11 @@ const Sidebar = () => {
                 <p>{session?.user.name as string}</p>
                 <span>{session?.user.email as string}</span>
               </div>
-              <SignOutButton />
+              <div className="logoutBtnContainer">
+                <button onClick={logoutModal}>
+                  <FontAwesomeIcon icon={faRightFromBracket} />
+                </button>
+              </div>
             </div>
           ) : (
             <p>There was an error while loading session</p>

@@ -9,7 +9,7 @@ import {
   faProjectDiagram,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Bar } from "@nivo/bar";
+import { ResponsiveBar } from "@nivo/bar";
 import { Pie } from "@nivo/pie";
 import { useEffect } from "react";
 import { Task, TaskPriority, TaskStatus } from "../types/interfaces";
@@ -140,210 +140,215 @@ const App = () => {
         <p>Your Central Hub for Project Success</p>
       </div>
 
-      <div className="row-between">
-        <div className="card">
-          <p>Number of Projects</p>
-          <div className="num">
-            <div className="icon">
-              <FontAwesomeIcon icon={faProjectDiagram} />
-            </div>
-            <p>{projects ? projects.length : 0}</p>
-          </div>
-        </div>
-
-        <div className="card">
-          <p>Number of Tasks</p>
-          <div className="num">
-            <div className="icon">
-              <FontAwesomeIcon icon={faListCheck} />
-            </div>
-            <p>{tasks.length}</p>
-          </div>
-        </div>
-
-        <div className="card">
-          <p>Completed Tasks</p>
-          <div className="num">
-            <div className="icon">
-              <FontAwesomeIcon icon={faCheck} />
-            </div>
-            <p>{completedTasks}</p>
-          </div>
-        </div>
-
-        <div className="card">
-          <p>Tasks Percentage Completed</p>
-          <div className="num">
-            <div className="icon">
-              <FontAwesomeIcon icon={faPercent} />
-            </div>
-            <p>
-              {completedTasks
-                ? ((completedTasks / tasks.length) * 100).toFixed(2)
-                : 100}
-              %
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="row-between full">
-        <div className="row-col">
+      <div className="dashboardContainer">
+        <div className="row-between">
           <div className="card">
-            <p>My Tasks</p>
-            <div className="tasksScroll">
-              {uncompletedTasks.length > 0 ? (
-                uncompletedTasks
-                  .sort(
-                    (a, b) =>
-                      priorityOrder.indexOf(a.priority) -
-                      priorityOrder.indexOf(b.priority)
-                  )
-                  .map((task) => (
-                    <div
-                      className={`uncompletedTask ${task.priority.toLowerCase()}`}
-                      key={`task${task.id}`}
-                    >
-                      <div className="icon">
-                        <FontAwesomeIcon icon={faFlag} />
-                      </div>
-                      <div className="details">
-                        <div className="detailsHeader">
-                          <h2>{task.title}</h2>
-                          <p>{task.project?.name}</p>
-                        </div>
+            <p>Number of Projects</p>
+            <div className="num">
+              <div className="icon">
+                <FontAwesomeIcon icon={faProjectDiagram} />
+              </div>
+              <p>{projects ? projects.length : 0}</p>
+            </div>
+          </div>
 
-                        <div className="taskDetails">
-                          <div className="col">
-                            <p>Status</p>
-                            <span>
-                              {task.taskStatus.replace("_", " ").toLowerCase()}
-                            </span>
-                          </div>
-                          <div className="col">
-                            <p>Priority</p>
-                            <span>
-                              {task.priority.replace("_", " ").toLowerCase()}
-                            </span>
-                          </div>
-                          <div className="col">
-                            <p>Stages Completed</p>
-                            {task.stages.length > 0 ? (
-                              <span>
-                                {
-                                  task.stages.filter(
-                                    (stage) => stage.isCompleted
-                                  ).length
-                                }
-                                /{task.stages.length}
-                              </span>
-                            ) : (
-                              <span>No stages</span>
-                            )}
-                          </div>
-                          <div className="col">
-                            <p>Due Date</p>
-                            <span>
-                              {task.dueTime ? (
-                                new Intl.DateTimeFormat("en-US", {
-                                  day: "numeric",
-                                  month: "long",
-                                  hour: "numeric",
-                                  minute: "numeric",
-                                }).format(new Date(task.dueTime))
-                              ) : (
-                                <span>None</span>
-                              )}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-              ) : (
-                <div className="noTasks">
-                  <FontAwesomeIcon icon={faCheckCircle} />
-                  <p>You have no tasks</p>
-                  <span>
-                    Looks like you're all caught up! No tasks for now—enjoy the
-                    break, you deserve it!
-                  </span>
-                </div>
-              )}
+          <div className="card">
+            <p>Number of Tasks</p>
+            <div className="num">
+              <div className="icon">
+                <FontAwesomeIcon icon={faListCheck} />
+              </div>
+              <p>{tasks.length}</p>
+            </div>
+          </div>
+
+          <div className="card">
+            <p>Completed Tasks</p>
+            <div className="num">
+              <div className="icon">
+                <FontAwesomeIcon icon={faCheck} />
+              </div>
+              <p>{completedTasks}</p>
+            </div>
+          </div>
+
+          <div className="card">
+            <p>Tasks Percentage Completed</p>
+            <div className="num">
+              <div className="icon">
+                <FontAwesomeIcon icon={faPercent} />
+              </div>
+              <p>
+                {completedTasks
+                  ? ((completedTasks / tasks.length) * 100).toFixed(2)
+                  : 100}
+                %
+              </p>
             </div>
           </div>
         </div>
-        <div className="row-col">
-          <div className="card chart">
-            <p>Completed Tasks Chart</p>
-            <div className="chart">
-              <Pie
-                data={pieData}
-                width={180}
-                height={180}
-                innerRadius={0.8}
-                padAngle={2}
-                borderWidth={0}
-                cornerRadius={45}
-                colors={({ id }) => colors[id as keyof typeof colors]}
-                enableArcLabels={false}
-                enableArcLinkLabels={false}
-                animate={true}
-                fit={false}
-                tooltip={({ datum }) => (
-                  <Tooltip value={datum.value} label={datum.label as string} />
+
+        <div className="row-between full">
+          <div className="row-col">
+            <div className="card">
+              <p>My Tasks</p>
+              <div className="tasksScroll">
+                {uncompletedTasks.length > 0 ? (
+                  uncompletedTasks
+                    .sort(
+                      (a, b) =>
+                        priorityOrder.indexOf(a.priority) -
+                        priorityOrder.indexOf(b.priority)
+                    )
+                    .map((task) => (
+                      <div
+                        className={`uncompletedTask ${task.priority.toLowerCase()}`}
+                        key={`task${task.id}`}
+                      >
+                        <div className="icon">
+                          <FontAwesomeIcon icon={faFlag} />
+                        </div>
+                        <div className="details">
+                          <div className="detailsHeader">
+                            <h2>{task.title}</h2>
+                            <p>{task.project?.name}</p>
+                          </div>
+
+                          <div className="taskDetails">
+                            <div className="col">
+                              <p>Status</p>
+                              <span>
+                                {task.taskStatus
+                                  .replace("_", " ")
+                                  .toLowerCase()}
+                              </span>
+                            </div>
+                            <div className="col">
+                              <p>Priority</p>
+                              <span>
+                                {task.priority.replace("_", " ").toLowerCase()}
+                              </span>
+                            </div>
+                            <div className="col">
+                              <p>Stages Completed</p>
+                              {task.stages.length > 0 ? (
+                                <span>
+                                  {
+                                    task.stages.filter(
+                                      (stage) => stage.isCompleted
+                                    ).length
+                                  }
+                                  /{task.stages.length}
+                                </span>
+                              ) : (
+                                <span>No stages</span>
+                              )}
+                            </div>
+                            <div className="col">
+                              <p>Due Date</p>
+                              <span>
+                                {task.dueTime ? (
+                                  new Intl.DateTimeFormat("en-US", {
+                                    day: "numeric",
+                                    month: "long",
+                                    hour: "numeric",
+                                    minute: "numeric",
+                                  }).format(new Date(task.dueTime))
+                                ) : (
+                                  <span>None</span>
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                  <div className="noTasks">
+                    <FontAwesomeIcon icon={faCheckCircle} />
+                    <p>You have no tasks</p>
+                    <span>
+                      Looks like you're all caught up! No tasks for now—enjoy
+                      the break, you deserve it!
+                    </span>
+                  </div>
                 )}
-              />
-              <div className="completedChart">
-                {uncompletedTasksNum > 0 && <p>{completed}</p>}
-                <span>
-                  {uncompletedTasksNum > 0
-                    ? "Tasks completed"
-                    : "No tasks yet!"}
-                </span>
               </div>
             </div>
           </div>
-          <div className="card chart">
-            <p>Graphs and Analysis</p>
-            <div className="chart">
-              <Bar
-                data={barData}
-                width={700}
-                height={200}
-                keys={["completed"]}
-                margin={{ top: 20, right: 0, bottom: 30, left: 0 }}
-                padding={0.6}
-                indexBy="day"
-                enableLabel={false}
-                enableGridY={false}
-                enableTotals={true}
-                borderRadius={10}
-                colors={colors.Completed}
-                axisBottom={{
-                  tickSize: 0,
-                  tickPadding: 10,
-                  tickRotation: 0,
-                  legendPosition: "middle",
-                  legendOffset: 0,
-                  format: (value) => value,
-                }}
-                axisLeft={null}
-                tooltip={({ data }) => (
-                  <Tooltip value={data.completed} label="Completed" />
-                )}
-                minValue={0}
-                theme={{
-                  axis: {
-                    ticks: {
-                      text: {
-                        fontSize: 12,
-                        fill: theme == "light" ? "#141515b3" : "#FFFFFFb3",
+          <div className="row-col">
+            <div className="card chart">
+              <p>Completed Tasks Chart</p>
+              <div className="chartContainer">
+                <Pie
+                  data={pieData}
+                  width={180}
+                  height={180}
+                  innerRadius={0.8}
+                  padAngle={2}
+                  borderWidth={0}
+                  cornerRadius={45}
+                  colors={({ id }) => colors[id as keyof typeof colors]}
+                  enableArcLabels={false}
+                  enableArcLinkLabels={false}
+                  animate={true}
+                  fit={false}
+                  tooltip={({ datum }) => (
+                    <Tooltip
+                      value={datum.value}
+                      label={datum.label as string}
+                    />
+                  )}
+                />
+                <div className="completedChart">
+                  {uncompletedTasksNum > 0 && <p>{completed}</p>}
+                  <span>
+                    {uncompletedTasksNum > 0
+                      ? "Tasks completed"
+                      : "No tasks yet!"}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="card chart">
+              <p>Graphs and Analysis</p>
+              <div className="chartContainer">
+                <ResponsiveBar
+                  data={barData}
+                  keys={["completed"]}
+                  margin={{ top: 20, right: 0, bottom: 30, left: 0 }}
+                  padding={0.6}
+                  indexBy="day"
+                  enableLabel={false}
+                  enableGridY={false}
+                  enableTotals={true}
+                  borderRadius={10}
+                  colors={colors.Completed}
+                  axisBottom={{
+                    tickSize: 0,
+                    tickPadding: 10,
+                    tickRotation: 0,
+                    legendPosition: "middle",
+                    legendOffset: 0,
+                    format: (value) => value,
+                  }}
+                  axisLeft={null}
+                  tooltip={({ data }) => (
+                    <Tooltip value={data.completed} label="Completed" />
+                  )}
+                  minValue={0}
+                  theme={{
+                    axis: {
+                      ticks: {
+                        text: {
+                          fontSize: 12,
+                          fill: theme == "light" ? "#141515b3" : "#FFFFFFb3",
+                        },
                       },
                     },
-                  },
-                }}
-              />
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>

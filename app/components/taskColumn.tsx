@@ -14,7 +14,7 @@ interface TaskColumnProps {
   status: TaskStatus;
   tasks: Task[];
   isAdmin: boolean;
-  showProject?: boolean
+  showProject?: boolean;
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   moveTask: (task: Task, status: TaskStatus) => void;
 }
@@ -25,7 +25,7 @@ export const TaskColumn = ({
   isAdmin,
   moveTask,
   setTasks,
-  showProject = false
+  showProject = false,
 }: TaskColumnProps) => {
   const divRef = useRef<HTMLDivElement>(null);
   const [, drop] = useDrop(
@@ -37,13 +37,18 @@ export const TaskColumn = ({
   );
   drop(divRef);
 
-
   return (
     <div className="cardCol" ref={divRef}>
-      <div className="colHeader">
+      <label className="colHeader" htmlFor={`status${status}Checkbox`}>
         <h1>{status.replace("_", " ").toLowerCase()}</h1>
         <span className="count">{tasks.length}</span>
-      </div>
+      </label>
+      <input
+        type="checkbox"
+        id={`status${status}Checkbox`}
+        className="statusCheckbox"
+      />
+
       <div className="cardsContainer">
         {tasks.map((task) => (
           <TaskCard

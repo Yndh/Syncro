@@ -275,7 +275,7 @@ input[type="checkbox"] {
         opacity: 1;
       }
 
-      ol > li {
+      ol>li {
         width: auto;
 
         span {
@@ -297,12 +297,12 @@ input[type="checkbox"] {
         display: flex !important;
       }
 
-      form {
+      .logoutBtnContainer {
         display: flex !important;
       }
     }
 
-    & ~ main {
+    &~main {
       margin-left: 300px;
 
       .projectPage .projectsList {
@@ -461,7 +461,7 @@ input[type="checkbox"] {
       }
     }
 
-    form {
+    .logoutBtnContainer {
       display: none;
       align-items: center;
       justify-content: center;
@@ -631,6 +631,14 @@ main {
     }
   }
 
+  .dashboardContainer {
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+  }
+
   .row-between {
     position: relative;
     display: flex;
@@ -704,10 +712,12 @@ main {
         }
       }
 
-      .chart {
+      .chartContainer {
         position: relative;
         display: flex;
         height: 100%;
+        width: 100%;
+        max-height: 250px;
         align-items: center;
         justify-content: center;
         color: var(--secondary-font-color);
@@ -907,6 +917,10 @@ main {
         }
       }
 
+      .statusCheckbox {
+        display: none;
+      }
+
       .cardsContainer {
         position: relative;
         display: flex;
@@ -1088,8 +1102,8 @@ main {
   }
 
   .absoluteButton {
-    position: absolute;
-    bottom: 15px;
+    position: fixed;
+    bottom: 120px;
     right: 15px;
     display: flex;
     align-items: center;
@@ -1097,16 +1111,42 @@ main {
 
     border-radius: 50%;
     aspect-ratio: 1/1;
-    scale: 1.3;
+    width: 55px;
+    height: 55px;
+    background: var(--card-color);
+    border: 1px solid var(--border-color);
+    z-index: 3;
 
     svg {
-      font-size: 22px;
+      font-size: 24px;
     }
   }
 
   .projectPage {
     display: flex;
     height: 100%;
+
+    input#projectMenuCheckbox {
+      display: none;
+    }
+
+    label.projectMenuCheckboxLabel {
+      position: fixed;
+      right: 0;
+      top: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: var(--card-color);
+      padding: 10px;
+      margin: 10px;
+      border: 1px solid var(--border-color);
+      aspect-ratio: 1/1;
+      border-radius: 50%;
+      z-index: 99;
+      width: 40px;
+    }
+
 
     .projectsList {
       display: flex;
@@ -1229,7 +1269,7 @@ main {
           input {
             display: none;
 
-            &:checked ~ label {
+            &:checked~label {
               background: var(--card-color);
               color: var(--primary-font-color);
             }
@@ -1720,7 +1760,7 @@ main {
           padding: 2px 7px;
           font-size: 16px;
 
-          input[type="checkbox"]:checked ~ label {
+          input[type="checkbox"]:checked~label {
             text-decoration: line-through;
           }
         }
@@ -1809,6 +1849,12 @@ main {
 
           input[type="datetime-local"] {
             width: 200px;
+          }
+
+          button {
+            width: 200px;
+            background: transparent;
+            border: 1px solid var(--border-color);
           }
 
           .stagesContainer {
@@ -1928,7 +1974,8 @@ main {
             }
           }
 
-          button.projectLeave {
+          button.projectLeave,
+          button.signOut {
             width: 300px;
             font-weight: 600;
             background: transparent;
@@ -2095,7 +2142,7 @@ main {
     display: none;
   }
 
-  input:checked ~ label img {
+  input:checked~label img {
     border-color: var(--accent-color);
   }
 }
@@ -2264,6 +2311,7 @@ body::-webkit-scrollbar {
     opacity: 0.15;
   }
 }
+
 // Mobile
 @media (max-width: 767px) {
   .sidebar {
@@ -2282,6 +2330,39 @@ body::-webkit-scrollbar {
     border: 1px solid var(--border-color);
     border-radius: 25px;
     margin: 20px 20px;
+
+    &:hover {
+      position: fixed;
+      width: calc(100% - 40px);
+      height: fit-content;
+      padding: 10px !important;
+
+      nav {
+        span {
+          display: none !important;
+        }
+
+        p {
+          display: none;
+        }
+
+        svg:nth-child(3) {
+          display: none;
+        }
+      }
+
+      .userContainer {
+        display: none;
+      }
+
+      &~main {
+        margin-left: 0 !important;
+
+        .projectPage .projectsList {
+          display: flex;
+        }
+      }
+    }
 
     &::before {
       position: absolute;
@@ -2329,13 +2410,35 @@ body::-webkit-scrollbar {
   }
 
   main {
-    overflow-y: scroll;
+    padding-bottom: 110px;
+    height: 100dvh;
+
+    .header {
+      p {
+        max-width: 100%;
+      }
+    }
+
+    .dashboardContainer {
+      overflow-y: scroll;
+
+      .row-between:first-child {
+
+        .card:nth-child(1),
+        .card:nth-child(2),
+        .card:nth-child(3) {
+          display: none;
+        }
+      }
+    }
 
     .row-between {
       flex-direction: column;
     }
 
     .chart {
+      max-height: 300px;
+
       svg {
         width: 100%;
 
@@ -2348,11 +2451,33 @@ body::-webkit-scrollbar {
     .projectPage {
       flex-direction: column;
 
+      label.projectMenuCheckboxLabel {
+        display: flex;
+        color: var(--primary-font-color);
+      }
+
+      input#projectMenuCheckbox {
+        &:checked~.projectsList {
+          right: 0;
+        }
+
+      }
+
       .projectsList {
-        padding: 10px;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100%;
+        background: var(--background-color);
+        padding: 80px 20px;
+        z-index: 90;
+        transition: .3s;
       }
 
       .projectContainer {
+        padding-left: 0;
+
         .header {
           p {
             max-width: 100%;
@@ -2372,26 +2497,44 @@ body::-webkit-scrollbar {
         }
 
         .projectNav {
+          display: flex;
           width: 100%;
 
-          label {
-            width: 60px !important;
+          .navElement {
+            width: 100%;
 
-            span {
-              display: none;
+            label {
+              width: 100%;
+              flex-grow: 1;
+
+              span {
+                display: none;
+              }
             }
           }
+
         }
       }
     }
 
     .todoContainer {
+
       grid-template-columns: repeat(1, 1fr);
       height: 100%;
       overflow-y: scroll;
 
       .cardCol {
-        height: 400px;
+        height: fit-content;
+        max-height: 400px;
+
+        .cardsContainer {
+          display: none;
+        }
+
+        .statusCheckbox:checked~.cardsContainer {
+          display: flex;
+          height: 100%;
+        }
       }
     }
 
@@ -2409,8 +2552,7 @@ body::-webkit-scrollbar {
 
       .content {
         form .formRow {
-          span {
-          }
+          span {}
 
           input:not([type="checkbox"]),
           textarea {
@@ -2431,5 +2573,4 @@ body::-webkit-scrollbar {
 }
 
 // Tablets
-@media (min-width: 768px) and (max-width: 1023px) {
-}
+@media (min-width: 768px) and (max-width: 1023px) {}
