@@ -1,8 +1,8 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
 import NextAuth, { DefaultSession } from "next-auth";
 import github from "next-auth/providers/github";
 import { prisma } from "./lib/prisma";
+import GitHub from "next-auth/providers/github";
 
 declare module "next-auth" {
   interface Session {
@@ -20,7 +20,12 @@ declare module "next-auth" {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  providers: [github],
+  providers: [
+    GitHub({
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    }),
+  ],
   debug: true,
   callbacks: {
     jwt: async ({ token, user, account, trigger, session }) => {

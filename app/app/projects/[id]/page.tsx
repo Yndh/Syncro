@@ -569,7 +569,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
               />
               <label htmlFor="tasks">
                 <FontAwesomeIcon icon={faListCheck} />
-                Tasks
+                <span>Tasks</span>
               </label>
             </div>
             <div className="navElement">
@@ -582,7 +582,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
               />
               <label htmlFor="notes">
                 <FontAwesomeIcon icon={faNoteSticky} />
-                Notes
+                <span>Notes</span>
               </label>
             </div>
             <div className="navElement">
@@ -595,7 +595,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
               />
               <label htmlFor="members">
                 <FontAwesomeIcon icon={faUsers} />
-                Members
+                <span>Members</span>
               </label>
             </div>
             <div className="navElement">
@@ -608,7 +608,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
               />
               <label htmlFor="settings">
                 <FontAwesomeIcon icon={faCog} />
-                Settings
+                <span>Settings</span>
               </label>
             </div>
           </div>
