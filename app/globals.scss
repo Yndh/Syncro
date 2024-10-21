@@ -275,7 +275,7 @@ input[type="checkbox"] {
         opacity: 1;
       }
 
-      ol>li {
+      ol > li {
         width: auto;
 
         span {
@@ -302,7 +302,7 @@ input[type="checkbox"] {
       }
     }
 
-    &~main {
+    & ~ main {
       margin-left: 300px;
 
       .projectPage .projectsList {
@@ -966,7 +966,8 @@ main {
             }
           }
 
-          .gripContainer {
+          .gripContainer,
+          .taskOptionsContainer {
             position: absolute;
             right: 0;
             top: 0;
@@ -979,6 +980,12 @@ main {
             &:hover {
               opacity: 0.7;
             }
+          }
+
+          .taskOptionsContainer {
+            display: none;
+            z-index: 99;
+            pointer-events: all;
           }
 
           .content {
@@ -1147,7 +1154,6 @@ main {
       width: 40px;
     }
 
-
     .projectsList {
       display: flex;
       flex-direction: column;
@@ -1269,7 +1275,7 @@ main {
           input {
             display: none;
 
-            &:checked~label {
+            &:checked ~ label {
               background: var(--card-color);
               color: var(--primary-font-color);
             }
@@ -1320,7 +1326,8 @@ main {
           }
 
           .notess {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             width: 100%;
             height: 100%;
@@ -1328,13 +1335,11 @@ main {
             scrollbar-width: none;
             -ms-overflow-style: none;
 
-            .column {
-              width: 25%;
-            }
-
             .noteCard {
               display: block;
               width: 100%;
+              max-width: 500px;
+              height: fit-content;
               margin-bottom: 20px;
               border-radius: 10px;
               padding: 10px;
@@ -1760,7 +1765,7 @@ main {
           padding: 2px 7px;
           font-size: 16px;
 
-          input[type="checkbox"]:checked~label {
+          input[type="checkbox"]:checked ~ label {
             text-decoration: line-through;
           }
         }
@@ -2142,7 +2147,7 @@ main {
     display: none;
   }
 
-  input:checked~label img {
+  input:checked ~ label img {
     border-color: var(--accent-color);
   }
 }
@@ -2355,7 +2360,7 @@ body::-webkit-scrollbar {
         display: none;
       }
 
-      &~main {
+      & ~ main {
         margin-left: 0 !important;
 
         .projectPage .projectsList {
@@ -2423,7 +2428,6 @@ body::-webkit-scrollbar {
       overflow-y: scroll;
 
       .row-between:first-child {
-
         .card:nth-child(1),
         .card:nth-child(2),
         .card:nth-child(3) {
@@ -2457,10 +2461,9 @@ body::-webkit-scrollbar {
       }
 
       input#projectMenuCheckbox {
-        &:checked~.projectsList {
+        &:checked ~ .projectsList {
           right: 0;
         }
-
       }
 
       .projectsList {
@@ -2472,7 +2475,7 @@ body::-webkit-scrollbar {
         background: var(--background-color);
         padding: 80px 20px;
         z-index: 90;
-        transition: .3s;
+        transition: 0.3s;
       }
 
       .projectContainer {
@@ -2512,13 +2515,11 @@ body::-webkit-scrollbar {
               }
             }
           }
-
         }
       }
     }
 
     .todoContainer {
-
       grid-template-columns: repeat(1, 1fr);
       height: 100%;
       overflow-y: scroll;
@@ -2527,11 +2528,24 @@ body::-webkit-scrollbar {
         height: fit-content;
         max-height: 400px;
 
-        .cardsContainer {
-          display: none;
+        .colHeader {
+          cursor: pointer;
         }
 
-        .statusCheckbox:checked~.cardsContainer {
+        .cardsContainer {
+          display: none;
+
+          .taskCard {
+            .gripContainer {
+              display: none;
+            }
+            .taskOptionsContainer {
+              display: block;
+            }
+          }
+        }
+
+        .statusCheckbox:checked ~ .cardsContainer {
           display: flex;
           height: 100%;
         }
@@ -2540,8 +2554,19 @@ body::-webkit-scrollbar {
 
     .membersContainer {
       .membersContent {
-        flex-direction: column-reverse;
-        overflow-y: scroll;
+        .membersRolesDescription {
+          display: none !important;
+        }
+      }
+
+      ul.membersUl li {
+        justify-content: center;
+        word-wrap: break-word;
+        flex-wrap: wrap;
+
+        .actions {
+          justify-content: center !important;
+        }
       }
     }
   }
@@ -2552,7 +2577,8 @@ body::-webkit-scrollbar {
 
       .content {
         form .formRow {
-          span {}
+          span {
+          }
 
           input:not([type="checkbox"]),
           textarea {
@@ -2573,4 +2599,5 @@ body::-webkit-scrollbar {
 }
 
 // Tablets
-@media (min-width: 768px) and (max-width: 1023px) {}
+@media (min-width: 768px) and (max-width: 1023px) {
+}

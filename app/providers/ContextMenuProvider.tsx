@@ -38,15 +38,10 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     useState<ContextMenuState | null>(null);
 
   const setContextMenu = (newContextMenuState: ContextMenuState | null) => {
-    setContextMenuState(newContextMenuState);
-  };
+    console.log("newContextMenuState");
+    console.log(newContextMenuState);
 
-  const contextMenuValue: ContextMenuState = {
-    x: contextMenuState?.x || 0,
-    y: contextMenuState?.y || 0,
-    onClose: contextMenuState?.onClose || (() => {}),
-    content: contextMenuState?.content || null,
-    setContextMenu,
+    setContextMenuState(newContextMenuState);
   };
 
   useEffect(() => {
@@ -60,6 +55,14 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
       document.removeEventListener("contextmenu", disableContextMenu);
     };
   }, []);
+
+  const contextMenuValue: ContextMenuState = {
+    x: contextMenuState?.x || 0,
+    y: contextMenuState?.y || 0,
+    onClose: contextMenuState?.onClose || (() => {}),
+    content: contextMenuState?.content ?? null,
+    setContextMenu,
+  };
 
   return (
     <ContextMenuContext.Provider value={contextMenuValue}>

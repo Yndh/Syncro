@@ -129,58 +129,15 @@ export const Notes = ({ isAdmin, projectId, project }: NotesProps) => {
         <span className="count">{notes.length}</span>
       </div>
       <div className="notess">
-        <div className="column">
-          {notes
-            .filter((_, index) => index % 4 === 0)
-            .map((note) => (
-              <NoteCard
-                note={note}
-                notes={notes}
-                setNotes={setNotes}
-                key={note.id}
-                isAdmin={isAdmin}
-              />
-            ))}
-        </div>
-        <div className="column">
-          {notes
-            .filter((_, index) => index % 4 === 1)
-            .map((note) => (
-              <NoteCard
-                note={note}
-                notes={notes}
-                setNotes={setNotes}
-                key={note.id}
-                isAdmin={isAdmin}
-              />
-            ))}
-        </div>
-        <div className="column">
-          {notes
-            .filter((_, index) => index % 4 === 2)
-            .map((note) => (
-              <NoteCard
-                note={note}
-                notes={notes}
-                setNotes={setNotes}
-                key={note.id}
-                isAdmin={isAdmin}
-              />
-            ))}
-        </div>
-        <div className="column">
-          {notes
-            .filter((_, index) => index % 4 === 3)
-            .map((note) => (
-              <NoteCard
-                note={note}
-                notes={notes}
-                setNotes={setNotes}
-                key={note.id}
-                isAdmin={isAdmin}
-              />
-            ))}
-        </div>
+        {notes.map((note) => (
+          <NoteCard
+            note={note}
+            notes={notes}
+            setNotes={setNotes}
+            key={note.id}
+            isAdmin={isAdmin}
+          />
+        ))}
       </div>
       <button className="absoluteButton" onClick={handleModal}>
         <FontAwesomeIcon icon={faAdd} />

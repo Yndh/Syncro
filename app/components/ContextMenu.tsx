@@ -31,6 +31,8 @@ const ContextMenu = () => {
     };
   }, []);
 
+  console.log(`x = ${x}, y = ${y}`);
+
   return (
     <div
       className="contextMenu"

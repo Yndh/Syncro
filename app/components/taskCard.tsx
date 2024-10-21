@@ -5,7 +5,7 @@ import { DragSourceMonitor, useDrag } from "react-dnd";
 import { Task, TaskStage, TaskStatus, User } from "../types/interfaces";
 import { useContextMenu } from "../providers/ContextMenuProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGripVertical } from "@fortawesome/free-solid-svg-icons";
+import { faEllipsis, faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { useModal } from "../providers/ModalProvider";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -61,6 +61,9 @@ export const TaskCard = ({
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
     e.preventDefault();
+    e.stopPropagation();
+
+    console.log("click");
 
     setContextMenu({
       x: e.clientX,
@@ -241,6 +244,9 @@ export const TaskCard = ({
           <FontAwesomeIcon icon={faGripVertical} />
         </div>
       )}
+      <div className="taskOptionsContainer" onClick={handleContextMenu}>
+        <FontAwesomeIcon icon={faEllipsis} />
+      </div>
       <div className="content">
         <div className="contentHeader">
           {showProject && (
