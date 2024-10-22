@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Familjen_Grotesk, Inter } from "next/font/google";
 import "./globals.scss";
+import { ThemeProvider } from "./providers/ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 const familjenGrotest = Familjen_Grotesk({ subsets: ["latin"] });
@@ -17,7 +18,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={familjenGrotest.className}>{children}</body>
+      <body className={familjenGrotest.className}>
+        <ThemeProvider>
+          {children}
+
+          <div className="blurCircle"></div>
+          <div className="blurCircle"></div>
+          <div className="blurCircle"></div>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

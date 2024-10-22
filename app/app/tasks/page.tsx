@@ -23,7 +23,6 @@ const UserTasks = () => {
                 }
                   if (data.tasks) {
                     setTasks(data.tasks);
-                    console.log(data.tasks)
                   }
                 
               });
@@ -34,9 +33,6 @@ const UserTasks = () => {
     
         fetchData();
       }, []);
-
-      console.log(`Tasks =`);
-      console.log(tasks);
       
     
     return (

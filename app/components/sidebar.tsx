@@ -75,14 +75,14 @@ const Sidebar = () => {
   const projectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null);
   const inviteInputRef = useRef<HTMLInputElement>(null);
   const usernameInputRef = useRef<HTMLInputElement>(null);
+  const deleteUsernameInput = useRef<HTMLInputElement>(null);
+  const deleteVerifyInput = useRef<HTMLInputElement>(null);
   const { projects, fetchProjects } = useProjects();
   const { setModal } = useModal();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, update } = useSession();
-
-  console.log(projects);
 
   useEffect(() => {
     const interval = setInterval(() => update(), 1000 * 60 * 60);
@@ -370,6 +370,17 @@ const Sidebar = () => {
               Logout
             </button>
           </div>
+
+          <div className="formRow">
+            <label>
+              <p>Delete</p>
+              <span>Permanently delete your account</span>
+            </label>
+
+            <button onClick={deleteModal} className="signOut">
+              Delete
+            </button>
+          </div>
         </form>
       ),
       bottom: (
@@ -451,6 +462,100 @@ const Sidebar = () => {
     }
   };
 
+  const deleteModal = () => {
+    setModal({
+      title: "Delete",
+      content: (
+        <>
+          <div className="header">
+            <h1> Are you sure you want to delete your account?</h1>
+            <p>
+              This action is permanent and cannot be undone. All your data will
+              be deleted, and you will no longer have access to your account.
+            </p>
+          </div>
+
+          <div className="contentCol">
+            <label htmlFor="userNameInputDelete">
+              Enter username <b>{session?.user.name}</b> to continue:
+            </label>
+            <input
+              type="text"
+              id="userNameInputDelete"
+              autoComplete="off"
+              ref={deleteUsernameInput}
+            />
+
+            <label htmlFor="verifyInputDelete">
+              To verify, type <b>delete my account</b> below:
+            </label>
+            <input
+              type="text"
+              autoComplete="off"
+              id="verifyInputDelete"
+              ref={deleteVerifyInput}
+            />
+          </div>
+        </>
+      ),
+      bottom: (
+        <>
+          <button onClick={deleteAccount}>Delete</button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
+        </>
+      ),
+      setModal,
+    });
+  };
+
+  const deleteAccount = async () => {
+    const nameValue = (deleteUsernameInput.current?.value as string).trim();
+    const userName = (session?.user.name as string).trim();
+    console.log(`${userName}, ${nameValue}`);
+    console.log(userName == nameValue);
+
+    if (nameValue !== userName) {
+      toast.error("Oops! Looks like you forgot your own name. Try again!");
+      return;
+    }
+
+    const verifyValue = (deleteVerifyInput.current?.value as string).trim();
+
+    if (verifyValue.toLowerCase() !== "delete my account") {
+      toast.error(
+        "Whoops! You didn't say the magic words. Hint: it's 'delete my account'."
+      );
+      return;
+    }
+
+    try {
+      await fetch("api/user", {
+        method: "DELETE",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            toast.error(
+              "Oh no! Something went wrong. Your account is still safe and sound!"
+            );
+          }
+          if (data.success) {
+            toast.success(
+              "Goodbye! Your account is officially on an endless vacation"
+            );
+            setModal(null);
+            signOut();
+          }
+        });
+    } catch (err) {
+      toast.error(
+        "Uh-oh! It looks like our digital hamster ran off with your request! Please try again later"
+      );
+    }
+  };
+
   const handleSettingsModal = () => {
     setModal({
       title: "Settings",
@@ -486,7 +591,6 @@ const Sidebar = () => {
   };
 
   const updateTheme = (option: any) => {
-    console.log(option);
     setTheme(option.value);
   };
 

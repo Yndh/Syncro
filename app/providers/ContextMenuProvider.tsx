@@ -38,9 +38,6 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
     useState<ContextMenuState | null>(null);
 
   const setContextMenu = (newContextMenuState: ContextMenuState | null) => {
-    console.log("newContextMenuState");
-    console.log(newContextMenuState);
-
     setContextMenuState(newContextMenuState);
   };
 

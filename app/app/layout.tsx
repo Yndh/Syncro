@@ -8,9 +8,9 @@ import { Modal } from "../components/Modal";
 import { SessionProvider } from "next-auth/react";
 import { ProjectsProvider } from "../providers/ProjectsProvider";
 import { TasksProvider } from "../providers/UserTasksProvider";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ThemeProvider } from "../providers/ThemeProvider";
+import { ToastContainerComponent } from "../components/ToastContainerComponent";
 
 export default async function Home({
   children,
@@ -41,8 +41,8 @@ export default async function Home({
               </ModalProvider>
             </TasksProvider>
           </ProjectsProvider>
+          <ToastContainerComponent />
         </ThemeProvider>
-        <ToastContainer />
       </SessionProvider>
     </div>
   );

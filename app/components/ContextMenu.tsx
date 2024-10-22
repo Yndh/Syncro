@@ -14,12 +14,19 @@ const ContextMenu = () => {
   };
 
   const handleClickOutside = (e: MouseEvent) => {
-    if (
-      !(
-        contextMenuRef.current &&
-        contextMenuRef.current.contains(e.target as Node)
-      )
-    ) {
+    const taskOptionsContainer = document.querySelector(
+      ".taskOptionsContainer"
+    );
+
+    const isClickInsideContextMenu =
+      contextMenuRef.current &&
+      contextMenuRef.current.contains(e.target as Node);
+
+    const isClickOnTaskOptionsContainer =
+      taskOptionsContainer === e.target ||
+      (taskOptionsContainer && taskOptionsContainer.contains(e.target as Node));
+
+    if (!(isClickInsideContextMenu || isClickOnTaskOptionsContainer)) {
       setContextMenu(null);
     }
   };
@@ -30,8 +37,6 @@ const ContextMenu = () => {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
-
-  console.log(`x = ${x}, y = ${y}`);
 
   return (
     <div

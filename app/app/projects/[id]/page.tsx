@@ -553,9 +553,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
         </div>
         <div className="projectContainer">
           <div className="header">
-            <h2>
-              {project?.name} [id{params.id}]
-            </h2>
+            <h2>{project?.name}</h2>
             <p>{project?.description}</p>
             <div className="percentage">
               <progress value={completedTasksPercentage} max={100}>

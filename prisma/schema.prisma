@@ -81,7 +81,7 @@ model ProjectMembership {
   id        Int         @id @default(autoincrement())
   project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId Int
-  user      User        @relation(fields: [userId], references: [id])
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   role      ProjectRole @default(MEMBER)
   createdAt DateTime    @default(now())
@@ -96,7 +96,7 @@ model ProjectInvitation {
   project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId   Int
   expires     DateTime?
-  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdById String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -133,7 +133,7 @@ model Notes {
   description String?
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId   Int
-  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

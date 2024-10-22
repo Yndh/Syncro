@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import EditTaskContextMenu from "./EditTaskContextMenu";
+import Select from "./Select";
 
 interface TaskCardProps {
   task: Task;

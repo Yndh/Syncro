@@ -275,7 +275,7 @@ input[type="checkbox"] {
         opacity: 1;
       }
 
-      ol > li {
+      ol>li {
         width: auto;
 
         span {
@@ -302,7 +302,7 @@ input[type="checkbox"] {
       }
     }
 
-    & ~ main {
+    &~main {
       margin-left: 300px;
 
       .projectPage .projectsList {
@@ -762,7 +762,7 @@ main {
           flex-direction: column;
           gap: 2px;
           width: 100%;
-          height: 30%;
+          height: fit-content;
           text-align: center;
 
           svg {
@@ -1275,7 +1275,7 @@ main {
           input {
             display: none;
 
-            &:checked ~ label {
+            &:checked~label {
               background: var(--card-color);
               color: var(--primary-font-color);
             }
@@ -1747,6 +1747,21 @@ main {
         }
       }
 
+      .contentCol {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin-top: 15px;
+
+        input {
+          padding: 5px 10px;
+
+          &:not(:last-child) {
+            margin-bottom: 10px;
+          }
+        }
+      }
+
       .stages {
         display: flex;
         flex-direction: column;
@@ -1765,7 +1780,7 @@ main {
           padding: 2px 7px;
           font-size: 16px;
 
-          input[type="checkbox"]:checked ~ label {
+          input[type="checkbox"]:checked~label {
             text-decoration: line-through;
           }
         }
@@ -2023,7 +2038,7 @@ main {
         button {
           background: transparent;
           border: 1px solid var(--border-color);
-          font-weight: 600px;
+          font-weight: 700px;
         }
       }
     }
@@ -2147,7 +2162,7 @@ main {
     display: none;
   }
 
-  input:checked ~ label img {
+  input:checked~label img {
     border-color: var(--accent-color);
   }
 }
@@ -2360,7 +2375,7 @@ body::-webkit-scrollbar {
         display: none;
       }
 
-      & ~ main {
+      &~main {
         margin-left: 0 !important;
 
         .projectPage .projectsList {
@@ -2428,6 +2443,7 @@ body::-webkit-scrollbar {
       overflow-y: scroll;
 
       .row-between:first-child {
+
         .card:nth-child(1),
         .card:nth-child(2),
         .card:nth-child(3) {
@@ -2461,7 +2477,7 @@ body::-webkit-scrollbar {
       }
 
       input#projectMenuCheckbox {
-        &:checked ~ .projectsList {
+        &:checked~.projectsList {
           right: 0;
         }
       }
@@ -2539,13 +2555,14 @@ body::-webkit-scrollbar {
             .gripContainer {
               display: none;
             }
+
             .taskOptionsContainer {
               display: block;
             }
           }
         }
 
-        .statusCheckbox:checked ~ .cardsContainer {
+        .statusCheckbox:checked~.cardsContainer {
           display: flex;
           height: 100%;
         }
@@ -2577,12 +2594,15 @@ body::-webkit-scrollbar {
 
       .content {
         form .formRow {
-          span {
-          }
+          span {}
 
           input:not([type="checkbox"]),
           textarea {
             width: 150px;
+          }
+
+          button {
+            width: 200px !important;
           }
 
           .inviteDetails {
@@ -2596,8 +2616,15 @@ body::-webkit-scrollbar {
       }
     }
   }
+
+  .contextMenu {
+    transform: translateX(-100px);
+
+    ol.contextMenuList li ol {
+      display: flex;
+    }
+  }
 }
 
 // Tablets
-@media (min-width: 768px) and (max-width: 1023px) {
-}
+@media (min-width: 768px) and (max-width: 1023px) {}

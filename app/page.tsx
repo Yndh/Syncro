@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default async function Home() {
   return (
-    <div className="dashboard">
+    <div className="landing">
       <h1>app 👍</h1>
       <Link href={"/app"}>Go to app</Link>
     </div>
