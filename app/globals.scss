@@ -275,7 +275,7 @@ input[type="checkbox"] {
         opacity: 1;
       }
 
-      ol>li {
+      ol > li {
         width: auto;
 
         span {
@@ -302,7 +302,7 @@ input[type="checkbox"] {
       }
     }
 
-    &~main {
+    & ~ main {
       margin-left: 300px;
 
       .projectPage .projectsList {
@@ -662,7 +662,7 @@ main {
       .card {
         flex: 1 1 auto;
         max-height: 100%;
-        overflow-y: auto;
+        height: fit-content;
       }
     }
 
@@ -1275,7 +1275,7 @@ main {
           input {
             display: none;
 
-            &:checked~label {
+            &:checked ~ label {
               background: var(--card-color);
               color: var(--primary-font-color);
             }
@@ -1780,7 +1780,7 @@ main {
           padding: 2px 7px;
           font-size: 16px;
 
-          input[type="checkbox"]:checked~label {
+          input[type="checkbox"]:checked ~ label {
             text-decoration: line-through;
           }
         }
@@ -2162,7 +2162,7 @@ main {
     display: none;
   }
 
-  input:checked~label img {
+  input:checked ~ label img {
     border-color: var(--accent-color);
   }
 }
@@ -2306,6 +2306,88 @@ main {
   }
 }
 
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 150px;
+  color: var(--primary-font-color);
+
+  .navbar {
+    position: fixed;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    width: 1200px;
+    padding: 20px 30px;
+    margin: 20px;
+    background: var(--card-color);
+    border: 1px solid var(--border-color);
+    border-radius: 25px;
+    color: var(--primary-font-color);
+
+    .logo {
+      display: flex;
+      gap: 7px;
+    }
+
+    ul {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      list-style-type: none;
+      width: fit-content;
+      gap: 10px;
+
+      li {
+        padding: 10px 15px;
+        font-size: 18px;
+        color: var(--secondary-font-color);
+      }
+    }
+
+    button.login {
+      background: transparent;
+      padding: 10px 25px;
+      border-radius: 10px;
+      font-size: 16px;
+      border: 1px solid var(--border-color);
+    }
+  }
+
+  .hero {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+    padding: 50px 0;
+    height: 90dvh;
+    width: 100%;
+
+    h1 {
+      font-size: 68px;
+      width: 60%;
+      text-align: center;
+    }
+
+    p {
+      width: 800px;
+      text-align: center;
+      font-size: 25px;
+      color: var(--secondary-font-color);
+    }
+
+    button {
+      font-size: 18px;
+      padding: 15px 30px;
+      font-weight: 600;
+      border-radius: 50px;
+      background: var(--accent-color);
+    }
+  }
+}
+
 ::-webkit-scrollbar {
   display: none;
   width: 0px;
@@ -2375,7 +2457,7 @@ body::-webkit-scrollbar {
         display: none;
       }
 
-      &~main {
+      & ~ main {
         margin-left: 0 !important;
 
         .projectPage .projectsList {
@@ -2442,18 +2524,43 @@ body::-webkit-scrollbar {
     .dashboardContainer {
       overflow-y: scroll;
 
-      .row-between:first-child {
+      .row-between {
+        overflow-x: scroll;
+        overflow-y: hidden;
+        height: 100%;
+        width: 100%;
 
-        .card:nth-child(1),
-        .card:nth-child(2),
-        .card:nth-child(3) {
-          display: none;
+        &:not(.full) {
+          height: 150px;
+
+          .card {
+            width: fit-content;
+            min-width: 200px;
+            max-height: unset;
+            height: 100%;
+          }
         }
       }
     }
 
-    .row-between {
+    .row-between.full {
       flex-direction: column;
+      overflow-y: scroll;
+
+      .card.chart:last-child {
+        display: none;
+      }
+    }
+
+    .card {
+      .tasksScroll .uncompletedTask {
+        .details {
+          .taskDetails {
+            flex-wrap: wrap;
+            gap: 10px;
+          }
+        }
+      }
     }
 
     .chart {
@@ -2477,7 +2584,7 @@ body::-webkit-scrollbar {
       }
 
       input#projectMenuCheckbox {
-        &:checked~.projectsList {
+        &:checked ~ .projectsList {
           right: 0;
         }
       }
@@ -2562,7 +2669,7 @@ body::-webkit-scrollbar {
           }
         }
 
-        .statusCheckbox:checked~.cardsContainer {
+        .statusCheckbox:checked ~ .cardsContainer {
           display: flex;
           height: 100%;
         }
@@ -2594,7 +2701,8 @@ body::-webkit-scrollbar {
 
       .content {
         form .formRow {
-          span {}
+          span {
+          }
 
           input:not([type="checkbox"]),
           textarea {
@@ -2627,4 +2735,5 @@ body::-webkit-scrollbar {
 }
 
 // Tablets
-@media (min-width: 768px) and (max-width: 1023px) {}
+@media (min-width: 768px) and (max-width: 1023px) {
+}

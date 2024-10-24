@@ -1,13 +1,47 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
-import Sidebar from "./components/sidebar";
+import Image from "next/image";
 import Link from "next/link";
 
 export default async function Home() {
   return (
-    <div className="landing">
-      <h1>app 👍</h1>
-      <Link href={"/app"}>Go to app</Link>
+    <div className="landing" id="home">
+      <div className="navbar">
+        <div className="logo">
+          <Image src="/logo.svg" alt="Logo" width={35} height={35} />
+          <h1>Syncro</h1>
+        </div>
+
+        <ul>
+          <li>
+            <Link href={"#home"}>Home</Link>
+          </li>
+          <li>
+            <Link href={"#home"}>Home</Link>
+          </li>
+          <li>
+            <Link href={"#home"}>Home</Link>
+          </li>
+        </ul>
+
+        <button className="login">
+          <Link href="/signIn">Sign in</Link>
+        </button>
+      </div>
+
+      <div className="hero">
+        <h1>
+          Tame the Chaos, Conquer the Deadlines, and Actually Enjoy Project
+          Management
+        </h1>
+        <p>
+          Managing projects shouldn't feel like a high-stakes juggling act with
+          flaming swords. With our tool, you'll turn chaos into clarity, keep
+          your team on the same page, and still have time for a coffee that's
+          actually hot
+        </p>
+        <button>
+          <Link href={"/app"}>Start Organizing the Fun!</Link>
+        </button>
+      </div>
     </div>
   );
 }
