@@ -27,24 +27,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   debug: true,
-  callbacks: {
-    jwt: async ({ token, user, account, trigger, session }) => {
-      if (trigger == "update" && session?.name) {
-        token.name = session.name;
-      }
-      if (account) token.provider = account.provider;
-      if (user) token.id = user.id;
-      return token;
-    },
-    session: async ({ session, token }) => {
-      session.user.id = token.id as string;
-      session.user.provider = token.provider as string;
-
-      return session;
-    },
-  },
+  trustHost: true,
   session: {
-    strategy: "jwt",
+    strategy: "database",
     maxAge: 31 * 24 * 60 * 60,
   },
   pages: {

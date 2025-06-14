@@ -19,6 +19,7 @@ import {
 import Select from "@/app/components/Select";
 import { createRoot } from "react-dom/client";
 import { useProjects } from "../providers/ProjectsProvider";
+import Image from "next/image";
 
 interface EditTaskProps {
   task: Task;
@@ -90,7 +91,7 @@ const EditTaskContextMenu = ({
   useEffect(() => {
     const proj = getProjectById(task.projectId);
     setProject(proj);
-  }, []);
+  }, [getProjectById, task.projectId]);
 
   const handleModal = () => {
     setModal({
@@ -161,7 +162,7 @@ const EditTaskContextMenu = ({
               {project &&
                 project?.members &&
                 project.members.map((member) => (
-                  <div>
+                  <div key={member.id}>
                     <input
                       type="checkbox"
                       className="member"
@@ -172,7 +173,12 @@ const EditTaskContextMenu = ({
                       )}
                     />
                     <label htmlFor={`${member.userId}`}>
-                      <img src={member.user.image} alt={member.user.name} />
+                      <Image
+                        width={64}
+                        height={64}
+                        src={member.user.image}
+                        alt={member.user.name}
+                      />
                     </label>
                   </div>
                 ))}
@@ -440,8 +446,8 @@ const EditTaskContextMenu = ({
         <div className="header">
           <h1>Confirm Task Deletion</h1>
           <p>
-            Are you sure you want to delete this task? Once it's gone, it can't
-            be retrieved!.
+            Are you sure you want to delete this task? Once it&apos;s gone, it
+            can&apos;t be retrieved!.
           </p>
         </div>
       ),

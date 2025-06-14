@@ -27,7 +27,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const id = res.params.id;
+  const { id } = res.params;
   if (!id) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
@@ -37,14 +37,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const projectId = parseInt(id);
-  if (isNaN(projectId)) {
-    return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
-      status: 400,
-    });
-  }
-
-  const admin = isAdmin(projectId);
+  const admin = isAdmin(id);
   if (!admin) {
     return new NextResponse(JSON.stringify({ error: "Access denied." }), {
       status: 403,
@@ -82,7 +75,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
 
   try {
     const project = await prisma.project.update({
-      where: { id: projectId },
+      where: { id: id },
       data: {
         name: name,
         description: description,

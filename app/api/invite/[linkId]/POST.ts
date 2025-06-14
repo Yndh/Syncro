@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
+import isAdmin from "@/lib/isAdmin";
 
 interface ResponseInterface<T = any> extends NextApiResponse<T> {
   params: {
@@ -9,8 +10,9 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
   };
 }
 
-interface reqBody {
-  maxUses?: number;
+interface joinReqBody {
+  maxUses: number;
+  expires?: Date;
 }
 
 export async function mPOST(req: Request, res: ResponseInterface) {
@@ -24,7 +26,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const linkId = res.params.linkId;
+  const { linkId } = res.params;
   if (!linkId) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
@@ -34,10 +36,10 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const body: reqBody = await req.json();
+  const body: joinReqBody = await req.json();
   const { maxUses } = body;
 
-  if (maxUses && maxUses <= 0) {
+  if (!maxUses || (maxUses && maxUses <= 0)) {
     return new NextResponse(
       JSON.stringify({ error: "MaxUses must be greater than 0." }),
       {
@@ -65,7 +67,15 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       });
     }
 
-    console.log(maxUses);
+    const admin = isAdmin(invite.projectId);
+    if (!admin) {
+      return new NextResponse(
+        JSON.stringify({
+          error: "You are not authorized to update this invite.",
+        }),
+        { status: 403 }
+      );
+    }
 
     const updatedInvite = await prisma.projectInvitation.update({
       where: { linkId: linkId },

@@ -21,7 +21,7 @@ export async function mGET(req: Request, res: ResponseInterface) {
     );
   }
 
-  const id = res.params.id;
+  const { id } = res.params;
   if (!id) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
@@ -31,14 +31,7 @@ export async function mGET(req: Request, res: ResponseInterface) {
     );
   }
 
-  const projectId = parseInt(id);
-  if (isNaN(projectId)) {
-    return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
-      status: 400,
-    });
-  }
-
-  const membership = isMember(projectId);
+  const membership = isMember(id);
 
   if (!membership) {
     return new NextResponse(JSON.stringify({ error: "Access denied." }), {
@@ -48,7 +41,7 @@ export async function mGET(req: Request, res: ResponseInterface) {
 
   try {
     const project = await prisma.project.findUnique({
-      where: { id: projectId },
+      where: { id: id },
       include: {
         members: {
           include: {
@@ -58,7 +51,7 @@ export async function mGET(req: Request, res: ResponseInterface) {
         tasks: {
           include: {
             assignedTo: true,
-            stages: true
+            stages: true,
           },
         },
         notes: {

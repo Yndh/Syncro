@@ -275,7 +275,7 @@ input[type="checkbox"] {
         opacity: 1;
       }
 
-      ol > li {
+      ol>li {
         width: auto;
 
         span {
@@ -302,7 +302,7 @@ input[type="checkbox"] {
       }
     }
 
-    & ~ main {
+    &~main {
       margin-left: 300px;
 
       .projectPage .projectsList {
@@ -896,6 +896,7 @@ main {
       gap: 15px;
 
       .colHeader {
+        position: relative;
         display: flex;
         align-items: center;
         gap: 7px;
@@ -919,6 +920,26 @@ main {
 
       .statusCheckbox {
         display: none;
+
+        &:checked~.chevron svg {
+          rotate: 180deg;
+        }
+      }
+
+      .chevron {
+        position: absolute;
+        z-index: 5;
+        top: 20px;
+        right: 20px;
+        width: 30px;
+        height: 40px;
+        display: none;
+        justify-content: center;
+        align-items: center;
+
+        svg {
+          transition: .3s;
+        }
       }
 
       .cardsContainer {
@@ -1135,6 +1156,16 @@ main {
 
     input#projectMenuCheckbox {
       display: none;
+
+      &:checked~.projectMenuCheckboxLabel {
+        .bars {
+          display: none;
+        }
+
+        .xmark {
+          display: block;
+        }
+      }
     }
 
     label.projectMenuCheckboxLabel {
@@ -1152,6 +1183,14 @@ main {
       border-radius: 50%;
       z-index: 99;
       width: 40px;
+
+      .bars {
+        display: block;
+      }
+
+      .xmark {
+        display: none;
+      }
     }
 
     .projectsList {
@@ -1275,7 +1314,7 @@ main {
           input {
             display: none;
 
-            &:checked ~ label {
+            &:checked~label {
               background: var(--card-color);
               color: var(--primary-font-color);
             }
@@ -1418,6 +1457,7 @@ main {
           overflow: hidden;
 
           .membersHeader {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -1693,6 +1733,7 @@ main {
   }
 
   .modal {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -1780,7 +1821,7 @@ main {
           padding: 2px 7px;
           font-size: 16px;
 
-          input[type="checkbox"]:checked ~ label {
+          input[type="checkbox"]:checked~label {
             text-decoration: line-through;
           }
         }
@@ -1898,9 +1939,14 @@ main {
                 gap: 2px;
 
                 button {
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
                   background: none;
                   color: var(--tertiary-font-color);
                   transition: 0.3s;
+                  padding: 5px 10px;
+                  width: 25% !important;
 
                   &:hover {
                     color: var(--error-color);
@@ -2162,7 +2208,7 @@ main {
     display: none;
   }
 
-  input:checked ~ label img {
+  input:checked~label img {
     border-color: var(--accent-color);
   }
 }
@@ -2457,7 +2503,7 @@ body::-webkit-scrollbar {
         display: none;
       }
 
-      & ~ main {
+      &~main {
         margin-left: 0 !important;
 
         .projectPage .projectsList {
@@ -2522,30 +2568,22 @@ body::-webkit-scrollbar {
     }
 
     .dashboardContainer {
-      overflow-y: scroll;
+      overflow-y: scroll !important;
 
       .row-between {
-        overflow-x: scroll;
-        overflow-y: hidden;
-        height: 100%;
-        width: 100%;
+        position: relative;
+        flex-direction: column;
+        height: fit-content !important;
 
-        &:not(.full) {
-          height: 150px;
-
-          .card {
-            width: fit-content;
-            min-width: 200px;
-            max-height: unset;
-            height: 100%;
-          }
+        .card {
+          width: 100%;
         }
       }
+
+
     }
 
     .row-between.full {
-      flex-direction: column;
-      overflow-y: scroll;
 
       .card.chart:last-child {
         display: none;
@@ -2584,7 +2622,7 @@ body::-webkit-scrollbar {
       }
 
       input#projectMenuCheckbox {
-        &:checked ~ .projectsList {
+        &:checked~.projectsList {
           right: 0;
         }
       }
@@ -2605,8 +2643,13 @@ body::-webkit-scrollbar {
         padding-left: 0;
 
         .header {
+          h2 {
+            font-size: 28px;
+          }
+
           p {
             max-width: 100%;
+            font-size: 16px;
           }
 
           .percentage {
@@ -2655,6 +2698,10 @@ body::-webkit-scrollbar {
           cursor: pointer;
         }
 
+        .chevron {
+          display: flex;
+        }
+
         .cardsContainer {
           display: none;
 
@@ -2669,7 +2716,7 @@ body::-webkit-scrollbar {
           }
         }
 
-        .statusCheckbox:checked ~ .cardsContainer {
+        .statusCheckbox:checked~.cardsContainer {
           display: flex;
           height: 100%;
         }
@@ -2677,6 +2724,22 @@ body::-webkit-scrollbar {
     }
 
     .membersContainer {
+      .membersHeader {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 4px !important;
+
+        input,
+        button {
+          width: 100% !important;
+        }
+
+        .buttons {
+          flex-direction: column;
+          width: 100%;
+        }
+      }
+
       .membersContent {
         .membersRolesDescription {
           display: none !important;
@@ -2698,19 +2761,25 @@ body::-webkit-scrollbar {
   .modalContainer {
     .modal {
       width: 95%;
+      max-height: 70vh;
 
       .content {
+        overflow-y: scroll;
+        width: 100%;
+
         form .formRow {
-          span {
-          }
+          flex-direction: column;
+          gap: 4px;
 
           input:not([type="checkbox"]),
-          textarea {
-            width: 150px;
+          textarea,
+          button,
+          .select-container {
+            width: 100% !important;
           }
 
-          button {
-            width: 200px !important;
+          input:not([type="checkbox"]) {
+            padding: 5px 10px;
           }
 
           .inviteDetails {
@@ -2720,6 +2789,10 @@ body::-webkit-scrollbar {
               flex-direction: column;
             }
           }
+        }
+
+        .stagesContainer {
+          width: 100% !important;
         }
       }
     }
@@ -2735,5 +2808,4 @@ body::-webkit-scrollbar {
 }
 
 // Tablets
-@media (min-width: 768px) and (max-width: 1023px) {
-}
+@media (min-width: 768px) and (max-width: 1023px) {}

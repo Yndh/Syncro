@@ -21,7 +21,9 @@ const InvitePage = async ({ params }: ProjectParams) => {
       <div className="invite__container">
         <div className="invite">
           <h2>Invalid invite</h2>
-          <p>We couldn't retrieve the invite details. Please check the link.</p>
+          <p>
+            We couldn&apos;t retrieve the invite details. Please check the link.
+          </p>
           <Link href={"/app"}>Go back to dashboard</Link>
         </div>
       </div>
@@ -36,7 +38,7 @@ const InvitePage = async ({ params }: ProjectParams) => {
       <div className="invite__container">
         <div className="invite">
           <h2>Invalid invite</h2>
-          <p>We couldn't find the invite. Please check the link.</p>
+          <p>We couldn&apos;t find the invite. Please check the link.</p>
           <Link href={"/app"}>Go back to dashboard</Link>
         </div>
       </div>
@@ -83,7 +85,7 @@ const InvitePage = async ({ params }: ProjectParams) => {
   return (
     <div className="invite__container">
       <div className="invite">
-        <span>You're Invited by {invite.createdBy.name}</span>
+        <span>You&apos;re Invited by {invite.createdBy.name}</span>
         <h2>{invite.project.name}</h2>
         <p>
           {invite.project.members.length}{" "}

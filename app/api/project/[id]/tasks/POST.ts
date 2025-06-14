@@ -30,7 +30,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const id = res.params.id;
+  const { id } = res.params;
   if (!id) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
@@ -38,13 +38,6 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         status: 400,
       }
     );
-  }
-
-  const projectId = parseInt(id);
-  if (isNaN(projectId)) {
-    return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
-      status: 400,
-    });
   }
 
   const body: CreateTaskReqBody = await req.json();
@@ -87,7 +80,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   }
 
   try {
-    const admin = await isAdmin(projectId);
+    const admin = await isAdmin(id);
 
     if (!admin) {
       return new NextResponse(
@@ -99,7 +92,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     }
 
     const projectMembers = await prisma.projectMembership.findMany({
-      where: { projectId: projectId },
+      where: { projectId: id },
     });
 
     const validMembers = projectMembers.map((member) => member.userId);
@@ -127,7 +120,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
           connect: assignedMembers.map((memberId) => ({ id: memberId })),
         },
         project: {
-          connect: { id: projectId },
+          connect: { id: id },
         },
         stages: {
           create: body.stages.map((title) => ({

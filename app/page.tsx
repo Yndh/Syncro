@@ -33,10 +33,10 @@ export default async function Home() {
           Management
         </h1>
         <p>
-          Managing projects shouldn't feel like a high-stakes juggling act with
-          flaming swords. With our tool, you'll turn chaos into clarity, keep
-          your team on the same page, and still have time for a coffee that's
-          actually hot
+          Managing projects shouldn&apos;t feel like a high-stakes juggling act
+          with flaming swords. With our tool, you&apos;ll turn chaos into
+          clarity, keep your team on the same page, and still have time for a
+          coffee that&apos;s actually hot
         </p>
         <button>
           <Link href={"/app"}>Start Organizing the Fun!</Link>

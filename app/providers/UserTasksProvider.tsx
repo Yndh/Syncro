@@ -3,6 +3,7 @@
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -30,31 +31,33 @@ interface TasksProviderProps {
 export const TasksProvider = ({ children }: TasksProviderProps) => {
   const [tasks, setTasksState] = useState<Task[]>([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await fetch("/api/user/tasks", {
-          method: "GET",
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.error) {
-              console.error(data.error);
-            } else {
-              if (data.tasks) {
-                setTasksState(data.tasks);
-              }
+  const fetchData = useCallback(async () => {
+    try {
+      await fetch("/api/user/tasks", {
+        method: "GET",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            console.error(data.error);
+          } else {
+            if (data.tasks) {
+              setTasksState(data.tasks);
             }
-          });
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-      }
-    };
-
-    fetchData();
+          }
+        });
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
   }, []);
 
-  const setTasks = (tasks: Task[]) => setTasksState(tasks);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const setTasks = useCallback((tasks: Task[]) => {
+    setTasksState(tasks);
+  }, []);
 
   return (
     <TasksContext.Provider value={{ tasks, setTasks }}>

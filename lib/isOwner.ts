@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "./prisma";
 
-export default async function isOwner(projectId: number) {
+export default async function isOwner(projectId: string) {
   const session = await auth();
   if (!session?.user?.id) {
     return false;

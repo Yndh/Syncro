@@ -27,7 +27,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const id = res.params.id;
+  const { id, noteId: noteIdPar } = res.params;
   if (!id) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
@@ -37,14 +37,6 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const projectId = parseInt(id);
-  if (isNaN(projectId)) {
-    return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
-      status: 400,
-    });
-  }
-
-  const noteIdPar = res.params.noteId;
   if (!noteIdPar) {
     return new NextResponse(
       JSON.stringify({
@@ -66,7 +58,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const membership = isMember(projectId);
+  const membership = isMember(id);
   if (!membership) {
     return new NextResponse(JSON.stringify({ error: "Access denied." }), {
       status: 403,

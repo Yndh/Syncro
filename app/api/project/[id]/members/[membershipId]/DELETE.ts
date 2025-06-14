@@ -33,13 +33,6 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     );
   }
 
-  const projectId = parseInt(id);
-  if (isNaN(projectId)) {
-    return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
-      status: 400,
-    });
-  }
-
   if (!membershipId) {
     return new NextResponse(
       JSON.stringify({
@@ -85,7 +78,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
   }
 
   if (membership?.userId == session.user.id) {
-    const owner = await isOwner(projectId);
+    const owner = await isOwner(id);
     if (owner) {
       return new NextResponse(
         JSON.stringify({ error: "You cannot remove yourself as the owner." }),
@@ -95,7 +88,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
       );
     }
   } else {
-    const admin = isAdmin(projectId);
+    const admin = isAdmin(id);
     if (!admin) {
       return new NextResponse(
         JSON.stringify({ error: "Unauthorized access to project." }),
@@ -109,7 +102,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
   try {
     const tasks = await prisma.task.findMany({
       where: {
-        projectId: projectId,
+        projectId: id,
         assignedTo: { some: { id: membership.userId } },
       },
     });
@@ -132,7 +125,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     });
 
     const project = await prisma.project.findFirst({
-      where: { id: projectId },
+      where: { id: id },
       include: {
         members: {
           include: {

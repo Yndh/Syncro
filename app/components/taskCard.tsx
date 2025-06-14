@@ -12,7 +12,6 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import EditTaskContextMenu from "./EditTaskContextMenu";
-import Select from "./Select";
 
 interface TaskCardProps {
   task: Task;
@@ -80,7 +79,6 @@ export const TaskCard = ({
           moveTask={moveTask}
         />
       ),
-      setContextMenu,
     });
   };
 
@@ -182,7 +180,7 @@ export const TaskCard = ({
             <div className="stages">
               <p>Subtasks</p>
               {task.stages.map((stage) => (
-                <div className="stage">
+                <div className="stage" key={stage.id}>
                   <input
                     type="checkbox"
                     id={`stage${stage.id}`}

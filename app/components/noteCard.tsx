@@ -46,7 +46,6 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
           </li>
         </ol>
       ),
-      setContextMenu,
     });
   };
 
@@ -175,8 +174,8 @@ export const NoteCard = ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
         <div className="header">
           <h1>Confirm Note Deletion</h1>
           <p>
-            Are you sure you want to delete this note? Once it's gone, it can't
-            be retrieved!.
+            Are you sure you want to delete this note? Once it&apos;s gone, it
+            can&apos;t be retrieved!.
           </p>
         </div>
       ),

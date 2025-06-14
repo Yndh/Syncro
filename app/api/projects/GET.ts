@@ -23,24 +23,6 @@ export async function mGET(req: Request, res: NextApiResponse) {
           },
         },
       },
-      include: {
-        members: {
-          include: {
-            user: true,
-          },
-        },
-        tasks: {
-          include: {
-            assignedTo: true,
-            stages: true,
-          },
-        },
-        notes: {
-          include: {
-            createdBy: true,
-          },
-        },
-      },
     });
 
     return new NextResponse(JSON.stringify({ projects: projects }), {

@@ -2,13 +2,14 @@
 
 import ToDo from "@/app/components/todo";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Invite, Project, ProjectRole } from "@/app/types/interfaces";
 import { MembersList } from "@/app/components/MembersList";
 import { Notes } from "@/app/components/Notes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
+  faClose,
   faCog,
   faListCheck,
   faNoteSticky,
@@ -50,32 +51,32 @@ const ProjectPage = ({ params }: ProjectParams) => {
   useEffect(() => {
     const localProject = getProjectById(parseInt(params.id));
     setProject(localProject);
-  }, []);
+  }, [getProjectById, params.id]);
+
+  const fetchData = useCallback(async () => {
+    try {
+      await fetch(`/api/project/${params.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            alert(
+              "Uh-oh! We couldn’t grab the project details. How about a quick refresh?"
+            );
+            router.push("/app");
+          } else {
+            setProject(data.project);
+            setRole(data.role);
+            setMembershipId(data.membershipId);
+          }
+        });
+    } catch (error) {
+      console.error("Error fetching project:", error);
+    }
+  }, [params.id, router]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await fetch(`/api/project/${params.id}`)
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.error) {
-              alert(
-                "Uh-oh! We couldn’t grab the project details. How about a quick refresh?"
-              );
-              router.push("/app");
-            } else {
-              setProject(data.project);
-              setRole(data.role);
-              setMembershipId(data.membershipId);
-            }
-          });
-      } catch (error) {
-        console.error("Error fetching project:", error);
-      }
-    };
-
     fetchData();
-  }, [params.id, router]);
+  }, [params.id, router, fetchData]);
 
   const isExpired = (invite: Invite) => {
     const now = new Date();
@@ -388,7 +389,6 @@ const ProjectPage = ({ params }: ProjectParams) => {
           )}
         </ol>
       ),
-      setContextMenu,
     });
   };
 
@@ -514,13 +514,14 @@ const ProjectPage = ({ params }: ProjectParams) => {
   return (
     <>
       <div className="projectPage">
+        <input type="checkbox" id="projectMenuCheckbox" />
         <label
           htmlFor="projectMenuCheckbox"
           className="projectMenuCheckboxLabel"
         >
-          <FontAwesomeIcon icon={faBars} />
+          <FontAwesomeIcon icon={faBars} className="bars" />
+          <FontAwesomeIcon icon={faClose} className="xmark" />
         </label>
-        <input type="checkbox" id="projectMenuCheckbox" />
         <div className="projectsList">
           <h2>Projects</h2>
 

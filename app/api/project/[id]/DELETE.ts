@@ -22,7 +22,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     );
   }
 
-  const id = res.params.id;
+  const { id } = res.params;
   if (!id) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
@@ -32,14 +32,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     );
   }
 
-  const projectId = parseInt(id);
-  if (isNaN(projectId)) {
-    return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
-      status: 400,
-    });
-  }
-
-  const ownership = isOwner(projectId);
+  const ownership = isOwner(id);
 
   if (!ownership) {
     return new NextResponse(JSON.stringify({ error: "Access denied." }), {
@@ -49,12 +42,12 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
 
   try {
     const project = await prisma.project.delete({
-        where: { id: projectId }
-    })
+      where: { id: id },
+    });
 
     return new NextResponse(
       JSON.stringify({
-        success: true
+        success: true,
       }),
       {
         status: 200,

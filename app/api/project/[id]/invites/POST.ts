@@ -28,7 +28,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const id = res.params.id;
+  const { id } = res.params;
   if (!id) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
@@ -38,14 +38,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const projectId = parseInt(id);
-  if (isNaN(projectId)) {
-    return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
-      status: 400,
-    });
-  }
-
-  const admin = isAdmin(projectId);
+  const admin = isAdmin(id);
   if (!admin) {
     return new NextResponse(
       JSON.stringify({ error: "Unauthorized access to project." }),
@@ -71,7 +64,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         maxUses: body.maxUses,
         project: {
           connect: {
-            id: projectId,
+            id: id,
           },
         },
         createdBy: {

@@ -71,7 +71,7 @@ const NewTask = ({ projectId, tasksList, setTasksList }: NewTaskProps) => {
   useEffect(() => {
     const proj = getProjectById(projectId);
     setProject(proj);
-  }, []);
+  }, [getProjectById, projectId]);
 
   const handleModal = () => {
     setModal({

@@ -30,7 +30,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const id = res.params.id;
+  const { id } = res.params;
   if (!id) {
     return new NextResponse(
       JSON.stringify({
@@ -40,13 +40,6 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         status: 400,
       }
     );
-  }
-
-  const projectId = parseInt(id);
-  if (isNaN(projectId)) {
-    return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
-      status: 400,
-    });
   }
 
   const body: ReqBody = await req.json();
@@ -70,7 +63,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const admin = isAdmin(projectId);
+  const admin = isAdmin(id);
   if (!admin) {
     return new NextResponse(JSON.stringify({ error: "Unauthorized access." }), {
       status: 403,
@@ -101,7 +94,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   }
   const userId = membership?.userId;
 
-  const member = memberExists(projectId, userId);
+  const member = memberExists(id, userId);
   if (!member) {
     return new NextResponse(
       JSON.stringify({ error: "User is not a member of the project." }),
@@ -113,7 +106,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
 
   try {
     const member = await prisma.projectMembership.update({
-      where: { id: membershipId, projectId: projectId, userId: userId },
+      where: { id: membershipId, projectId: id, userId: userId },
       data: {
         role: role,
       },
@@ -124,7 +117,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     });
 
     const project = await prisma.project.findFirst({
-      where: { id: projectId },
+      where: { id: id },
       include: {
         members: {
           include: {

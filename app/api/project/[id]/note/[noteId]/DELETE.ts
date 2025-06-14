@@ -21,7 +21,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     );
   }
 
-  const id = res.params.id;
+  const { id, noteId } = res.params;
   if (!id) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
@@ -31,14 +31,6 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     );
   }
 
-  const projectId = parseInt(id);
-  if (isNaN(projectId)) {
-    return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
-      status: 400,
-    });
-  }
-
-  const noteId = res.params.noteId;
   if (!noteId) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
@@ -57,7 +49,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
 
   try {
     const project = await prisma.project.findUnique({
-      where: { id: projectId },
+      where: { id: id },
       select: { members: true },
     });
 
@@ -110,7 +102,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     });
 
     const notes = await prisma.notes.findMany({
-      where: { projectId: projectId },
+      where: { projectId: id },
       include: {
         createdBy: true,
       },

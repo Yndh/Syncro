@@ -56,7 +56,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     } catch (error) {
       console.error("Failed to save theme");
     }
-  }, [theme]);
+  }, [theme, loading]);
 
   return (
     <ThemeContext.Provider

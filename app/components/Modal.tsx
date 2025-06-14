@@ -10,18 +10,18 @@ export const Modal = () => {
   const modalRef = useRef<HTMLDivElement>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleClickOutside = (e: MouseEvent) => {
-    if (modalContainerRef.current && e.target === modalContainerRef.current) {
-      setModal(null); // Close the modal
-    }
-  };
-
   useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modalContainerRef.current && e.target === modalContainerRef.current) {
+        setModal(null); // Close the modal
+      }
+    };
+
     document.addEventListener("click", handleClickOutside);
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []);
+  }, [setModal]);
 
   return (
     <div

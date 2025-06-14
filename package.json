@@ -1,10 +1,10 @@
 {
-  "name": "project-manager",
-  "version": "0.1.0",
+  "name": "syncro",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npx prisma generate && npx next build",
     "start": "next start",
     "lint": "next lint"
   },

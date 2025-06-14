@@ -4,6 +4,8 @@ import { useRef } from "react";
 import { useDrop } from "react-dnd";
 import { TaskCard } from "./taskCard";
 import { Project, Task, TaskStatus } from "../types/interfaces";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 interface DragItem {
   task: Task;
@@ -48,6 +50,9 @@ export const TaskColumn = ({
         id={`status${status}Checkbox`}
         className="statusCheckbox"
       />
+      <div className="chevron">
+        <FontAwesomeIcon icon={faChevronUp} />
+      </div>
 
       <div className="cardsContainer">
         {tasks.map((task) => (

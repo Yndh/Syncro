@@ -27,7 +27,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const id = res.params.id;
+  const { id } = res.params;
   if (!id) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
@@ -37,17 +37,10 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const projectId = parseInt(id);
-  if (isNaN(projectId)) {
-    return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
-      status: 400,
-    });
-  }
-
   const body: UpdateStageReqBody = await req.json();
 
   try {
-    const admin = await isAdmin(projectId);
+    const admin = await isAdmin(id);
 
     const taskStage = await prisma.taskStage.findUnique({
       where: { id: body.id },

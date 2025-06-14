@@ -11,7 +11,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ResponsiveBar } from "@nivo/bar";
 import { Pie } from "@nivo/pie";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { Task, TaskPriority, TaskStatus } from "../types/interfaces";
 import { useTasks } from "../providers/UserTasksProvider";
 import { useProjects } from "../providers/ProjectsProvider";
@@ -42,35 +42,35 @@ const App = () => {
   const { projects, setProjects } = useProjects();
   const { theme } = useTheme();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await fetch("/api/user", {
-          method: "GET",
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.error) {
-              toast.error(
-                "Uh-oh! We couldn't fetch your user data. Please try again later!"
-              );
-              location.reload();
-              return;
-            }
-            if (data.tasks) {
-              setTasks(data.tasks);
-            }
-            if (data.projects) {
-              setProjects(data.projects);
-            }
-          });
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
+  const fetchData = useCallback(async () => {
+    try {
+      await fetch("/api/user", {
+        method: "GET",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            toast.error(
+              "Uh-oh! We couldn't fetch your user data. Please try again later!"
+            );
+            location.reload();
+            return;
+          }
+          if (data.tasks) {
+            setTasks(data.tasks);
+          }
+          if (data.projects) {
+            setProjects(data.projects);
+          }
+        });
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  }, [setProjects, setTasks]);
 
+  useEffect(() => {
     fetchData();
-  }, []);
+  }, [setProjects, setTasks, fetchData]);
 
   const completedTasks = tasks.filter(
     (task) => task.taskStatus == "DONE"
@@ -136,7 +136,7 @@ const App = () => {
   return (
     <>
       <div className="header">
-        <h1>Dashboard</h1>
+        <h2>Dashboard</h2>
         <p>Your Central Hub for Project Success</p>
       </div>
 
@@ -268,8 +268,8 @@ const App = () => {
                     <FontAwesomeIcon icon={faCheckCircle} />
                     <p>You have no tasks</p>
                     <span>
-                      Looks like you're all caught up! No tasks for now—enjoy
-                      the break, you deserve it!
+                      Looks like you&apos;re all caught up! No tasks for
+                      now—enjoy the break, you deserve it!
                     </span>
                   </div>
                 )}

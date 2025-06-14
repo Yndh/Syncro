@@ -10,7 +10,7 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
 }
 
 export async function mGET(req: Request, res: ResponseInterface) {
-  const linkId = res.params.linkId;
+  const { linkId } = res.params;
   if (!linkId) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),

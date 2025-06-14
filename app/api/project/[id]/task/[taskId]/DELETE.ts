@@ -22,7 +22,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     );
   }
 
-  const id = res.params.id;
+  const { id, taskId } = res.params;
   if (!id) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
@@ -32,14 +32,6 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     );
   }
 
-  const projectId = parseInt(id);
-  if (isNaN(projectId)) {
-    return new NextResponse(JSON.stringify({ error: "Invalid id format." }), {
-      status: 400,
-    });
-  }
-
-  const taskId = res.params.taskId;
   if (!taskId) {
     return new NextResponse(
       JSON.stringify({ error: "No id is provided in the URL parameters." }),
@@ -56,7 +48,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     });
   }
 
-  const admin = isAdmin(projectId);
+  const admin = isAdmin(id);
   if (!admin) {
     return new NextResponse(
       JSON.stringify({ error: "Unauthorized access to project." }),
@@ -72,7 +64,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
     });
 
     const tasks = await prisma.task.findMany({
-      where: { projectId: projectId },
+      where: { projectId: id },
       include: {
         assignedTo: true,
       },

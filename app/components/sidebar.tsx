@@ -82,7 +82,9 @@ const Sidebar = () => {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
-  const { data: session, update } = useSession();
+  const { data: session, update } = useSession({
+    required: true,
+  });
 
   useEffect(() => {
     const interval = setInterval(() => update(), 1000 * 60 * 60);
@@ -546,7 +548,6 @@ const Sidebar = () => {
               "Goodbye! Your account is officially on an endless vacation"
             );
             setModal(null);
-            signOut();
           }
         });
     } catch (err) {

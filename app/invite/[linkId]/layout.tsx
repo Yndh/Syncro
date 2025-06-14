@@ -16,10 +16,7 @@ export default async function Invitation({
   return (
     <SessionProvider>
       <ThemeProvider>
-        <ContextMenuProvider>
-          <ContextMenu />
-          {children}
-        </ContextMenuProvider>
+        {children}
         <div className="blurCircle"></div>
         <div className="blurCircle"></div>
         <div className="blurCircle"></div>

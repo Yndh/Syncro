@@ -1,6 +1,6 @@
 import { prisma } from "./prisma";
 
-export default async function memberExists(projectId: number, userId: string) {
+export default async function memberExists(projectId: string, userId: string) {
   const memberExists = await prisma.projectMembership.findFirst({
     where: { projectId: projectId, userId: userId },
   });

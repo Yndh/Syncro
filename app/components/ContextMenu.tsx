@@ -13,30 +13,31 @@ const ContextMenu = () => {
     onClose();
   };
 
-  const handleClickOutside = (e: MouseEvent) => {
-    const taskOptionsContainer = document.querySelector(
-      ".taskOptionsContainer"
-    );
-
-    const isClickInsideContextMenu =
-      contextMenuRef.current &&
-      contextMenuRef.current.contains(e.target as Node);
-
-    const isClickOnTaskOptionsContainer =
-      taskOptionsContainer === e.target ||
-      (taskOptionsContainer && taskOptionsContainer.contains(e.target as Node));
-
-    if (!(isClickInsideContextMenu || isClickOnTaskOptionsContainer)) {
-      setContextMenu(null);
-    }
-  };
-
   useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const taskOptionsContainer = document.querySelector(
+        ".taskOptionsContainer"
+      );
+
+      const isClickInsideContextMenu =
+        contextMenuRef.current &&
+        contextMenuRef.current.contains(e.target as Node);
+
+      const isClickOnTaskOptionsContainer =
+        taskOptionsContainer === e.target ||
+        (taskOptionsContainer &&
+          taskOptionsContainer.contains(e.target as Node));
+
+      if (!(isClickInsideContextMenu || isClickOnTaskOptionsContainer)) {
+        setContextMenu(null);
+      }
+    };
+
     document.addEventListener("click", handleClickOutside);
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []);
+  }, [setContextMenu]);
 
   return (
     <div

@@ -3,6 +3,7 @@
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -34,40 +35,41 @@ interface ProjectsProviderProps {
 export const ProjectsProvider = ({ children }: ProjectsProviderProps) => {
   const [projects, setProjectsState] = useState<Project[]>([]);
 
-  useEffect(() => {
-    fetchProjects();
+  const setProjects = useCallback((projects: Project[]) => {
+    setProjectsState(projects);
   }, []);
 
-  const setProjects = (projects: Project[]) => {
-    setProjectsState(projects);
-  };
-
-  const addProject = (project: Project) =>
+  const addProject = useCallback((project: Project) => {
     setProjectsState((prevProjects) => [...prevProjects, project]);
+  }, []);
 
-  const getProjectById = (id: number): Project | undefined => {
-    return projects?.find((project) => project.id === id) ?? undefined;
-  };
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
-      await fetch("/api/projects", {
+      const res = await fetch("/api/projects", {
         method: "GET",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            console.error(data.error);
-          } else {
-            if (data.projects) {
-              setProjectsState(data.projects);
-            }
-          }
-        });
+      });
+      const data = await res.json();
+
+      if (data.error) {
+        console.error(data.error);
+      } else if (data.projects) {
+        setProjectsState(data.projects);
+      }
     } catch (error) {
       console.error("Error fetching projects:", error);
     }
-  };
+  }, []);
+
+  const getProjectById = useCallback(
+    (id: number): Project | undefined => {
+      return projects.find((project) => project.id === id);
+    },
+    [projects]
+  );
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   return (
     <ProjectsContext.Provider

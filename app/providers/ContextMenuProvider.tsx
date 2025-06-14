@@ -6,6 +6,8 @@ import React, {
   useContext,
   useEffect,
   useState,
+  useCallback,
+  useMemo,
 } from "react";
 
 interface ContextMenuState {
@@ -13,16 +15,18 @@ interface ContextMenuState {
   y: number;
   onClose: () => void;
   content: JSX.Element | null;
+}
+
+interface ContextMenuContextType extends ContextMenuState {
   setContextMenu: (contextMenuState: ContextMenuState | null) => void;
 }
 
-const ContextMenuContext = createContext<ContextMenuState | undefined>(
+const ContextMenuContext = createContext<ContextMenuContextType | undefined>(
   undefined
 );
 
 export const useContextMenu = () => {
   const context = useContext(ContextMenuContext);
-
   if (!context) {
     throw new Error("useContextMenu must be used within a ContextMenuProvider");
   }
@@ -37,29 +41,28 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
   const [contextMenuState, setContextMenuState] =
     useState<ContextMenuState | null>(null);
 
-  const setContextMenu = (newContextMenuState: ContextMenuState | null) => {
-    setContextMenuState(newContextMenuState);
-  };
+  const setContextMenu = useCallback((newState: ContextMenuState | null) => {
+    setContextMenuState(newState);
+  }, []);
 
   useEffect(() => {
-    const disableContextMenu = (e: Event) => {
-      e.preventDefault();
-    };
-
+    const disableContextMenu = (e: Event) => e.preventDefault();
     document.addEventListener("contextmenu", disableContextMenu);
-
     return () => {
       document.removeEventListener("contextmenu", disableContextMenu);
     };
   }, []);
 
-  const contextMenuValue: ContextMenuState = {
-    x: contextMenuState?.x || 0,
-    y: contextMenuState?.y || 0,
-    onClose: contextMenuState?.onClose || (() => {}),
-    content: contextMenuState?.content ?? null,
-    setContextMenu,
-  };
+  const contextMenuValue = useMemo<ContextMenuContextType>(
+    () => ({
+      x: contextMenuState?.x ?? 0,
+      y: contextMenuState?.y ?? 0,
+      onClose: contextMenuState?.onClose ?? (() => {}),
+      content: contextMenuState?.content ?? null,
+      setContextMenu,
+    }),
+    [contextMenuState, setContextMenu]
+  );
 
   return (
     <ContextMenuContext.Provider value={contextMenuValue}>
