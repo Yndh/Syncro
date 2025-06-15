@@ -2158,6 +2158,7 @@ main {
       }
 
       svg {
+        fill: var(--primary-font-color) !important;
         width: 30%;
       }
     }

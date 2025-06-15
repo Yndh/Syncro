@@ -70,7 +70,7 @@ const themeOptions = [
 ];
 
 const Sidebar = () => {
-  const [projectId, setProjectId] = useState<number | boolean>(false);
+  const [projectId, setProjectId] = useState<string | boolean>(false);
   const projectNameInputRef = useRef<HTMLInputElement>(null);
   const projectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null);
   const inviteInputRef = useRef<HTMLInputElement>(null);

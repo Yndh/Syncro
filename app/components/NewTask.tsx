@@ -1,3 +1,5 @@
+"use client";
+
 import {
   faAdd,
   faFlag,
@@ -10,7 +12,7 @@ import Select from "./Select";
 import { Project, Task, TaskPriority } from "../types/interfaces";
 import { toast } from "react-toastify";
 import { createRoot } from "react-dom/client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useProjects } from "../providers/ProjectsProvider";
 import Image from "next/image";
 
@@ -54,26 +56,183 @@ const options = [
 ];
 
 interface NewTaskProps {
-  projectId: number;
+  projectId: string;
   tasksList: Task[];
   setTasksList: React.Dispatch<React.SetStateAction<Task[]>>;
 }
 
 const NewTask = ({ projectId, tasksList, setTasksList }: NewTaskProps) => {
+  const { setModal } = useModal();
+  const { getProjectById } = useProjects();
+
+  const [project, setProject] = useState<Project>();
+
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descInputRef = useRef<HTMLTextAreaElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
   const membersListRef = useRef<HTMLDivElement>(null);
-  const { setModal } = useModal();
-  const { getProjectById } = useProjects();
-  const [project, setProject] = useState<Project>();
 
   useEffect(() => {
     const proj = getProjectById(projectId);
     setProject(proj);
   }, [getProjectById, projectId]);
 
-  const handleModal = () => {
+  const getCheckedMemberIds = useCallback((): string[] => {
+    const checkedMembers: string[] = [];
+    const checkboxes = membersListRef.current?.querySelectorAll(
+      'input[type="checkbox"]:checked'
+    );
+    if (checkboxes) {
+      checkboxes.forEach((checkbox) => {
+        checkedMembers.push(checkbox.id.replace("radio", ""));
+      });
+    }
+    return checkedMembers;
+  }, []);
+
+  const getStages = useCallback(() => {
+    const stagesList: string[] = [];
+    const stageElements = document.querySelectorAll(".stagesList input");
+
+    stageElements.forEach((stage) => {
+      const stageName = (stage as HTMLInputElement).value.trim();
+      if (stageName) {
+        stagesList.push(stageName);
+      }
+    });
+
+    return stagesList;
+  }, []);
+
+  const addStage = useCallback(() => {
+    const stagesList = document.querySelector(".stagesList");
+
+    const li = document.createElement("li");
+    li.className = "newStageContainer";
+
+    const input = document.createElement("input");
+    input.placeholder = "Add new stage";
+
+    const removeButton = document.createElement("button");
+    removeButton.onclick = () => {
+      li.remove();
+    };
+    removeButton.type = "button";
+
+    const root = createRoot(removeButton);
+    root.render(<FontAwesomeIcon icon={faTrash} />);
+
+    li.appendChild(input);
+    li.appendChild(removeButton);
+    stagesList?.appendChild(li);
+  }, []);
+
+  const submitForm = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      const title = (titleInputRef.current?.value as string).trim();
+      if (title === "") {
+        toast.warn("Hold on! The task needs a name. What should we call it?");
+        return;
+      }
+      if (title.length > 100) {
+        toast.warn(
+          "Heads up! The task name is a bit too lengthy. Consider making it more concise!"
+        );
+        return;
+      }
+
+      const description = (descInputRef.current?.value as string).trim();
+      if (description.length > 400) {
+        toast.warn(
+          "Heads up! The task description is a bit too long. Try to keep it brief!"
+        );
+        return;
+      }
+      const assignedMembers = getCheckedMemberIds();
+      if (assignedMembers.length < 1) {
+        toast.warn(
+          "Hold up! A task needs a team! Please assign at least one member to get things rolling!"
+        );
+        return;
+      }
+
+      let priority = "";
+      try {
+        const priorityDiv = document.querySelector("#prioritySelect")!;
+        priority = priorityDiv.getAttribute("data-value") ?? options[0].value;
+      } catch (err) {
+        toast.warn(
+          "Oops! Every task needs a priority. Pick one to keep things on track!"
+        );
+        return;
+      }
+
+      const stages = getStages();
+
+      const dueDate = dateInputRef.current?.value;
+      let isoDueDate;
+      if (dueDate) {
+        const date = new Date(dueDate);
+        if (isNaN(date.getTime())) {
+          toast.warn(
+            "Oops! That due date is invalid. Please choose a future date!"
+          );
+          return;
+        }
+
+        if (date < new Date()) {
+          toast.warn(
+            "Uh-oh! Time travel isn’t allowed here. Please pick a valid due date!"
+          );
+          return;
+        }
+
+        isoDueDate = new Date(dueDate).toISOString();
+      }
+
+      setModal(null);
+
+      await fetch(`/api/project/${projectId}/tasks`, {
+        method: "POST",
+        body: JSON.stringify({
+          title: title,
+          description: description,
+          assignedMembers: assignedMembers,
+          dueDate: isoDueDate,
+          priority: priority,
+          stages: stages,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            toast.error(
+              "Yikes! We couldn't create the task. It seems to be playing hard to get!"
+            );
+            return;
+          }
+
+          if (data.task) {
+            setTasksList([...tasksList, data.task]);
+            toast.success(
+              "Success! Your task has been created and is ready to tackle!"
+            );
+          }
+        });
+    },
+    [
+      getCheckedMemberIds,
+      getStages,
+      projectId,
+      setModal,
+      setTasksList,
+      tasksList,
+    ]
+  );
+
+  const handleModal = useCallback(() => {
     setModal({
       title: "New Task",
       content: (
@@ -119,30 +278,28 @@ const NewTask = ({ projectId, tasksList, setTasksList }: NewTaskProps) => {
 
           <div className="formRow">
             <label>
-              <p>Asignee</p>
-              <span>Asign task to members of the project</span>
+              <p>Assignee</p>
+              <span>Assign task to members of the project</span>
             </label>
             <div className="membersList" ref={membersListRef}>
-              {project &&
-                project.members &&
-                project.members.map((member) => (
-                  <div key={`member${member.id}`}>
-                    <input
-                      type="checkbox"
-                      className="member"
-                      name="todoAsign"
-                      id={member.user.id}
+              {project?.members?.map((member) => (
+                <div key={`member${member.id}`}>
+                  <input
+                    type="checkbox"
+                    className="member"
+                    name="todoAsign"
+                    id={member.user.id}
+                  />
+                  <label htmlFor={member.user.id}>
+                    <Image
+                      src={member.user.image}
+                      alt={member.user.name}
+                      width={40}
+                      height={40}
                     />
-                    <label htmlFor={member.user.id}>
-                      <Image
-                        src={member.user.image}
-                        alt={member.user.name}
-                        width={40}
-                        height={40}
-                      />
-                    </label>
-                  </div>
-                ))}
+                  </label>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -184,152 +341,7 @@ const NewTask = ({ projectId, tasksList, setTasksList }: NewTaskProps) => {
       ),
       setModal,
     });
-  };
-
-  const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const title = (titleInputRef.current?.value as string).trim();
-    if (title === "") {
-      toast.warn("Hold on! The task needs a name. What should we call it?");
-      return;
-    }
-    if (title.length > 100) {
-      toast.warn(
-        "Heads up! The task name is a bit too lengthy. Consider making it more concise!"
-      );
-      return;
-    }
-
-    const description = (descInputRef.current?.value as string).trim();
-    if (description.length > 400) {
-      toast.warn(
-        "Heads up! The task description is a bit too long. Try to keep it brief!"
-      );
-      return;
-    }
-    const assignedMembers = getCheckedMemberIds();
-    if (assignedMembers.length < 1) {
-      toast.warn(
-        "Hold up! A task needs a team! Please assign at least one member to get things rolling!"
-      );
-      return;
-    }
-
-    let priority = "";
-    try {
-      const priorityDiv = document.querySelector("#prioritySelect")!;
-      priority = priorityDiv.getAttribute("data-value") ?? options[0].value;
-    } catch (err) {
-      toast.warn(
-        "Oops! Every task needs a priority. Pick one to keep things on track!"
-      );
-      return;
-    }
-
-    const stages = getStages();
-
-    const dueDate = dateInputRef.current?.value;
-    let isoDueDate;
-    if (dueDate) {
-      const date = new Date(dueDate);
-      if (isNaN(date.getTime())) {
-        toast.warn(
-          "Oops! That due date is invalid. Please choose a future date!"
-        );
-        return;
-      }
-
-      if (date < new Date()) {
-        toast.warn(
-          "Uh-oh! Time travel isn’t allowed here. Please pick a valid due date!"
-        );
-        return;
-      }
-
-      isoDueDate = new Date(dueDate).toISOString();
-    }
-
-    setModal(null);
-
-    await fetch(`/api/project/${projectId}/tasks`, {
-      method: "POST",
-      body: JSON.stringify({
-        title: title,
-        description: description,
-        assignedMembers: assignedMembers,
-        dueDate: isoDueDate,
-        priority: priority,
-        stages: stages,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          toast.error(
-            "Yikes! We couldn't create the task. It seems to be playing hard to get!"
-          );
-          return;
-        }
-
-        if (data.task) {
-          setTasksList([...tasksList, data.task]);
-          toast.success(
-            "Success! Your task has been created and is ready to tackle!"
-          );
-        }
-      });
-  };
-
-  const getCheckedMemberIds = (): string[] => {
-    const checkedMembers: string[] = [];
-    const checkboxes = membersListRef.current?.querySelectorAll(
-      'input[type="checkbox"]:checked'
-    );
-    if (checkboxes) {
-      checkboxes.forEach((checkbox) => {
-        checkedMembers.push(checkbox.id.replace("radio", ""));
-      });
-    }
-    return checkedMembers;
-  };
-
-  const getStages = () => {
-    const stagesList: string[] = [];
-    const stageElements = document.querySelectorAll(".stagesList input");
-
-    stageElements.forEach((stage) => {
-      const stageName = (stage as HTMLInputElement).value.trim();
-      if (stageName) {
-        stagesList.push(stageName);
-      }
-    });
-
-    return stagesList;
-  };
-
-  const addStage = () => {
-    const stagesList = document.querySelector(".stagesList");
-
-    const li = document.createElement("li");
-    li.className = "newStageContainer";
-
-    const input = document.createElement("input");
-    input.placeholder = "Add new stage";
-
-    const removeButton = document.createElement("button");
-    removeButton.onclick = () => {
-      li.remove();
-    };
-    removeButton.type = "button";
-
-    const root = createRoot(removeButton);
-    root.render(<FontAwesomeIcon icon={faTrash} />);
-
-    li.appendChild(input);
-    li.appendChild(removeButton);
-    stagesList?.appendChild(li);
-  };
+  }, [addStage, project, setModal, submitForm]);
 
   return (
     <button className="absoluteButton" onClick={handleModal}>

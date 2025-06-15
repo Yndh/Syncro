@@ -1,15 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import {
-  Invite,
-  Project,
-  ProjectMembership,
-  ProjectRole,
-} from "../types/interfaces";
+import { Project, ProjectRole } from "../types/interfaces";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCalendar,
   faCalendarDays,
   faCalendarXmark,
   faCopy,
@@ -18,27 +12,20 @@ import {
   faHashtag,
   faInfinity,
   faPlus,
-  faRightFromBracket,
   faUser,
-  faUserPlus,
   faUserSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import { useModal } from "../providers/ModalProvider";
-import { useRef, useState } from "react";
-import {
-  faSquareWebAwesomeStroke,
-  faSquareWebAwesome,
-} from "@fortawesome/free-brands-svg-icons";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { useSession } from "next-auth/react";
+import { useState, useCallback, useMemo } from "react";
 import Select from "./Select";
 import getUrl from "@/lib/getUrl";
 import QRCode from "react-qr-code";
 import { useProjects } from "../providers/ProjectsProvider";
 import { toast } from "react-toastify";
+import { useTheme } from "../providers/ThemeProvider";
 
 interface MembersListProps {
-  projectId: number;
+  projectId: string;
   project: Project;
   role: ProjectRole;
   setProject: React.Dispatch<React.SetStateAction<Project | undefined>>;
@@ -46,7 +33,7 @@ interface MembersListProps {
 
 const options = [
   {
-    value: ProjectRole.ADMIN as string,
+    value: ProjectRole.ADMIN,
     label: (
       <div className="roleSelect admin">
         <FontAwesomeIcon icon={faHammer} />
@@ -55,7 +42,7 @@ const options = [
     ),
   },
   {
-    value: ProjectRole.MEMBER as string,
+    value: ProjectRole.MEMBER,
     label: (
       <div className="roleSelect member">
         <FontAwesomeIcon icon={faUser} />
@@ -67,7 +54,7 @@ const options = [
 
 const ownerOption = [
   {
-    value: ProjectRole.OWNER as string,
+    value: ProjectRole.OWNER,
     label: (
       <div className="roleSelect owner">
         <FontAwesomeIcon icon={faCrown} />
@@ -206,32 +193,193 @@ export const MembersList = ({
   projectId,
   setProject,
 }: MembersListProps) => {
-  const session = useSession();
   const { setModal } = useModal();
   const { projects, setProjects } = useProjects();
+  const { theme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleModal = () => {
+  const copyToClipboardFallback = useCallback((link: string) => {
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = link;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      toast.success("Text copied to clipboard!");
+    } catch (err) {
+      toast.error(
+        "Uh-oh! We couldn't copy the invite link. Give it another try!"
+      );
+    }
+  }, []);
+
+  const copyLink = useCallback(
+    async (link: string) => {
+      try {
+        await navigator.clipboard.writeText(link);
+        toast.success(
+          "Success! The invite link has been copied to your clipboard!"
+        );
+      } catch (err) {
+        copyToClipboardFallback(link);
+      }
+    },
+    [copyToClipboardFallback]
+  );
+
+  const displayInvite = useCallback(
+    (invite: { linkId: string }) => {
+      setModal({
+        title: "Invite",
+        content: (
+          <>
+            <div className="row">
+              <label htmlFor="">
+                <p>Invite</p>
+                Join to project using this link
+              </label>
+              <div className="link">
+                <input
+                  type="text"
+                  disabled={true}
+                  value={`${getUrl()}/invite/${invite.linkId}`}
+                />
+                <button
+                  onClick={() =>
+                    copyLink(`${getUrl()}/invite/${invite.linkId}`)
+                  }
+                >
+                  <FontAwesomeIcon icon={faCopy} />
+                  Copy
+                </button>
+              </div>
+            </div>
+            <div className="qrCode">
+              <span>Or Scan QR Code</span>
+              <QRCode
+                value={`${getUrl()}/invite/${invite.linkId}`}
+                bgColor="transparent"
+                className="qrCodeElement"
+                fgColor={theme == "dark" ? "#FFFFFFb3" : "#141515b3"}
+              />
+            </div>
+          </>
+        ),
+        bottom: (
+          <>
+            <button className="secondary" onClick={() => setModal(null)}>
+              Close
+            </button>
+          </>
+        ),
+        setModal,
+      });
+    },
+    [setModal, copyLink]
+  );
+
+  const handleForm = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      const getSelectedValue = (id: string, defaultOption: any) => {
+        const selectedDiv = document.querySelector(`#${id}`);
+        return selectedDiv?.getAttribute("data-value") ?? defaultOption.value;
+      };
+
+      const inviteMaxUses = getSelectedValue("maxUsesSelect", usesOptions[0]);
+      let uses: number | null = null;
+      if (inviteMaxUses !== "never") {
+        uses = parseInt(inviteMaxUses.toString());
+      } else if (inviteMaxUses === undefined) {
+        toast.warn(
+          "Hold on! You need to specify the maximum number of uses for this invite."
+        );
+        return;
+      }
+
+      const inviteExpirationDate = getSelectedValue(
+        "expirationDateSelect",
+        expirationOptions[0]
+      );
+      let expirationDate: Date | null = null;
+      if (inviteExpirationDate !== "never") {
+        const currentTime = new Date();
+        expirationDate = new Date(
+          currentTime.getTime() +
+            parseInt(inviteExpirationDate.toString()) * 60000
+        );
+      } else if (inviteExpirationDate === undefined) {
+        toast.warn(
+          "Oops! Don’t forget to set an expiration date for the invite."
+        );
+        return;
+      }
+
+      setModal(null);
+
+      try {
+        const res = await fetch(`/api/project/${projectId}/invites`, {
+          method: "POST",
+          body: JSON.stringify({
+            maxUses: uses,
+            expires: expirationDate,
+          }),
+        });
+        const data = await res.json();
+
+        if (data.error) {
+          toast.error(
+            "Oops! The invite didn’t want to be created. Maybe it needs a pep talk?"
+          );
+          return;
+        }
+
+        if (data.invite) {
+          displayInvite(data.invite);
+          setProjects((prevProjects) =>
+            prevProjects.map((dproject) =>
+              dproject.id === projectId
+                ? {
+                    ...dproject,
+                    projectInvitations: [
+                      ...(dproject.projectInvitations || []),
+                      data.invite,
+                    ],
+                  }
+                : dproject
+            )
+          );
+          toast.success(
+            "Success! Your invite has been sent out—let the fun begin!"
+          );
+        }
+      } catch (err) {
+        toast.error("An unexpected error occurred while creating the invite.");
+      }
+    },
+    [setModal, projectId, setProjects, displayInvite]
+  );
+
+  const handleModal = useCallback(() => {
     setModal({
       title: "New Invite",
       content: (
         <form onSubmit={handleForm} id="inviteForm">
           <h2>Create invite</h2>
-
           <div className="formRow">
             <label>
               <p>Uses</p>
               <span>Number of members that can join</span>
             </label>
-
             <Select
               options={usesOptions}
               selectedOption={usesOptions[0]}
               id="maxUsesSelect"
-              onChange={(option) => {}}
+              onChange={() => {}}
             />
           </div>
-
           <div className="formRow">
             <label htmlFor="">
               <p>Expiration</p>
@@ -241,7 +389,7 @@ export const MembersList = ({
               options={expirationOptions}
               selectedOption={expirationOptions[0]}
               id="expirationDateSelect"
-              onChange={(option) => {}}
+              onChange={() => {}}
             />
           </div>
         </form>
@@ -258,190 +406,36 @@ export const MembersList = ({
       ),
       setModal,
     });
-  };
+  }, [setModal, handleForm]);
 
-  const handleForm = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const updateRole = useCallback(
+    async (membershipId: number, newRole: "ADMIN" | "MEMBER") => {
+      const prevProject = { ...project };
 
-    let inviteMaxUses;
-    try {
-      const selectedDivUses = document.querySelector("#maxUsesSelect")!;
-      inviteMaxUses =
-        selectedDivUses.getAttribute("data-value") ?? usesOptions[0].value;
-    } catch (err) {
-      toast.warn(
-        "Hold on! You need to specify the maximum number of uses for this invite."
-      );
-      return;
-    }
-
-    let uses: number | null = null;
-    if (inviteMaxUses !== "never") {
-      uses = parseInt(inviteMaxUses.toString());
-    }
-
-    let inviteExpirationDate;
-    try {
-      const selectedDivExpiration = document.querySelector(
-        "#expirationDateSelect"
-      )!;
-      inviteExpirationDate =
-        selectedDivExpiration.getAttribute("data-value") ??
-        expirationOptions[0].value;
-    } catch (err) {
-      toast.warn(
-        "Oops! Don’t forget to set an expiration date for the invite."
-      );
-      return;
-    }
-
-    let expirationDate: Date | null = null;
-    if (inviteExpirationDate !== "never") {
-      const currentTime = new Date();
-      expirationDate = new Date(
-        currentTime.getTime() +
-          parseInt(inviteExpirationDate.toString()) * 60000
-      );
-    }
-
-    setModal(null);
-
-    await fetch(`/api/project/${projectId}/invites`, {
-      method: "POST",
-      body: JSON.stringify({
-        maxUses: uses,
-        expires: expirationDate,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          toast.error(
-            "Oops! The invite didn’t want to be created. Maybe it needs a pep talk?"
-          );
-          return;
+      setProject((prevProj) => {
+        if (prevProj) {
+          return {
+            ...prevProj,
+            members: prevProj.members.map((member) =>
+              member.id === membershipId
+                ? { ...member, role: newRole as ProjectRole }
+                : member
+            ),
+          };
         }
-
-        if (data.invite) {
-          displayInvite(data.invite);
-          setProjects(
-            projects.map((dproject) =>
-              dproject.id === projectId
-                ? {
-                    ...dproject,
-                    projectInvitations: [
-                      ...(dproject.projectInvitations || []),
-                      data.invite,
-                    ],
-                  }
-                : dproject
-            )
-          );
-          toast.success(
-            "Success! Your invite has been sent out—let the fun begin!"
-          );
-        }
+        return undefined;
       });
-  };
 
-  const displayInvite = (invite: Invite) => {
-    setModal({
-      title: "Invite",
-      content: (
-        <>
-          <div className="row">
-            <label htmlFor="">
-              <p>Invite</p>
-              Join to project using this link
-            </label>
+      try {
+        const res = await fetch(`/api/project/${projectId}/role`, {
+          method: "POST",
+          body: JSON.stringify({
+            membershipId: membershipId,
+            role: newRole,
+          }),
+        });
+        const data = await res.json();
 
-            <div className="link">
-              <input
-                type="text"
-                disabled={true}
-                value={`${getUrl()}/invite/${invite.linkId}`}
-              />
-              <button
-                onClick={() => copyLink(`${getUrl()}/invite/${invite.linkId}`)}
-              >
-                <FontAwesomeIcon icon={faCopy} />
-                Copy
-              </button>
-            </div>
-          </div>
-
-          <div className="qrCode">
-            <span>Or Scan QR Code</span>
-            <QRCode
-              value={`${getUrl()}/${invite.linkId}`}
-              bgColor="transparent"
-            />
-          </div>
-        </>
-      ),
-      bottom: (
-        <>
-          <button className="secondary" onClick={() => setModal(null)}>
-            Close
-          </button>
-        </>
-      ),
-      setModal,
-    });
-  };
-
-  const copyLink = async (link: string) => {
-    try {
-      await navigator.clipboard.writeText(link);
-      toast.success(
-        "Success! The invite link has been copied to your clipboard!"
-      );
-    } catch (err) {
-      copyToClipboardFallback(link);
-    }
-  };
-  const copyToClipboardFallback = (link: string) => {
-    try {
-      const textarea = document.createElement("textarea");
-      textarea.value = link;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-      alert("Text copied to clipboard!");
-    } catch (err) {
-      toast.error(
-        "Uh-oh! We couldn't copy the invite link. Give it another try!"
-      );
-    }
-  };
-
-  const updateRole = async (membershipId: number, role: "ADMIN" | "MEMBER") => {
-    const prevProject = { ...project };
-
-    setProject((prevProj) => {
-      if (prevProj) {
-        return {
-          ...prevProj,
-          members: prevProj.members.map((member) =>
-            member.id === membershipId
-              ? { ...member, role: role as ProjectRole }
-              : member
-          ),
-        };
-      }
-      return undefined;
-    });
-
-    await fetch(`/api/project/${projectId}/role`, {
-      method: "POST",
-      body: JSON.stringify({
-        membershipId: membershipId,
-        role: role,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
         if (data.error) {
           toast.error(
             "Oops! We couldn't update the member's role. Please try again!"
@@ -454,15 +448,25 @@ export const MembersList = ({
           setProject(data.project);
           toast.success("Success! The member's role has been updated!");
         }
-      });
-  };
+      } catch (err) {
+        toast.error("An unexpected error occurred while updating the role.");
+        setProject(prevProject);
+      }
+    },
+    [project, projectId, setProject]
+  );
 
-  const kickUser = async (membershipId: number) => {
-    await fetch(`/api/project/${projectId}/members/${membershipId}`, {
-      method: "DELETE",
-    })
-      .then((res) => res.json())
-      .then((data) => {
+  const kickUser = useCallback(
+    async (membershipId: number) => {
+      try {
+        const res = await fetch(
+          `/api/project/${projectId}/members/${membershipId}`,
+          {
+            method: "DELETE",
+          }
+        );
+        const data = await res.json();
+
         if (data.error) {
           toast.error("Uh-oh! We couldn't kick the user. Please try again!");
           return;
@@ -472,21 +476,25 @@ export const MembersList = ({
           setProject(data.project);
           toast.success("Success! The user has been removed from the project!");
         }
-      });
-  };
+      } catch (err) {
+        toast.error("An unexpected error occurred while kicking the user.");
+      }
+    },
+    [projectId, setProject]
+  );
 
-  const filteredMembers = project?.members
-    ? project.members.filter(
-        (member) =>
-          member.user.name
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase().trim()) ||
-          member.user.email
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase().trim()) ||
-          member.role.toLowerCase().includes(searchQuery.toLowerCase().trim())
-      )
-    : [];
+  const filteredMembers = useMemo(() => {
+    if (!project?.members) {
+      return [];
+    }
+    const lowerCaseSearchQuery = searchQuery.toLowerCase().trim();
+    return project.members.filter(
+      (member) =>
+        member.user.name.toLowerCase().includes(lowerCaseSearchQuery) ||
+        member.user.email.toLowerCase().includes(lowerCaseSearchQuery) ||
+        member.role.toLowerCase().includes(lowerCaseSearchQuery)
+    );
+  }, [project?.members, searchQuery]);
 
   return (
     <div className="membersContainer">
@@ -497,7 +505,6 @@ export const MembersList = ({
             {project?.members ? project.members.length : 0}
           </span>
         </div>
-
         <div className="buttons">
           <input
             type="text"
@@ -505,7 +512,7 @@ export const MembersList = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          {(role == "ADMIN" || role == "OWNER") && (
+          {(role === ProjectRole.ADMIN || role === ProjectRole.OWNER) && (
             <button onClick={handleModal}>
               <FontAwesomeIcon icon={faPlus} />
               Invite member
@@ -528,27 +535,28 @@ export const MembersList = ({
               <div className="actions">
                 <Select
                   options={
-                    member.role == "OWNER"
+                    member.role === ProjectRole.OWNER
                       ? ownerOption
                       : [
                           {
                             ...options[0],
-                            disabled: role !== "OWNER",
+                            disabled: role !== ProjectRole.OWNER,
                           },
                           options[1],
                         ]
                   }
                   selectedOption={
-                    member.role == "OWNER"
+                    member.role === ProjectRole.OWNER
                       ? ownerOption[0]
                       : options.find(
-                          (option) => option.value.toUpperCase() == member.role
+                          (option) => option.value.toUpperCase() === member.role
                         )
                   }
                   disabled={
-                    member.role == "OWNER" ||
-                    role == "MEMBER" ||
-                    (role == "ADMIN" && member.role == "ADMIN")
+                    member.role === ProjectRole.OWNER ||
+                    role === ProjectRole.MEMBER ||
+                    (role === ProjectRole.ADMIN &&
+                      member.role === ProjectRole.ADMIN)
                   }
                   onChange={(option) => {
                     updateRole(
@@ -559,13 +567,14 @@ export const MembersList = ({
                     );
                   }}
                 />
-                {(role == "ADMIN" || role == "OWNER") && (
+                {(role === ProjectRole.ADMIN || role === ProjectRole.OWNER) && (
                   <button
                     onClick={() => kickUser(member.id)}
                     disabled={
-                      (role === "ADMIN" &&
-                        (member.role == "OWNER" || member.role == "ADMIN")) ||
-                      member.role == "OWNER"
+                      (role === ProjectRole.ADMIN &&
+                        (member.role === ProjectRole.OWNER ||
+                          member.role === ProjectRole.ADMIN)) ||
+                      member.role === ProjectRole.OWNER
                     }
                   >
                     <FontAwesomeIcon icon={faUserSlash} />
@@ -577,7 +586,6 @@ export const MembersList = ({
         </ul>
         <div className="membersRolesDescription">
           <h2>Access control</h2>
-
           <div className="roleDescription">
             <p>Owner</p>
             <span>
@@ -585,7 +593,6 @@ export const MembersList = ({
               oversees all tasks and members.
             </span>
           </div>
-
           <div className="roleDescription">
             <p>Administrator</p>
             <span>
@@ -593,7 +600,6 @@ export const MembersList = ({
               invite and remove members.
             </span>
           </div>
-
           <div className="roleDescription">
             <p>Member</p>
             <span>

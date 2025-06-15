@@ -2,7 +2,13 @@
 
 import ToDo from "@/app/components/todo";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Invite, Project, ProjectRole } from "@/app/types/interfaces";
 import { MembersList } from "@/app/components/MembersList";
 import { Notes } from "@/app/components/Notes";
@@ -30,32 +36,61 @@ interface ProjectParams {
   };
 }
 
+const isInviteExpired = (invite: Invite) => {
+  const now = new Date();
+  return invite.expires && new Date(invite.expires) < now;
+};
+
+const getCompletedTasksPercentage = (project: Project): string => {
+  if (!project?.tasks?.length) return "0.00";
+  const completed = project.tasks.filter(
+    (task) => task.taskStatus === "DONE"
+  ).length;
+  return ((completed / project.tasks.length) * 100).toFixed(2);
+};
+
+const getNonExpiredInvites = (project: Project): Invite[] => {
+  return project?.projectInvitations
+    ? project.projectInvitations.filter(
+        (invite) => invite && !isInviteExpired(invite)
+      )
+    : [];
+};
+
 const ProjectPage = ({ params }: ProjectParams) => {
-  const { projects, getProjectById } = useProjects();
+  const { projects, getProjectById, setProjectById } = useProjects();
   const { setModal } = useModal();
   const { setContextMenu } = useContextMenu();
   const { fetchProjects } = useProjects();
+  const router = useRouter();
+
+  const [project, setProject] = useState<Project | undefined>(undefined);
+  const [membershipId, setMembershipId] = useState<number | undefined>(
+    undefined
+  );
   const [role, setRole] = useState<ProjectRole>(ProjectRole.MEMBER);
-  const [membershipId, setMembershipId] = useState<number>();
+
   const [selectedTab, setSelectedTab] = useState<
     "tasks" | "notes" | "members" | "settings"
   >("tasks");
-  const router = useRouter();
-  const [project, setProject] = useState<Project>();
+  const [isLoading, setIsLoading] = useState(true);
+
   const projectNameInputRef = useRef<HTMLInputElement>(null);
   const projectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null);
   const newProjectNameInputRef = useRef<HTMLInputElement>(null);
   const newProjectDescriptionTextAreaRef = useRef<HTMLTextAreaElement>(null);
-  const isAdmin: boolean = role === "OWNER" || role === "ADMIN";
 
-  useEffect(() => {
-    const localProject = getProjectById(parseInt(params.id));
-    setProject(localProject);
-  }, [getProjectById, params.id]);
+  const isAdmin: boolean = useMemo(() => {
+    return role === ProjectRole.OWNER || role === ProjectRole.ADMIN;
+  }, [role]);
 
-  const fetchData = useCallback(async () => {
+  const fetchProjectData = useCallback(async () => {
     try {
-      await fetch(`/api/project/${params.id}`)
+      await fetch(`/api/project/${params.id}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
@@ -64,6 +99,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
             );
             router.push("/app");
           } else {
+            setIsLoading(false);
             setProject(data.project);
             setRole(data.role);
             setMembershipId(data.membershipId);
@@ -75,21 +111,206 @@ const ProjectPage = ({ params }: ProjectParams) => {
   }, [params.id, router]);
 
   useEffect(() => {
-    fetchData();
-  }, [params.id, router, fetchData]);
+    if (!isLoading) return;
+    const cachedProject = getProjectById(params.id);
+    console.log("== cached ==");
+    console.log(cachedProject);
+    if (cachedProject) {
+      setProject(cachedProject);
+      setIsLoading(false);
+    }
+  }, [projects]);
 
-  const isExpired = (invite: Invite) => {
-    const now = new Date();
-    return invite.expires && new Date(invite.expires) < now;
-  };
+  useEffect(() => {
+    fetchProjectData();
+  }, [fetchProjectData]);
 
-  const nonExpiredInvites = project?.projectInvitations
-    ? project.projectInvitations.filter(
-        (invite) => invite && !isExpired(invite)
-      )
-    : [];
+  useEffect(() => {
+    if (!project || project == getProjectById(params.id)) return;
+    console.log("saving project");
+    setProjectById(params.id, project);
+  }, [project]);
+
+  const leaveProject = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement>, projectId: string) => {
+      e.preventDefault();
+
+      setModal(null);
+
+      await fetch(`/api/project/${projectId}/members/${membershipId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            toast.error(
+              "Oops! Something went wrong while trying to leave the project. Give it another shot!"
+            );
+            return;
+          }
+
+          if (data.project) {
+            router.push("/app");
+
+            fetchProjects();
+            toast.success(
+              "You've successfully left the project! Onward to new endeavors!"
+            );
+          }
+        });
+    },
+    [membershipId, router, fetchProjects, setModal]
+  );
+
+  const deleteProject = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+
+      setModal(null);
+
+      await fetch(`/api/project/${project?.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            toast.error(
+              "Uh-oh! The project didn't want to be deleted just yet. Try again!"
+            );
+            return;
+          }
+
+          if (data.success) {
+            router.push("/app");
+            toast.success(
+              "Project deleted! Time to make room for new adventures!"
+            );
+          }
+        });
+    },
+    [project?.id, router, fetchProjects, setModal]
+  );
+
+  const updateProject = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      const name = (projectNameInputRef.current?.value as string).trim();
+
+      if (name === "") {
+        toast.warn("Hold on! A project needs a name. What should we call it?");
+        return;
+      }
+      if (name.length > 100) {
+        toast.warn(
+          "Heads up! The project name is a bit too lengthy. Try shortening it to keep things concise!"
+        );
+        return;
+      }
+      const description = (
+        projectDescriptionTextAreaRef.current?.value as string
+      ).trim();
+      if (description.length > 400) {
+        toast.warn(
+          "Warning! The project description is getting too wordy. Let's trim it down a bit!"
+        );
+        return;
+      }
+
+      setModal(null);
+
+      await fetch(`/api/project/${project?.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name,
+          description: description,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+
+          if (data.project) {
+            setProject(data.project);
+            toast.success("Success! Your project has been updated!");
+            return;
+          }
+        });
+    },
+    [project?.id, setModal]
+  );
+
+  const createProject = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      const name = (newProjectNameInputRef.current?.value as string).trim();
+      if (name === "") {
+        toast.warn("Hold on! A project needs a name. What should we call it?");
+        return;
+      }
+      if (name.length > 100) {
+        toast.warn(
+          "Heads up! The project name is a bit too lengthy. Try shortening it to keep things concise!"
+        );
+        return;
+      }
+
+      const description = (
+        newProjectDescriptionTextAreaRef.current?.value as string
+      ).trim();
+      if (description.length > 400) {
+        toast.warn(
+          "Warning! The project description is getting too wordy. Let's trim it down a bit!"
+        );
+        return;
+      }
+
+      setModal(null);
+
+      await fetch("/api/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, description }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            toast.error(
+              "Oops! Something went wrong while creating your project. Give it another try!"
+            );
+            return;
+          }
+
+          if (data.id) {
+            router.push(`/app/projects/${data.id}`);
+            fetchProjects();
+            toast.success(
+              "Congratulations! Your project has been created successfully!"
+            );
+          }
+        });
+    },
+    [router, fetchProjects, setModal]
+  );
 
   const openSettings = () => {
+    const nonExpiredInvites = project ? getNonExpiredInvites(project) : [];
+
     setModal({
       title: "Settings",
       content: (
@@ -116,7 +337,9 @@ const ProjectPage = ({ params }: ProjectParams) => {
             </label>
 
             <textarea
-              disabled={!(role === "ADMIN" || role === "OWNER")}
+              disabled={
+                !(role === ProjectRole.ADMIN || role === ProjectRole.OWNER)
+              }
               placeholder="Project name..."
               ref={projectDescriptionTextAreaRef}
               defaultValue={project?.description}
@@ -124,34 +347,30 @@ const ProjectPage = ({ params }: ProjectParams) => {
             />
           </div>
 
-          {(role === "ADMIN" || role === "OWNER") && (
+          {(role === ProjectRole.ADMIN || role === ProjectRole.OWNER) && (
             <div className="formRow">
               <label htmlFor="projectDescription">
                 <p>Invites</p>
-                <span>Manage project invitatuibs</span>
+                <span>Manage project invitations</span>
               </label>
 
               <div className="invites">
-                {nonExpiredInvites ? (
-                  nonExpiredInvites.length > 0 ? (
-                    nonExpiredInvites.map((invite) => (
-                      <InviteDetails
-                        invite={invite}
-                        key={invite.id}
-                        setProject={setProject}
-                      />
-                    ))
-                  ) : (
-                    <p className="noInvites">There is no active invites</p>
-                  )
+                {nonExpiredInvites.length > 0 ? (
+                  nonExpiredInvites.map((invite) => (
+                    <InviteDetails
+                      invite={invite}
+                      key={invite.id}
+                      setProject={setProject}
+                    />
+                  ))
                 ) : (
-                  <p className="noInvites">There is no active invites</p>
+                  <p className="noInvites">There are no active invites.</p>
                 )}
               </div>
             </div>
           )}
 
-          {role === "OWNER" ? (
+          {role === ProjectRole.OWNER ? (
             <div className="formRow action">
               <label htmlFor="projectDescription">
                 <p>Delete</p>
@@ -183,7 +402,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
       ),
       bottom: (
         <>
-          {(role === "ADMIN" || role === "OWNER") && (
+          {(role === ProjectRole.ADMIN || role === ProjectRole.OWNER) && (
             <button type="submit" form="settingsForm">
               Save changes
             </button>
@@ -197,56 +416,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
     });
   };
 
-  const updateProject = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const name = (projectNameInputRef.current?.value as string).trim();
-
-    if (name === "") {
-      toast.warn("Hold on! A project needs a name. What should we call it?");
-      return;
-    }
-    if (name.length > 100) {
-      toast.warn(
-        "Heads up! The project name is a bit too lengthy. Try shortening it to keep things concise!"
-      );
-      return;
-    }
-    const description = (
-      projectDescriptionTextAreaRef.current?.value as string
-    ).trim();
-    if (description.length > 400) {
-      toast.warn(
-        "Warning! The project description is getting too wordy. Let's trim it down a bit!"
-      );
-      return;
-    }
-
-    setModal(null);
-
-    await fetch(`/api/project/${project?.id}`, {
-      method: "POST",
-      body: JSON.stringify({
-        name: name,
-        description: description,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          alert(data.error);
-          return;
-        }
-
-        if (data.project) {
-          setProject(data.project);
-          toast.success("Success! Your project has been updated!");
-          return;
-        }
-      });
-  };
-
-  const leaveProjectModal = (projectId: number) => {
+  const leaveProjectModal = (projectId: string) => {
     setModal({
       title: "Leave Project",
       content: (
@@ -296,63 +466,6 @@ const ProjectPage = ({ params }: ProjectParams) => {
     });
   };
 
-  const leaveProject = async (
-    e: React.MouseEvent<HTMLButtonElement>,
-    projectId: number
-  ) => {
-    e.preventDefault();
-
-    setModal(null);
-
-    await fetch(`/api/project/${projectId}/members/${membershipId}`, {
-      method: "DELETE",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          toast.error(
-            "Oops! Something went wrong while trying to leave the project. Give it another shot!"
-          );
-          return;
-        }
-
-        if (data.project) {
-          router.push("/app");
-
-          fetchProjects();
-          toast.success(
-            "You've successfully left the project! Onward to new endeavors!"
-          );
-        }
-      });
-  };
-
-  const deleteProject = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-
-    setModal(null);
-
-    await fetch(`/api/project/${project?.id}`, {
-      method: "DELETE",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          toast.error(
-            "Uh-oh! The project didn't want to be deleted just yet. Try again!"
-          );
-          return;
-        }
-
-        if (data.success) {
-          router.push("/app");
-          toast.success(
-            "Project deleted! Time to make room for new adventures!"
-          );
-        }
-      });
-  };
-
   const handleNavChange = (tab: "tasks" | "notes" | "members" | "settings") => {
     if (tab === "settings") {
       openSettings();
@@ -361,17 +474,9 @@ const ProjectPage = ({ params }: ProjectParams) => {
     setSelectedTab(tab);
   };
 
-  const completedTasksPercentage = project?.tasks?.length
-    ? (
-        (project.tasks.filter((task) => task.taskStatus === "DONE").length /
-          project.tasks.length) *
-        100
-      ).toFixed(2)
-    : "0.00";
-
   const handleContextMenu = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
-    projectId: number
+    projectId: string
   ) => {
     e.preventDefault();
 
@@ -384,7 +489,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
       content: (
         <ol className="contextMenuList">
           {isAdmin && <li onClick={openSettings}>Project Settings</li>}
-          {role != "OWNER" && (
+          {role !== ProjectRole.OWNER && (
             <li onClick={() => leaveProjectModal(projectId)}>Leave</li>
           )}
         </ol>
@@ -393,7 +498,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
   };
 
   const displayMembers = () => {
-    if (!project) return;
+    if (!project || !project?.members || !project.members.length) return;
     const MAX_NUM_OF_MEMBERS = 3;
     const remainingMembers = project?.members.length - MAX_NUM_OF_MEMBERS;
 
@@ -461,56 +566,6 @@ const ProjectPage = ({ params }: ProjectParams) => {
     });
   };
 
-  const createProject = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const name = (newProjectNameInputRef.current?.value as string).trim();
-    if (name === "") {
-      toast.warn("Hold on! A project needs a name. What should we call it?");
-      return;
-    }
-    if (name.length > 100) {
-      toast.warn(
-        "Heads up! The project name is a bit too lengthy. Try shortening it to keep things concise!"
-      );
-      return;
-    }
-
-    const description = (
-      newProjectDescriptionTextAreaRef.current?.value as string
-    ).trim();
-    if (description.length > 400) {
-      toast.warn(
-        "Warning! The project description is getting too wordy. Let's trim it down a bit!"
-      );
-      return;
-    }
-
-    setModal(null);
-
-    await fetch("/api/projects", {
-      method: "POST",
-      body: JSON.stringify({ name, description }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          toast.error(
-            "Oops! Something went wrong while creating your project. Give it another try!"
-          );
-          return;
-        }
-
-        if (data.id) {
-          router.push(`/app/projects/${data.id}`);
-          fetchProjects();
-          toast.success(
-            "Congratulations! Your project has been created successfully!"
-          );
-        }
-      });
-  };
-
   return (
     <>
       <div className="projectPage">
@@ -534,9 +589,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
                     <span className="min"></span>
                     <Link
                       href={`/app/projects/${project.id}`}
-                      className={
-                        parseInt(params.id) === project.id ? "active" : ""
-                      }
+                      className={params.id === project.id ? "active" : ""}
                       onContextMenu={(e) => {
                         handleContextMenu(e, project.id);
                       }}
@@ -557,10 +610,15 @@ const ProjectPage = ({ params }: ProjectParams) => {
             <h2>{project?.name}</h2>
             <p>{project?.description}</p>
             <div className="percentage">
-              <progress value={completedTasksPercentage} max={100}>
+              <progress
+                value={project ? getCompletedTasksPercentage(project) : 0}
+                max={100}
+              >
                 {" "}
               </progress>
-              <p>{completedTasksPercentage}% Completed</p>
+              <p>
+                {project ? getCompletedTasksPercentage(project) : 0}% Completed
+              </p>
               {displayMembers()}
             </div>
           </div>
@@ -623,15 +681,16 @@ const ProjectPage = ({ params }: ProjectParams) => {
           <div className="projectElementContainer">
             {selectedTab === "tasks" && project && (
               <ToDo
-                projectId={project?.id as number}
+                projectId={project?.id as string}
                 isAdmin={isAdmin}
                 tasks={project.tasks}
+                setProject={setProject}
               />
             )}
             {selectedTab === "notes" && project && (
               <Notes
                 isAdmin={isAdmin}
-                projectId={project?.id as number}
+                projectId={project?.id as string}
                 project={project}
               />
             )}

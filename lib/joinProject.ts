@@ -1,6 +1,6 @@
 import { prisma } from "./prisma";
 
-export async function joinProject(userId: string, projectId: number) {
+export async function joinProject(userId: string, projectId: string) {
   const project = await prisma.project.findFirst({
     where: { id: projectId },
   });
@@ -25,5 +25,5 @@ export async function joinProject(userId: string, projectId: number) {
     },
   });
 
-  return membership.projectId as number;
+  return membership.projectId as string;
 }
