@@ -16,7 +16,8 @@ import "../globals.scss";
 
 export const metadata: Metadata = {
   title: "Syncro",
-  description: "",
+  description:
+    "Your free project management solution. Create projects, invite members, track tasks with subtasks, notes & more. Simplify collaboration now!",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

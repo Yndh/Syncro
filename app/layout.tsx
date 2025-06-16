@@ -9,7 +9,7 @@ const familjenGrotest = Familjen_Grotesk({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Syncro",
   description:
-    "our free project management solution. Create projects, invite members, track tasks with subtasks, notes & more. Simplify collaboration now!",
+    "Your free project management solution. Create projects, invite members, track tasks with subtasks, notes & more. Simplify collaboration now!",
 };
 
 export default function RootLayout({
