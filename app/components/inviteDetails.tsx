@@ -86,10 +86,8 @@ export const InviteDetails = ({ invite, setProject }: InviteDetailsProps) => {
 
   const deleteInvite = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (
-      window.confirm(`Do you really want to delete invite ${invite.linkId}?`)
-    ) {
-      await fetch(`/api/invite/${invite.linkId}/join`, {
+    try {
+      await fetch(`/api/invite/${invite.linkId}`, {
         method: "DELETE",
       })
         .then((res) => res.json())
@@ -105,8 +103,12 @@ export const InviteDetails = ({ invite, setProject }: InviteDetailsProps) => {
             const dataProject = data.project[0];
             setProject(dataProject);
             toast.success("Success! The invite has been deleted!");
+            setModal(null);
           }
         });
+    } catch (err) {
+      toast.error("Oops! We couldn’t delete the invite. Please try again!");
+      return;
     }
   };
 
@@ -131,6 +133,30 @@ export const InviteDetails = ({ invite, setProject }: InviteDetailsProps) => {
           toast.success("Success! The invite has been updated!");
         }
       });
+  };
+
+  const confirmDeletionModal = () => {
+    setModal({
+      title: "Confirm Invite Deletion",
+      content: (
+        <div className="header">
+          <h1>Confirm Invite Deletion</h1>
+          <p>
+            Are you sure you want to delete this invite? Once it&apos;s gone, it
+            can&apos;t be retrieved!.
+          </p>
+        </div>
+      ),
+      bottom: (
+        <>
+          <button onClick={deleteInvite}>Delete Invite</button>
+          <button className="secondary" onClick={() => setModal(null)}>
+            Cancel
+          </button>
+        </>
+      ),
+      setModal,
+    });
   };
 
   return (
@@ -176,7 +202,7 @@ export const InviteDetails = ({ invite, setProject }: InviteDetailsProps) => {
             <p>Actions</p>
             <span>Delete this invite</span>
           </label>
-          <button onClick={deleteInvite}>
+          <button onClick={confirmDeletionModal}>
             <FontAwesomeIcon icon={faTrash} />
           </button>
         </div>

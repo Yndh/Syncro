@@ -194,7 +194,6 @@ export const MembersList = ({
   setProject,
 }: MembersListProps) => {
   const { setModal } = useModal();
-  const { projects, setProjects } = useProjects();
   const { theme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -276,7 +275,7 @@ export const MembersList = ({
         setModal,
       });
     },
-    [setModal, copyLink]
+    [setModal, copyLink, theme]
   );
 
   const handleForm = useCallback(
@@ -338,19 +337,18 @@ export const MembersList = ({
 
         if (data.invite) {
           displayInvite(data.invite);
-          setProjects((prevProjects) =>
-            prevProjects.map((dproject) =>
-              dproject.id === projectId
-                ? {
-                    ...dproject,
-                    projectInvitations: [
-                      ...(dproject.projectInvitations || []),
-                      data.invite,
-                    ],
-                  }
-                : dproject
-            )
-          );
+          setProject((prevProject) => {
+            if (!prevProject) return prevProject;
+
+            return {
+              ...prevProject,
+              projectInvitations: [
+                ...(prevProject.projectInvitations || []),
+                data.invite,
+              ],
+            };
+          });
+
           toast.success(
             "Success! Your invite has been sent out—let the fun begin!"
           );
@@ -359,7 +357,7 @@ export const MembersList = ({
         toast.error("An unexpected error occurred while creating the invite.");
       }
     },
-    [setModal, projectId, setProjects, displayInvite]
+    [setModal, projectId, setProject, displayInvite]
   );
 
   const handleModal = useCallback(() => {

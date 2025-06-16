@@ -46,6 +46,8 @@ const ToDo = ({
 
   const moveTask = useCallback(
     async (task: Task, newStatus: TaskStatus) => {
+      if (typeof tasksList != "object") return;
+
       const prevTasksList = [...tasksList];
 
       setTasksList((prevTasks) =>

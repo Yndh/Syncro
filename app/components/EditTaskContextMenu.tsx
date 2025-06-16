@@ -160,7 +160,7 @@ const EditTaskContextMenu = ({
             </label>
             <div className="membersList" ref={membersListRef}>
               {project &&
-                project?.members &&
+                project.members &&
                 project.members.map((member) => (
                   <div key={member.id}>
                     <input

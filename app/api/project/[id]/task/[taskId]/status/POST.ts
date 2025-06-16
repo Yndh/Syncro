@@ -93,20 +93,6 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const projectMembers = await prisma.projectMembership.findMany({
-    where: { projectId: id },
-  });
-
-  if (
-    !existingTask.assignedTo.some((user) => user.id === session.user?.id) &&
-    !admin
-  ) {
-    return new NextResponse(
-      JSON.stringify({ error: "Unauthorized access to task." }),
-      { status: 403 }
-    );
-  }
-
   try {
     const updatedTask = await prisma.task.update({
       where: { id: taskId },

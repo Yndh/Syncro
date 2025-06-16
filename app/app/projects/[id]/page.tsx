@@ -29,6 +29,7 @@ import { toast } from "react-toastify";
 import { useContextMenu } from "@/app/providers/ContextMenuProvider";
 import Link from "next/link";
 import Image from "next/image";
+import { Skeleton } from "@/app/components/Skeleton";
 
 interface ProjectParams {
   params: {
@@ -113,23 +114,27 @@ const ProjectPage = ({ params }: ProjectParams) => {
   useEffect(() => {
     if (!isLoading) return;
     const cachedProject = getProjectById(params.id);
-    console.log("== cached ==");
-    console.log(cachedProject);
     if (cachedProject) {
       setProject(cachedProject);
       setIsLoading(false);
     }
-  }, [projects]);
+  }, [projects, getProjectById, isLoading, params.id]);
 
   useEffect(() => {
     fetchProjectData();
   }, [fetchProjectData]);
 
   useEffect(() => {
-    if (!project || project == getProjectById(params.id)) return;
-    console.log("saving project");
-    setProjectById(params.id, project);
-  }, [project]);
+    const savedProject = getProjectById(params.id);
+    if (!project || !savedProject) return;
+
+    const hasChanged = JSON.stringify(project) !== JSON.stringify(savedProject);
+
+    if (hasChanged) {
+      console.log("saving project", project.id);
+      setProjectById(params.id, project);
+    }
+  }, [project, params.id, setProjectById]);
 
   const leaveProject = useCallback(
     async (e: React.MouseEvent<HTMLButtonElement>, projectId: string) => {
@@ -194,7 +199,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
           }
         });
     },
-    [project?.id, router, fetchProjects, setModal]
+    [project?.id, router, setModal]
   );
 
   const updateProject = useCallback(
@@ -581,9 +586,17 @@ const ProjectPage = ({ params }: ProjectParams) => {
           <h2>Projects</h2>
 
           <div className="list">
-            <p>All Projects ({projects ? projects.length : 0})</p>
+            <p>
+              All Projects (
+              {projects ? (
+                projects.length
+              ) : (
+                <Skeleton size="small" width="text" />
+              )}
+              )
+            </p>
             <ol>
-              {projects &&
+              {projects ? (
                 projects.map((project) => (
                   <li key={`project${project.id}`}>
                     <span className="min"></span>
@@ -597,7 +610,10 @@ const ProjectPage = ({ params }: ProjectParams) => {
                       {project.name}
                     </Link>
                   </li>
-                ))}
+                ))
+              ) : (
+                <Skeleton width="full" size="medium" />
+              )}
             </ol>
             <button onClick={createProjectModal}>
               <FontAwesomeIcon icon={faPlus} />
@@ -607,100 +623,121 @@ const ProjectPage = ({ params }: ProjectParams) => {
         </div>
         <div className="projectContainer">
           <div className="header">
-            <h2>{project?.name}</h2>
-            <p>{project?.description}</p>
-            <div className="percentage">
-              <progress
-                value={project ? getCompletedTasksPercentage(project) : 0}
-                max={100}
-              >
-                {" "}
-              </progress>
-              <p>
-                {project ? getCompletedTasksPercentage(project) : 0}% Completed
-              </p>
-              {displayMembers()}
-            </div>
+            {project ? (
+              <>
+                <h2>{project?.name}</h2>
+                <p>{project?.description}</p>
+                <div className="percentage">
+                  <progress
+                    value={project ? getCompletedTasksPercentage(project) : 0}
+                    max={100}
+                  >
+                    {" "}
+                  </progress>
+                  <p>
+                    {project ? getCompletedTasksPercentage(project) : 0}%
+                    Completed
+                  </p>
+                  {displayMembers()}
+                </div>
+              </>
+            ) : (
+              <>
+                <Skeleton size="large" />
+                <Skeleton width="quarter" />
+                <Skeleton size="medium" />
+              </>
+            )}
           </div>
 
-          <div className="projectNav">
-            <div className="navElement">
-              <input
-                type="radio"
-                id="tasks"
-                name="projectNav"
-                checked={selectedTab === "tasks"}
-                onChange={() => handleNavChange("tasks")}
-              />
-              <label htmlFor="tasks">
-                <FontAwesomeIcon icon={faListCheck} />
-                <span>Tasks</span>
-              </label>
+          {project ? (
+            <div className="projectNav">
+              <div className="navElement">
+                <input
+                  type="radio"
+                  id="tasks"
+                  name="projectNav"
+                  checked={selectedTab === "tasks"}
+                  onChange={() => handleNavChange("tasks")}
+                />
+                <label htmlFor="tasks">
+                  <FontAwesomeIcon icon={faListCheck} />
+                  <span>Tasks</span>
+                </label>
+              </div>
+              <div className="navElement">
+                <input
+                  type="radio"
+                  id="notes"
+                  name="projectNav"
+                  checked={selectedTab === "notes"}
+                  onChange={() => handleNavChange("notes")}
+                />
+                <label htmlFor="notes">
+                  <FontAwesomeIcon icon={faNoteSticky} />
+                  <span>Notes</span>
+                </label>
+              </div>
+              <div className="navElement">
+                <input
+                  type="radio"
+                  id="members"
+                  name="projectNav"
+                  checked={selectedTab === "members"}
+                  onChange={() => handleNavChange("members")}
+                />
+                <label htmlFor="members">
+                  <FontAwesomeIcon icon={faUsers} />
+                  <span>Members</span>
+                </label>
+              </div>
+              <div className="navElement">
+                <input
+                  type="radio"
+                  id="settings"
+                  name="projectNav"
+                  checked={selectedTab === "settings"}
+                  onChange={() => handleNavChange("settings")}
+                />
+                <label htmlFor="settings">
+                  <FontAwesomeIcon icon={faCog} />
+                  <span>Settings</span>
+                </label>
+              </div>
             </div>
-            <div className="navElement">
-              <input
-                type="radio"
-                id="notes"
-                name="projectNav"
-                checked={selectedTab === "notes"}
-                onChange={() => handleNavChange("notes")}
-              />
-              <label htmlFor="notes">
-                <FontAwesomeIcon icon={faNoteSticky} />
-                <span>Notes</span>
-              </label>
-            </div>
-            <div className="navElement">
-              <input
-                type="radio"
-                id="members"
-                name="projectNav"
-                checked={selectedTab === "members"}
-                onChange={() => handleNavChange("members")}
-              />
-              <label htmlFor="members">
-                <FontAwesomeIcon icon={faUsers} />
-                <span>Members</span>
-              </label>
-            </div>
-            <div className="navElement">
-              <input
-                type="radio"
-                id="settings"
-                name="projectNav"
-                checked={selectedTab === "settings"}
-                onChange={() => handleNavChange("settings")}
-              />
-              <label htmlFor="settings">
-                <FontAwesomeIcon icon={faCog} />
-                <span>Settings</span>
-              </label>
-            </div>
-          </div>
+          ) : (
+            <Skeleton size="large" />
+          )}
 
           <div className="projectElementContainer">
-            {selectedTab === "tasks" && project && (
-              <ToDo
-                projectId={project?.id as string}
-                isAdmin={isAdmin}
-                tasks={project.tasks}
-                setProject={setProject}
-              />
-            )}
-            {selectedTab === "notes" && project && (
-              <Notes
-                isAdmin={isAdmin}
-                projectId={project?.id as string}
-                project={project}
-              />
-            )}
-            {selectedTab === "members" && project && role && (
-              <MembersList
-                projectId={project.id}
-                project={project}
-                role={role}
-                setProject={setProject}
-              />
+            {project ? (
+              <>
+                {selectedTab === "tasks" && project && (
+                  <ToDo
+                    projectId={project?.id as string}
+                    isAdmin={isAdmin}
+                    tasks={project.tasks}
+                    setProject={setProject}
+                  />
+                )}
+                {selectedTab === "notes" && project && (
+                  <Notes
+                    isAdmin={isAdmin}
+                    projectId={project?.id as string}
+                    project={project}
+                  />
+                )}
+                {selectedTab === "members" && project && role && (
+                  <MembersList
+                    projectId={project.id}
+                    project={project}
+                    role={role}
+                    setProject={setProject}
+                  />
+                )}
+              </>
+            ) : (
+              <Skeleton size="full" width="full" />
             )}
           </div>
         </div>

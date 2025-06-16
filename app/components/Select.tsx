@@ -33,8 +33,6 @@ const Select = ({
       selectContainerRef.current &&
       !selectContainerRef.current.contains(e.target as Node)
     ) {
-      console.log("close");
-
       setIsOpen(false);
     }
   };

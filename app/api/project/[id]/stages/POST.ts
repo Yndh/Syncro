@@ -38,17 +38,18 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   }
 
   const body: UpdateStageReqBody = await req.json();
+  const { id: stageId, taskId, isCompleted } = body;
 
   try {
     const admin = await isAdmin(id);
 
     const taskStage = await prisma.taskStage.findUnique({
-      where: { id: body.id },
+      where: { id: stageId },
       include: {},
     });
 
     const existingTask = await prisma.task.findUnique({
-      where: { id: body.taskId },
+      where: { id: taskId },
       include: { assignedTo: true, stages: true },
     });
 
@@ -92,17 +93,29 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       );
     }
 
-    const updatedStage = await prisma.taskStage.update({
-      where: { id: body.id },
+    const updatedTask = await prisma.task.update({
+      where: { id: taskId },
       data: {
-        isCompleted: body.isCompleted,
+        taskStatus:
+          isCompleted && existingTask.taskStatus == "TO_DO"
+            ? "ON_GOING"
+            : existingTask.taskStatus,
+        stages: {
+          update: {
+            where: { id: stageId },
+            data: { isCompleted: isCompleted },
+          },
+        },
       },
-      include: { task: true },
+      include: {
+        stages: true,
+        assignedTo: true,
+      },
     });
 
     return new NextResponse(
       JSON.stringify({
-        stage: updatedStage,
+        task: updatedTask,
       }),
       { status: 200 }
     );

@@ -32,12 +32,14 @@ export const TaskCard = memo(
     moveTask,
     showProject = false,
   }: TaskCardProps) => {
-    const session = useSession();
+    const session = useSession({
+      required: true,
+    });
     const cardRef = useRef<HTMLDivElement>(null);
 
-    const isAssigned = useMemo(() => {
-      return task.assignedTo.some((user) => user.id === session.data?.user?.id);
-    }, [task.assignedTo, session.data?.user?.id]);
+    const isAssigned = task.assignedTo.some(
+      (user) => user.id === session.data?.user.id
+    );
 
     const [{ isDragging }, drag] = useDrag(
       () => ({
@@ -92,7 +94,10 @@ export const TaskCard = memo(
 
     const updateStage = useCallback(
       async (e: React.ChangeEvent<HTMLInputElement>, stageId: number) => {
-        const prevTasksList = [...tasksList];
+        const prevTask = tasksList.find(
+          (task2) => (task2.id = task.id)
+        ) as Task;
+        if (!prevTask) return;
 
         setTasks((prevTasks) =>
           prevTasks.map((prevTask) =>
@@ -129,26 +134,29 @@ export const TaskCard = memo(
             toast.error(
               "Uh-oh! We couldn't update the task stage. It seems to be stuck in limbo!"
             );
-            setTasks(prevTasksList);
+            setTasks((prevTasks) =>
+              prevTasks.map((prevTaskk) =>
+                prevTaskk.id == prevTask.id ? prevTask : prevTaskk
+              )
+            );
             e.target.checked = !check;
-          } else if (data.stage as TaskStage) {
+          } else if (data.task as Task) {
+            const { task } = data as { task: Task };
+
             setTasks((prevTasks) =>
               prevTasks.map((prevTask) =>
-                prevTask.id === data.stage.taskId
-                  ? {
-                      ...prevTask,
-                      stages: prevTask.stages.map((stage) =>
-                        stage.id === data.stage.id ? data.stage : stage
-                      ),
-                    }
-                  : prevTask
+                prevTask.id === task.id ? task : prevTask
               )
             );
           }
         } catch (error) {
           console.error("Error updating stage:", error);
           toast.error("Failed to update task stage due to a network error.");
-          setTasks(prevTasksList);
+          setTasks((prevTasks) =>
+            prevTasks.map((prevTaskk) =>
+              prevTaskk.id == prevTask.id ? prevTask : prevTaskk
+            )
+          );
           e.target.checked = !check;
         }
       },
@@ -203,18 +211,25 @@ export const TaskCard = memo(
                       id={`stage${stage.id}`}
                       defaultChecked={stage.isCompleted}
                       onChange={(e) => updateStage(e, stage.id)}
-                      disabled={
-                        !isAssigned ||
-                        (!isAdmin &&
-                          (task.taskStatus === TaskStatus.REVIEWING ||
-                            task.taskStatus === TaskStatus.DONE))
-                      }
+                      disabled={!isAssigned && !isAdmin}
                     />
                     <label htmlFor={`stage${stage.id}`}>{stage.title}</label>
                   </div>
                 ))}
               </div>
             )}
+
+            {task.stages &&
+              task.stages.length > 0 &&
+              task.stages.filter((task) => !task.isCompleted).length === 0 &&
+              (isAssigned || isAdmin) &&
+              task.taskStatus == TaskStatus.ON_GOING && (
+                <div className="button">
+                  <button onClick={() => moveTask(task, TaskStatus.REVIEWING)}>
+                    Send to review!
+                  </button>
+                </div>
+              )}
 
             <div className="contentBottom">
               <div>
@@ -249,6 +264,7 @@ export const TaskCard = memo(
       isAssigned,
       isAdmin,
       displayAssignedMembers,
+      moveTask,
     ]);
 
     return (
@@ -324,3 +340,5 @@ export const TaskCard = memo(
     );
   }
 );
+
+TaskCard.displayName = "TaskCard";

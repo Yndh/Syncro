@@ -27,7 +27,7 @@ export interface Project {
 export interface ProjectMembership {
   id: number;
   project: Project;
-  projectId: number;
+  projectId: string;
   user: User;
   userId: string;
   role: ProjectRole;
@@ -41,7 +41,7 @@ export interface Task {
   description?: string;
   dueTime?: Date;
   project?: Project;
-  projectId: number;
+  projectId: string;
   priority: TaskPriority;
   taskStatus: TaskStatus;
   stages: TaskStage[];
@@ -65,7 +65,7 @@ export interface Note {
   title: string;
   description?: string;
   project: Project;
-  projectId: number;
+  projectId: string;
   createdBy: User;
   createdById: string;
   createdAt: Date;
@@ -78,7 +78,7 @@ export interface Invite {
   maxUses?: number;
   uses: number;
   project: Project;
-  projectId: number;
+  projectId: string;
   expires?: DateTime;
   createdBy: User;
   createdById: string;

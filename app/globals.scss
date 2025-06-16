@@ -57,6 +57,7 @@ body {
     --warning-color-transparent: #{$warning-color-transparent};
     --high-color-transparent: #{$high-color-transparent};
     --success-color-transparent: #{$success-color-transparent};
+    --shimmer-color: #{$shimmer-gradient-light};
   }
 
   &.dark {
@@ -83,6 +84,7 @@ body {
     --warning-color-transparent: #{$dark-warning-color-transparent};
     --high-color-transparent: #{$dark-high-color-transparent};
     --success-color-transparent: #{$dark-success-color-transparent};
+    --shimmer-color: #{$shimmer-gradient-dark};
   }
 }
 
@@ -172,15 +174,16 @@ input[type="checkbox"] {
     border-radius: 5px;
     max-height: 150px;
     overflow-y: auto;
-    z-index: 99 !important;
+    z-index: 99999 !important;
     user-select: none;
     opacity: 0;
     pointer-events: none;
-    transition: 0.3;
+    transition: 0.3s;
+    overflow: auto;
 
     &.visible {
       opacity: 1;
-      pointer-events: all;
+      pointer-events: auto;
     }
 
     li.select-option {
@@ -1080,6 +1083,7 @@ main {
               display: flex;
               justify-content: space-between;
               align-items: center;
+              flex-wrap: wrap;
               width: 100%;
 
               span.dueTime {
@@ -1827,6 +1831,14 @@ main {
         }
       }
 
+      .button {
+        width: 100%;
+
+        button {
+          width: 100%;
+        }
+      }
+
       .contentBottom {
         display: flex;
         justify-content: space-between;
@@ -2435,6 +2447,50 @@ main {
   }
 }
 
+.skeleton {
+  border-radius: 5px;
+  display: block;
+  color: transparent;
+  pointer-events: none;
+  background: var(--shimmer-color);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  margin-bottom: 5px;
+
+  &.small {
+    height: 20px;
+  }
+
+  &.medium {
+    height: 30px;
+  }
+
+  &.large {
+    height: 50px;
+  }
+
+  &.full {
+    height: 100%;
+  }
+
+  &.wfull {
+    width: 100%;
+  }
+
+  &.whalf {
+    width: 50%;
+  }
+
+  &.wquarter {
+    width: 25%;
+  }
+
+  &.wtext {
+    width: 5px;
+  }
+}
+
+
 ::-webkit-scrollbar {
   display: none;
   width: 0px;
@@ -2458,6 +2514,16 @@ body::-webkit-scrollbar {
   100% {
     scale: 1;
     opacity: 0.15;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
   }
 }
 

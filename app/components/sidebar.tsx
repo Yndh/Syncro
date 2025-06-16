@@ -87,19 +87,6 @@ const Sidebar = () => {
   });
 
   useEffect(() => {
-    const interval = setInterval(() => update(), 1000 * 60 * 60);
-    return () => clearInterval(interval);
-  }, [update]);
-
-  useEffect(() => {
-    const visibilityHandler = () =>
-      document.visibilityState === "visible" && update();
-    window.addEventListener("visibilitychange", visibilityHandler, false);
-    return () =>
-      window.removeEventListener("visibilitychange", visibilityHandler, false);
-  }, [update]);
-
-  useEffect(() => {
     if (projects != null && projects.length > 0) {
       setProjectId(projects[0].id);
     } else if (projects == null) {
@@ -344,23 +331,25 @@ const Sidebar = () => {
               disabled={true}
             />
           </div>
-          <div className="formRow">
-            <label>
-              <p>Provider</p>
-              <span>Your auth provider</span>
-            </label>
+          {session && session?.user.provider && (
+            <div className="formRow">
+              <label>
+                <p>Provider</p>
+                <span>Your auth provider</span>
+              </label>
 
-            <Select
-              disabled={true}
-              options={providersOptions}
-              selectedOption={providersOptions.find(
-                (option) =>
-                  option.value.toLowerCase() ===
-                  session?.user.provider?.toLowerCase()
-              )}
-              onChange={() => {}}
-            />
-          </div>
+              <Select
+                disabled={true}
+                options={providersOptions}
+                selectedOption={providersOptions.find(
+                  (option) =>
+                    option.value.toLowerCase() ===
+                    session?.user.provider?.toLowerCase()
+                )}
+                onChange={() => {}}
+              />
+            </div>
+          )}
 
           <div className="formRow">
             <label>
@@ -515,8 +504,6 @@ const Sidebar = () => {
   const deleteAccount = async () => {
     const nameValue = (deleteUsernameInput.current?.value as string).trim();
     const userName = (session?.user.name as string).trim();
-    console.log(`${userName}, ${nameValue}`);
-    console.log(userName == nameValue);
 
     if (nameValue !== userName) {
       toast.error("Oops! Looks like you forgot your own name. Try again!");
@@ -533,7 +520,7 @@ const Sidebar = () => {
     }
 
     try {
-      await fetch("api/user", {
+      await fetch("/api/user", {
         method: "DELETE",
       })
         .then((res) => res.json())
@@ -548,6 +535,7 @@ const Sidebar = () => {
               "Goodbye! Your account is officially on an endless vacation"
             );
             setModal(null);
+            window.location.reload();
           }
         });
     } catch (err) {

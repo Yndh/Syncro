@@ -23,7 +23,10 @@ $error-color-transparent: #ff4d4d33;
 $warning-color-transparent: #FFCC0033;
 $high-color-transparent: #FFA50033;
 $success-color-transparent: #74D04833;
-
+$shimmer-gradient-light: linear-gradient(100deg,
+        rgba(220, 224, 230, 0.4) 20%,
+        rgba(250, 250, 250, 0.7) 50%,
+        rgba(220, 224, 230, 0.4) 80%);
 
 
 
@@ -51,3 +54,7 @@ $dark-error-color-transparent: #D63C3C33;
 $dark-warning-color-transparent: #FFBB3333;
 $dark-high-color-transparent: #FF880033;
 $dark-success-color-transparent: #4A983333;
+$shimmer-gradient-dark: linear-gradient(100deg,
+        rgba(60, 60, 60, 0.4) 20%,
+        rgba(100, 100, 100, 0.6) 50%,
+        rgba(60, 60, 60, 0.4) 80%);
