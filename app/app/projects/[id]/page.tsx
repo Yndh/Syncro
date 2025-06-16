@@ -134,7 +134,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
       console.log("saving project", project.id);
       setProjectById(params.id, project);
     }
-  }, [project, params.id, setProjectById]);
+  }, [project, params.id, setProjectById, getProjectById]);
 
   const leaveProject = useCallback(
     async (e: React.MouseEvent<HTMLButtonElement>, projectId: string) => {

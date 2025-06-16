@@ -1839,6 +1839,11 @@ main {
         }
       }
 
+      ol.pwalist {
+        font-size: 16px;
+        padding-left: 16px;
+      }
+
       .contentBottom {
         display: flex;
         justify-content: space-between;
@@ -2829,6 +2834,10 @@ body::-webkit-scrollbar {
     .modal {
       width: 95%;
       max-height: 70vh;
+
+      .title h1 {
+        font-size: 24px;
+      }
 
       .content {
         overflow-y: scroll;

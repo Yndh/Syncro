@@ -9,8 +9,37 @@ import { SessionProvider } from "next-auth/react";
 import { ProjectsProvider } from "../providers/ProjectsProvider";
 import { TasksProvider } from "../providers/UserTasksProvider";
 import "react-toastify/dist/ReactToastify.css";
-import { ThemeProvider } from "../providers/ThemeProvider";
 import { ToastContainerComponent } from "../components/ToastContainerComponent";
+import { PwaPrompt } from "../components/PwaPrompt";
+import { Metadata, Viewport } from "next";
+
+export const metadata: Metadata = {
+  title: "Syncro",
+  description: "",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "My App",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    {
+      media: "(prefers-color-scheme: light)",
+      color:
+        "linear-gradient(120deg, rgba(243, 246, 248, 1) 0%, rgba(241, 245, 230, 1) 100%)",
+    },
+    {
+      media: "(prefers-color-scheme: dark)",
+      color: " linear-gradient(120deg, #1C1C1C 0%, #1C1C1C 100%)",
+    },
+  ],
+};
 
 export default async function Home({
   children,
@@ -23,26 +52,22 @@ export default async function Home({
   return (
     <div className="app__container">
       <SessionProvider session={session}>
-        <ThemeProvider>
-          <ProjectsProvider>
-            <TasksProvider>
-              <ModalProvider>
-                <Sidebar />
-                <ContextMenuProvider>
-                  <main>
-                    <ContextMenu />
-                    {children}
-                  </main>
-                </ContextMenuProvider>
-                <div className="blurCircle"></div>
-                <div className="blurCircle"></div>
-                <div className="blurCircle"></div>
-                <Modal />
-              </ModalProvider>
-            </TasksProvider>
-          </ProjectsProvider>
-          <ToastContainerComponent />
-        </ThemeProvider>
+        <ProjectsProvider>
+          <TasksProvider>
+            <ModalProvider>
+              <Sidebar />
+              <ContextMenuProvider>
+                <main>
+                  <ContextMenu />
+                  <PwaPrompt />
+                  {children}
+                </main>
+              </ContextMenuProvider>
+              <Modal />
+            </ModalProvider>
+          </TasksProvider>
+        </ProjectsProvider>
+        <ToastContainerComponent />
       </SessionProvider>
     </div>
   );
