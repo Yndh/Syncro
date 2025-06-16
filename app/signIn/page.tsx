@@ -28,7 +28,7 @@ export default function SignInPage() {
           Sign in using GitHub
         </button>
         <span className="or">or</span>
-        <button>
+        <button onClick={() => signIn("google", { callbackUrl: "/app" })}>
           <FontAwesomeIcon icon={faGoogle as IconDefinition} />
           Sign in using Google
         </button>

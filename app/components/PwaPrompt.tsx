@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useModal } from "../providers/ModalProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -31,7 +31,7 @@ export const PwaPrompt = () => {
   const [showPrompt, setShowPrompt] = useState(false);
   const { setModal } = useModal();
 
-  const isPwa = (): boolean => {
+  const isPwa = useCallback((): boolean => {
     if (typeof window === "undefined") return false;
 
     const isIos = (window.navigator as any).standalone === true;
@@ -41,7 +41,7 @@ export const PwaPrompt = () => {
       window.matchMedia("(display-mode: standalone)").matches;
 
     return isIos || isAndroid;
-  };
+  }, []);
 
   useEffect(() => {
     if (typeof navigator !== "undefined") {
@@ -82,9 +82,9 @@ export const PwaPrompt = () => {
         return () => clearTimeout(timer);
       }
     }
-  }, [platform]);
+  }, [platform, isPwa]);
 
-  const handleInstall = async () => {
+  const handleInstall = useCallback(async () => {
     if (!deferredPrompt) {
       toast.error("Nie można zainstalować aplikacji automatycznie.");
       return;
@@ -105,16 +105,16 @@ export const PwaPrompt = () => {
       new Date().getTime().toString()
     );
     setModal(null);
-  };
+  }, [deferredPrompt, setModal]);
 
-  const handleDialogClose = () => {
+  const handleDialogClose = useCallback(() => {
     setModal(null);
     setShowPrompt(false);
     localStorage.setItem(
       LOCAL_STORAGE_PROMPT_SHOWN_KEY,
       new Date().getTime().toString()
     );
-  };
+  }, [setModal]);
 
   useEffect(() => {
     if (showPrompt && !isPwa()) {

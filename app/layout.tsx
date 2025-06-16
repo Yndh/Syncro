@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Familjen_Grotesk, Inter } from "next/font/google";
-import "./globals.scss";
 import { ThemeProvider } from "./providers/ThemeProvider";
+import "./landing.scss";
 
 const inter = Inter({ subsets: ["latin"] });
 const familjenGrotest = Familjen_Grotesk({ subsets: ["latin"] });

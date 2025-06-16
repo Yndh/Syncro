@@ -136,6 +136,14 @@ const ProjectPage = ({ params }: ProjectParams) => {
     }
   }, [project, params.id, setProjectById, getProjectById]);
 
+  useEffect(() => {
+    if (project?.name) {
+      document.title = `${project.name} | Syncro`;
+    } else {
+      document.title = "Loading Project... | Syncro";
+    }
+  }, [project]);
+
   const leaveProject = useCallback(
     async (e: React.MouseEvent<HTMLButtonElement>, projectId: string) => {
       e.preventDefault();
@@ -493,7 +501,9 @@ const ProjectPage = ({ params }: ProjectParams) => {
       },
       content: (
         <ol className="contextMenuList">
-          {isAdmin && <li onClick={openSettings}>Project Settings</li>}
+          {isAdmin && projectId == project?.id && (
+            <li onClick={openSettings}>Project Settings</li>
+          )}
           {role !== ProjectRole.OWNER && (
             <li onClick={() => leaveProjectModal(projectId)}>Leave</li>
           )}
@@ -504,22 +514,29 @@ const ProjectPage = ({ params }: ProjectParams) => {
 
   const displayMembers = () => {
     if (!project || !project?.members || !project.members.length) return;
-    const MAX_NUM_OF_MEMBERS = 3;
+    const MAX_NUM_OF_MEMBERS = 2;
     const remainingMembers = project?.members.length - MAX_NUM_OF_MEMBERS;
 
     return (
       <div className="projectMembers">
         {project.members.slice(0, MAX_NUM_OF_MEMBERS).map((member) => (
-          <Image
-            key={member.id}
-            src={member.user.image}
-            alt={member.user.name}
-            className="memberAvatar"
-            width={40}
-            height={40}
-          />
+          <div className="avatar" key={member.id}>
+            <Image
+              src={member.user.image}
+              alt={member.user.name}
+              className="memberAvatar"
+              width={40}
+              height={40}
+            />
+
+            <p>{member.user.name}</p>
+          </div>
         ))}
-        {remainingMembers > 0 && <span>+{remainingMembers}</span>}
+        {remainingMembers > 0 && (
+          <div className="avatar bg">
+            <span>+{remainingMembers}</span>
+          </div>
+        )}
       </div>
     );
   };

@@ -256,13 +256,16 @@ export const NoteCard = memo(
               </div>
               <div className="assignedMembers">
                 {note.createdBy?.image && note.createdBy?.name && (
-                  <Image
-                    src={note.createdBy.image}
-                    alt={note.createdBy.name}
-                    width={30}
-                    height={30}
-                    className="memberAvatar"
-                  />
+                  <div className="avatar">
+                    <Image
+                      src={note.createdBy.image}
+                      alt={note.createdBy.name}
+                      width={30}
+                      height={30}
+                      className="memberAvatar"
+                    />
+                    <p>{note.createdBy.name}</p>
+                  </div>
                 )}
               </div>
             </div>
@@ -307,12 +310,16 @@ export const NoteCard = memo(
               </span>
             </div>
             {note.createdBy?.image && note.createdBy?.name && (
-              <Image
-                src={note.createdBy.image}
-                alt={note.createdBy.name}
-                width={30}
-                height={30}
-              />
+              <div className="avatar">
+                <Image
+                  src={note.createdBy.image}
+                  alt={note.createdBy.name}
+                  width={30}
+                  height={30}
+                  className="memberAvatar"
+                />
+                <p>{note.createdBy.name}</p>
+              </div>
             )}
           </div>
         </div>

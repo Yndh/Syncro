@@ -50,9 +50,9 @@ export const TaskColumn = ({
         id={`status${status}Checkbox`}
         className="statusCheckbox"
       />
-      <div className="chevron">
+      <label className="chevron" htmlFor={`status${status}Checkbox`}>
         <FontAwesomeIcon icon={faChevronUp} />
-      </div>
+      </label>
 
       <div className="cardsContainer">
         {tasks.map((task) => (

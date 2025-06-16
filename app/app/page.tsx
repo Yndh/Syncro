@@ -72,9 +72,8 @@ const App = () => {
     fetchData();
   }, [setProjects, setTasks, fetchData]);
 
-  const completedTasks = tasks.filter(
-    (task) => task.taskStatus == "DONE"
-  ).length;
+  const completedTasks =
+    tasks.filter((task) => task.taskStatus == "DONE").length ?? 0;
   const uncompletedTasks = tasks.filter((task) => task.taskStatus != "DONE");
   const uncompletedTasksNum = uncompletedTasks.length;
 
@@ -179,9 +178,9 @@ const App = () => {
                 <FontAwesomeIcon icon={faPercent} />
               </div>
               <p>
-                {completedTasks
+                {tasks.length > 0
                   ? ((completedTasks / tasks.length) * 100).toFixed(2)
-                  : 100}
+                  : 0}
                 %
               </p>
             </div>

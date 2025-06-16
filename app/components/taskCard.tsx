@@ -171,16 +171,22 @@ export const TaskCard = memo(
       return (
         <div className="assignedMembers">
           {displayedMembers.map((member) => (
-            <Image
-              key={member.id}
-              src={member.image}
-              alt={member.name}
-              className="memberAvatar"
-              width={30}
-              height={30}
-            />
+            <div className="avatar" key={member.id}>
+              <Image
+                src={member.image}
+                alt={member.name}
+                className="memberAvatar"
+                width={30}
+                height={30}
+              />
+              <p>{member.name}</p>
+            </div>
           ))}
-          {remainingMembers > 0 && <span>+{remainingMembers}</span>}
+          {remainingMembers > 0 && (
+            <div className="avatar bg">
+              <span>+{remainingMembers}</span>
+            </div>
+          )}
         </div>
       );
     }, []);

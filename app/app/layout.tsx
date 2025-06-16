@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainerComponent } from "../components/ToastContainerComponent";
 import { PwaPrompt } from "../components/PwaPrompt";
 import { Metadata, Viewport } from "next";
+import "../globals.scss";
 
 export const metadata: Metadata = {
   title: "Syncro",
@@ -51,6 +52,7 @@ export default async function Home({
 
   return (
     <div className="app__container">
+      <div className="gradient-overlay"></div>
       <SessionProvider session={session}>
         <ProjectsProvider>
           <TasksProvider>

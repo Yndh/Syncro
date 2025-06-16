@@ -585,10 +585,10 @@ const Sidebar = () => {
 
   return (
     <div className="sidebar">
-      <div className="logo">
+      <Link className="logo" href={"/app"}>
         <Image src="/logo.svg" alt="Logo" width={35} height={35} />
         <h1>Syncro</h1>
-      </div>
+      </Link>
 
       <nav>
         <p>Navigation</p>
