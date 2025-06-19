@@ -2645,6 +2645,11 @@ body::-webkit-scrollbar {
       }
     }
 
+    .absoluteButton {
+      bottom: 100px;
+      margin: 20px;
+    }
+
     .projectPage {
       flex-direction: column;
 
