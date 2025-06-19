@@ -112,7 +112,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       },
     });
 
-    return new NextResponse(JSON.stringify({ project: project }), {
+    return new NextResponse(JSON.stringify({ success: true }), {
       status: 200,
     });
   } catch (e) {

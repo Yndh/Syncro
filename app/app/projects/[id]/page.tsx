@@ -742,6 +742,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
                     isAdmin={isAdmin}
                     projectId={project?.id as string}
                     project={project}
+                    setProject={setProject}
                   />
                 )}
                 {selectedTab === "members" && project && role && (

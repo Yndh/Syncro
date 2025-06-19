@@ -96,7 +96,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
 
     return new NextResponse(
       JSON.stringify({
-        project: project,
+        success: true,
       }),
       { status: 200 }
     );

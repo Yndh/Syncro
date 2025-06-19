@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Note } from "../types/interfaces";
+import { Note, Project } from "../types/interfaces";
 import { useContextMenu } from "../providers/ContextMenuProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
@@ -15,11 +15,11 @@ interface NoteCardProps {
   note: Note;
   notes: Note[];
   isAdmin: boolean;
-  setNotes: React.Dispatch<React.SetStateAction<Note[]>>;
+  setProject: React.Dispatch<React.SetStateAction<Project | undefined>>;
 }
 
 export const NoteCard = memo(
-  ({ note, notes, isAdmin, setNotes }: NoteCardProps) => {
+  ({ note, notes, isAdmin, setProject }: NoteCardProps) => {
     const { setContextMenu } = useContextMenu();
     const { setModal } = useModal();
     const titleInputRef = useRef<HTMLInputElement>(null);
@@ -35,34 +35,39 @@ export const NoteCard = memo(
 
     const handleDeleteNote = useCallback(async () => {
       setModal(null);
-      if (window.confirm(`Do you really want to delete note id ${note.id}?`)) {
-        try {
-          const res = await fetch(
-            `/api/project/${note.projectId}/note/${note.id}`,
-            {
-              method: "DELETE",
-            }
-          );
-          const data = await res.json();
-
-          if (data.error) {
-            toast.error(
-              "Oops! The note didn't want to say goodbye. Let's try that again!"
-            );
-          } else if (data.notes) {
-            setNotes(data.notes);
-            toast.success(
-              "Success! The note has been deleted. Out of sight, out of mind!"
-            );
+      try {
+        const res = await fetch(
+          `/api/project/${note.projectId}/note/${note.id}`,
+          {
+            method: "DELETE",
           }
-        } catch (err) {
-          console.error("Error deleting note:", err);
+        );
+        const data = await res.json();
+
+        if (data.error) {
           toast.error(
             "Oops! The note didn't want to say goodbye. Let's try that again!"
           );
+        } else if (data.success) {
+          setProject((prevProject) =>
+            prevProject
+              ? {
+                  ...prevProject,
+                  notes: prevProject.notes.filter((n) => n.id !== note.id),
+                }
+              : prevProject
+          );
+          toast.success(
+            "Success! The note has been deleted. Out of sight, out of mind!"
+          );
         }
+      } catch (err) {
+        console.error("Error deleting note:", err);
+        toast.error(
+          "Oops! The note didn't want to say goodbye. Let's try that again!"
+        );
       }
-    }, [note.id, note.projectId, setModal, setNotes]);
+    }, [note.id, note.projectId, setModal, setProject]);
 
     const deleteNoteModal = useCallback(() => {
       setContextMenu(null);
@@ -118,10 +123,17 @@ export const NoteCard = memo(
 
         const prevNotes = notes;
 
-        setNotes((prev) =>
-          prev.map((disnote) =>
-            disnote.id === note.id ? { ...note, title, description } : disnote
-          )
+        setProject((prevProject) =>
+          prevProject
+            ? {
+                ...prevProject,
+                notes: prevProject.notes.map((disnote) =>
+                  disnote.id === note.id
+                    ? { ...note, title, description }
+                    : disnote
+                ),
+              }
+            : prevProject
         );
 
         try {
@@ -144,10 +156,24 @@ export const NoteCard = memo(
             toast.error(
               "Yikes! The note couldn't be updated. Even notes have their off days!"
             );
-            setNotes(prevNotes);
+            setProject((prevProject) =>
+              prevProject
+                ? {
+                    ...prevProject,
+                    notes: prevNotes,
+                  }
+                : prevProject
+            );
           } else if (data.note) {
-            setNotes((prev) =>
-              prev.map((n) => (n.id === data.note.id ? data.note : n))
+            setProject((prevProject) =>
+              prevProject
+                ? {
+                    ...prevProject,
+                    notes: prevProject.notes.map((n) =>
+                      n.id === data.note.id ? data.note : n
+                    ),
+                  }
+                : prevProject
             );
             toast.success(
               "Success! Your note has been updated and is ready to rock!"
@@ -155,13 +181,20 @@ export const NoteCard = memo(
           }
         } catch (err) {
           console.error("Error updating note:", err);
-          setNotes(prevNotes);
+          setProject((prevProject) =>
+            prevProject
+              ? {
+                  ...prevProject,
+                  notes: prevNotes,
+                }
+              : prevProject
+          );
           toast.error(
             "Yikes! The note couldn't be updated. Even notes have their off days!"
           );
         }
       },
-      [note, notes, setModal, setNotes, setContextMenu]
+      [note, notes, setModal, setProject, setContextMenu]
     );
 
     const handleEditModal = useCallback(() => {

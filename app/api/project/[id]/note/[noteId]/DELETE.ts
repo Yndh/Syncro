@@ -110,7 +110,7 @@ export async function mDELETE(req: Request, res: ResponseInterface) {
 
     return new NextResponse(
       JSON.stringify({
-        notes: notes,
+        success: true,
       }),
       { status: 200 }
     );

@@ -86,6 +86,7 @@ export const InviteDetails = ({ invite, setProject }: InviteDetailsProps) => {
 
   const deleteInvite = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    setModal(null);
     try {
       await fetch(`/api/invite/${invite.linkId}`, {
         method: "DELETE",
@@ -99,11 +100,18 @@ export const InviteDetails = ({ invite, setProject }: InviteDetailsProps) => {
             return;
           }
 
-          if (data.project) {
-            const dataProject = data.project[0];
-            setProject(dataProject);
+          if (data.success) {
+            setProject((prevProject) =>
+              prevProject
+                ? {
+                    ...prevProject,
+                    projectInvitations: prevProject.projectInvitations.filter(
+                      (i: Invite) => i.linkId !== invite.linkId
+                    ),
+                  }
+                : undefined
+            );
             toast.success("Success! The invite has been deleted!");
-            setModal(null);
           }
         });
     } catch (err) {
@@ -128,8 +136,25 @@ export const InviteDetails = ({ invite, setProject }: InviteDetailsProps) => {
           return;
         }
 
-        if (data.project) {
-          setProject(data.project);
+        if (data.success) {
+          setProject((prevProject) =>
+            prevProject
+              ? {
+                  ...prevProject,
+                  projectInvitations: prevProject.projectInvitations.map(
+                    (i: Invite) =>
+                      i.linkId === invite.linkId
+                        ? {
+                            ...i,
+                            maxUses: data.project.projectInvitations.find(
+                              (inv: Invite) => inv.linkId === invite.linkId
+                            )?.maxUses,
+                          }
+                        : i
+                  ),
+                }
+              : undefined
+          );
           toast.success("Success! The invite has been updated!");
         }
       });
