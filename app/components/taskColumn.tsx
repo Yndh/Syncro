@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useDrop } from "react-dnd";
 import { TaskCard } from "./taskCard";
 import { Project, Task, TaskStatus } from "../types/interfaces";
@@ -39,6 +39,29 @@ export const TaskColumn = ({
   );
   drop(divRef);
 
+  const activeTasks = useMemo(
+    () =>
+      tasks.filter((task) => {
+        if (status === TaskStatus.REVIEWING || status === TaskStatus.DONE)
+          return true;
+        return !task.dueTime || new Date(task.dueTime) >= new Date();
+      }),
+    [tasks, status]
+  );
+
+  const expiredTasks = useMemo(
+    () =>
+      status === TaskStatus.REVIEWING || status === TaskStatus.DONE
+        ? []
+        : tasks.filter(
+            (task) => task.dueTime && new Date(task.dueTime) < new Date()
+          ),
+    [tasks, status]
+  );
+
+  console.log(expiredTasks);
+  console.log(activeTasks);
+
   return (
     <div className="cardCol" ref={divRef}>
       <label className="colHeader" htmlFor={`status${status}Checkbox`}>
@@ -50,12 +73,46 @@ export const TaskColumn = ({
         id={`status${status}Checkbox`}
         className="statusCheckbox"
       />
-      <label className="chevron" htmlFor={`status${status}Checkbox`}>
+      <label className="chevron" htmlFor={`expired${status}Checkbox`}>
         <FontAwesomeIcon icon={faChevronUp} />
       </label>
 
       <div className="cardsContainer">
-        {tasks.map((task) => (
+        {expiredTasks.length > 0 && (
+          <div className="expiredCardsContainer">
+            <label
+              htmlFor={`expired${status}Checkbox`}
+              className="expiredHeader"
+            >
+              Expired tasks <span className="count">{expiredTasks.length}</span>
+            </label>
+            <input
+              type="checkbox"
+              id={`expired${status}Checkbox`}
+              className="expiredCheckbox"
+            />
+            <label
+              className="expiredchevron"
+              htmlFor={`expired${status}Checkbox`}
+            >
+              <FontAwesomeIcon icon={faChevronUp} />
+            </label>
+            <div className="expiredContent">
+              {expiredTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  tasksList={tasks}
+                  isAdmin={isAdmin}
+                  moveTask={moveTask}
+                  setTasks={setTasks}
+                  showProject={showProject}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        {activeTasks.map((task) => (
           <TaskCard
             key={task.id}
             task={task}

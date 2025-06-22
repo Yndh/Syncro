@@ -1214,6 +1214,85 @@ main {
             }
           }
         }
+
+        .expiredCardsContainer {
+          position: relative;
+          border: 1px solid var(--error-color);
+          border-radius: 10px;
+          background: var(--error-color-transparent);
+          padding: 10px;
+          height: auto;
+          min-height: fit-content;
+          overflow-y: hidden;
+
+          .expiredHeader {
+            display: flex;
+            width: 100%;
+            padding: 10px 4px;
+            cursor: pointer;
+          }
+
+
+          .expiredchevron {
+            position: absolute;
+            z-index: 5;
+            top: 10px;
+            right: 20px;
+            width: 30px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+
+            svg {
+              transition: .3s;
+            }
+          }
+
+          .count {
+            background: var(--secondary-font-color);
+            color: var(--primary-light-font-color);
+            font-weight: 500;
+            font-size: 14px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+          }
+
+          .expiredCheckbox {
+            display: none;
+            pointer-events: none;
+
+            &:checked~.expiredContent {
+              display: flex !important;
+              // height: 100%;
+            }
+
+
+            &:checked~.expiredchevron svg {
+              rotate: 180deg;
+              pointer-events: none;
+            }
+          }
+
+
+          .expiredContent {
+            position: relative;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+            max-height: 100%;
+            width: 100%;
+            overflow-y: scroll;
+
+            .taskCard {
+              width: 100% !important;
+            }
+          }
+
+        }
       }
     }
   }
@@ -1476,6 +1555,7 @@ main {
               background: var(--card-color);
               box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
               color: var(--secondary-font-color);
+              cursor: pointer;
 
               .content {
                 display: flex;

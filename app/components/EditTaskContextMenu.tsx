@@ -132,19 +132,20 @@ const EditTaskContextMenu = ({
             </label>
             <div className="stagesContainer">
               <ul className="stagesList">
-                {task.stages.map((stage, index) => (
-                  <li key={index} className="newStageContainer">
-                    <input
-                      id={`stage${stage.id}`}
-                      type="text"
-                      placeholder="Stage name"
-                      defaultValue={stage.title}
-                    />
-                    <button type="button" onClick={() => removeStage(index)}>
-                      <FontAwesomeIcon icon={faTrash} />
-                    </button>
-                  </li>
-                ))}
+                {task.stages &&
+                  task.stages.map((stage, index) => (
+                    <li key={index} className="newStageContainer">
+                      <input
+                        id={`stage${stage.id}`}
+                        type="text"
+                        placeholder="Stage name"
+                        defaultValue={stage.title}
+                      />
+                      <button type="button" onClick={() => removeStage(index)}>
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
+                    </li>
+                  ))}
               </ul>
               <button type="button" onClick={addStage}>
                 <FontAwesomeIcon icon={faPlus} />
@@ -464,32 +465,31 @@ const EditTaskContextMenu = ({
   };
 
   const handleDeleteTask = async (taskId: number) => {
-    if (window.confirm(`Do you really want to delete task id ${taskId}?`)) {
-      try {
-        await fetch(`/api/project/${task.projectId}/task/${taskId}`, {
-          method: "DELETE",
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.error) {
-              toast.error(
-                "Oops! We couldn't delete the task. It must be hiding from us!"
-              );
-              return;
-            }
-            if (data.tasks) {
-              setTasks(data.tasks);
-              toast.success(
-                "Success! The task has been deleted. Out of sight, out of mind!"
-              );
-            }
-          });
-      } catch (error) {
-        console.error("Error deleting task:", error);
-        toast.error(
-          "Oops! We couldn't delete the task. It must be hiding from us!"
-        );
-      }
+    try {
+      setModal(null);
+      await fetch(`/api/project/${task.projectId}/task/${taskId}`, {
+        method: "DELETE",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            toast.error(
+              "Oops! We couldn't delete the task. It must be hiding from us!"
+            );
+            return;
+          }
+          if (data.tasks) {
+            setTasks(data.tasks);
+            toast.success(
+              "Success! The task has been deleted. Out of sight, out of mind!"
+            );
+          }
+        });
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      toast.error(
+        "Oops! We couldn't delete the task. It must be hiding from us!"
+      );
     }
   };
 

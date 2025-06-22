@@ -10,6 +10,7 @@ import { useRef, useCallback, memo } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
+import { LinkText } from "./LinkText";
 
 interface NoteCardProps {
   note: Note;
@@ -274,7 +275,7 @@ export const NoteCard = memo(
           <>
             <div className="header">
               <h2>{note.title}</h2>
-              <span>{note.description}</span>
+              <LinkText text={note.description as string} />
             </div>
             <div className="contentBottom">
               <div>

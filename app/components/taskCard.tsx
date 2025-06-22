@@ -13,6 +13,7 @@ import Image from "next/image";
 import { toast } from "react-toastify";
 import EditTaskContextMenu from "./EditTaskContextMenu";
 import React from "react";
+import { LinkText } from "./LinkText";
 
 interface TaskCardProps {
   task: Task;
@@ -204,7 +205,7 @@ export const TaskCard = memo(
           <>
             <div className="header">
               <h2>{task.title}</h2>
-              <span>{task.description}</span>
+              <LinkText text={task.description as string} />
             </div>
 
             {task.stages && task.stages.length > 0 && (
