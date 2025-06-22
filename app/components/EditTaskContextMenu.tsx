@@ -69,7 +69,7 @@ const options = [
 
 const taskStatuses: TaskStatus[] = [
   TaskStatus.TO_DO,
-  TaskStatus.ON_GOING,
+  TaskStatus.ONGOING,
   TaskStatus.REVIEWING,
   TaskStatus.DONE,
 ];
@@ -433,7 +433,9 @@ const EditTaskContextMenu = ({
   const removeStage = (index: number) => {
     const stagesList = document.querySelector(".stagesList");
     if (stagesList) {
-      const stageItems = stagesList.querySelectorAll("li");
+      const stageItems = Array.from(stagesList.children).filter((el) =>
+        el.classList.contains("newStageContainer")
+      );
       if (index >= 0 && index < stageItems.length) {
         stageItems[index].remove();
       }

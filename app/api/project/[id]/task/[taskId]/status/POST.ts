@@ -12,7 +12,7 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
 }
 
 interface UpdateStatusReq {
-  taskStatus: "TO_DO" | "ON_GOING" | "REVIEWING" | "DONE";
+  taskStatus: "TO_DO" | "ONGOING" | "REVIEWING" | "DONE";
 }
 
 export async function mPOST(req: Request, res: ResponseInterface) {

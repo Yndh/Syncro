@@ -57,7 +57,7 @@ export const TaskCard = memo(
       return (
         (isAssigned &&
           (task.taskStatus === TaskStatus.TO_DO ||
-            task.taskStatus === TaskStatus.ON_GOING)) ||
+            task.taskStatus === TaskStatus.ONGOING)) ||
         isAdmin
       );
     }, [isAssigned, task.taskStatus, isAdmin]);
@@ -142,11 +142,26 @@ export const TaskCard = memo(
             );
             e.target.checked = !check;
           } else if (data.task as Task) {
-            const { task } = data as { task: Task };
+            const { task: updatedTask } = data as { task: Task };
 
             setTasks((prevTasks) =>
               prevTasks.map((prevTask) =>
-                prevTask.id === task.id ? task : prevTask
+                prevTask.id === updatedTask.id
+                  ? {
+                      ...prevTask,
+                      stages: prevTask.stages.map((stage) =>
+                        stage.id === stageId
+                          ? {
+                              ...stage,
+                              isCompleted:
+                                updatedTask.stages.find((s) => s.id === stageId)
+                                  ?.isCompleted ?? stage.isCompleted,
+                            }
+                          : stage
+                      ),
+                      taskStatus: updatedTask.taskStatus,
+                    }
+                  : prevTask
               )
             );
           }
@@ -230,7 +245,7 @@ export const TaskCard = memo(
               task.stages.length > 0 &&
               task.stages.filter((task) => !task.isCompleted).length === 0 &&
               (isAssigned || isAdmin) &&
-              task.taskStatus == TaskStatus.ON_GOING && (
+              task.taskStatus == TaskStatus.ONGOING && (
                 <div className="button">
                   <button onClick={() => moveTask(task, TaskStatus.REVIEWING)}>
                     Send to review!

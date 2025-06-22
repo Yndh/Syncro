@@ -154,7 +154,7 @@ enum ProjectStatus {
 
 enum TaskStatus {
   TO_DO
-  ON_GOING
+  ONGOING
   REVIEWING
   DONE
 }

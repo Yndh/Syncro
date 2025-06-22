@@ -101,7 +101,7 @@ export enum ProjectStatus {
 
 export enum TaskStatus {
   TO_DO = "TO_DO",
-  ON_GOING = "ON_GOING",
+  ONGOING = "ONGOING",
   REVIEWING = "REVIEWING",
   DONE = "DONE",
 }

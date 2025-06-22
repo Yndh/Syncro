@@ -1,3 +1,4 @@
+import { TaskStatus } from "@/app/types/interfaces";
 import { auth } from "@/auth";
 import isAdmin from "@/lib/isAdmin";
 import { prisma } from "@/lib/prisma";
@@ -97,8 +98,8 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       where: { id: taskId },
       data: {
         taskStatus:
-          isCompleted && existingTask.taskStatus == "TO_DO"
-            ? "ON_GOING"
+          isCompleted && existingTask.taskStatus == TaskStatus.TO_DO
+            ? TaskStatus.ONGOING
             : existingTask.taskStatus,
         stages: {
           update: {

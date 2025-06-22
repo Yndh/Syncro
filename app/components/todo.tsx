@@ -110,7 +110,7 @@ const ToDo = ({
     [filterTasksByStatus]
   );
   const onGoingTasks = useMemo(
-    () => filterTasksByStatus(TaskStatus.ON_GOING),
+    () => filterTasksByStatus(TaskStatus.ONGOING),
     [filterTasksByStatus]
   );
   const reviewingTasks = useMemo(
@@ -134,7 +134,7 @@ const ToDo = ({
           showProject={showProject}
         />
         <TaskColumn
-          status={TaskStatus.ON_GOING}
+          status={TaskStatus.ONGOING}
           tasks={onGoingTasks}
           isAdmin={isAdmin}
           moveTask={moveTask}
