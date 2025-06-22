@@ -12,6 +12,9 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
   };
 }
 
+const MAX_PROJECTS = process.env.MAX_PROJECTS;
+const MAX_USERS = process.env.MAX_USERS;
+
 export async function mPOST(req: Request, res: ResponseInterface) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -30,6 +33,30 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       {
         status: 400,
       }
+    );
+  }
+
+  const user = await prisma.user.findFirst({
+    where: { id: session.user.id },
+    select: {
+      projectMembership: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (
+    user &&
+    user.projectMembership &&
+    user.projectMembership.length >= Number(MAX_PROJECTS)
+  ) {
+    return new NextResponse(
+      JSON.stringify({
+        error: `You have reached the maximum number of projects.`,
+      }),
+      { status: 400 }
     );
   }
 
@@ -80,6 +107,30 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         {
           status: 409,
         }
+      );
+    }
+
+    const projectMembers = await prisma.project.findFirst({
+      where: { id: invite.projectId },
+      select: {
+        members: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (
+      projectMembers &&
+      projectMembers.members &&
+      projectMembers.members.length >= Number(MAX_USERS)
+    ) {
+      return new NextResponse(
+        JSON.stringify({
+          error: `This project has reached the maximum number of members.`,
+        }),
+        { status: 400 }
       );
     }
 

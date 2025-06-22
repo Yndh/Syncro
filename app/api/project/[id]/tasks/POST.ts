@@ -19,6 +19,8 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
   };
 }
 
+const MAX_TASKS = process.env.MAX_TASKS;
+
 export async function mPOST(req: Request, res: ResponseInterface) {
   const session = await auth();
   if (!session || !session.user) {
@@ -88,6 +90,22 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         {
           status: 403,
         }
+      );
+    }
+
+    const projectTasks = await prisma.task.findMany({
+      where: { projectId: id },
+      select: {
+        id: true,
+      },
+    });
+
+    if (projectTasks && projectTasks.length >= Number(MAX_TASKS)) {
+      return new NextResponse(
+        JSON.stringify({
+          error: "Maximum number of tasks reached for this project.",
+        }),
+        { status: 400 }
       );
     }
 

@@ -69,9 +69,7 @@ export const Notes = memo(
           const data = await res.json();
 
           if (data.error) {
-            toast.error(
-              "Yikes! The note refused to be created. Let's give it another shot!"
-            );
+            toast.error(data.error);
           } else if (data.note) {
             setProject((prevProject) =>
               prevProject

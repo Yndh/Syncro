@@ -15,6 +15,8 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
   };
 }
 
+const MAX_NOTES = process.env.MAX_NOTES;
+
 export async function mPOST(req: Request, res: ResponseInterface) {
   const session = await auth();
   if (!session || !session.user) {
@@ -63,6 +65,22 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       {
         status: 400,
       }
+    );
+  }
+
+  const projectNotes = await prisma.notes.findMany({
+    where: { projectId: id },
+    select: {
+      id: true,
+    },
+  });
+
+  if (projectNotes && projectNotes.length >= Number(MAX_NOTES)) {
+    return new NextResponse(
+      JSON.stringify({
+        error: "Maximum number of notes reached for this project.",
+      }),
+      { status: 400 }
     );
   }
 

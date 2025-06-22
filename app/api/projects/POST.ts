@@ -8,6 +8,8 @@ interface reqBody {
   description: string;
 }
 
+const MAX_PROJECTS = process.env.MAX_PROJECTS;
+
 export async function mPOST(req: Request, res: NextApiResponse) {
   const session = await auth();
   if (!session || !session.user) {
@@ -36,6 +38,30 @@ export async function mPOST(req: Request, res: NextApiResponse) {
       {
         status: 400,
       }
+    );
+  }
+
+  const user = await prisma.user.findFirst({
+    where: { id: session.user.id },
+    select: {
+      projectMembership: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (
+    user &&
+    user.projectMembership &&
+    user.projectMembership.length >= Number(MAX_PROJECTS)
+  ) {
+    return new NextResponse(
+      JSON.stringify({
+        error: `You have reached the maximum number of projects.`,
+      }),
+      { status: 400 }
     );
   }
 

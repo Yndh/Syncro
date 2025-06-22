@@ -303,9 +303,7 @@ const ProjectPage = ({ params }: ProjectParams) => {
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
-            toast.error(
-              "Oops! Something went wrong while creating your project. Give it another try!"
-            );
+            toast.error(data.error);
             return;
           }
 

@@ -11,7 +11,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ResponsiveBar } from "@nivo/bar";
 import { Pie } from "@nivo/pie";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Task, TaskPriority, TaskStatus } from "../types/interfaces";
 import { useTasks } from "../providers/UserTasksProvider";
 import { useProjects } from "../providers/ProjectsProvider";
@@ -72,10 +72,23 @@ const App = () => {
     fetchData();
   }, [setProjects, setTasks, fetchData]);
 
-  const completedTasks =
-    tasks.filter((task) => task.taskStatus == "DONE").length ?? 0;
-  const uncompletedTasks = tasks.filter((task) => task.taskStatus != "DONE");
-  const uncompletedTasksNum = uncompletedTasks.length;
+  const completedTasks = useMemo(
+    () => tasks.filter((task) => task.taskStatus == "DONE").length ?? 0,
+    [tasks]
+  );
+  const uncompletedTasks = useMemo(
+    () =>
+      tasks.filter((task) => {
+        if (
+          task.taskStatus === TaskStatus.REVIEWING ||
+          task.taskStatus === TaskStatus.DONE
+        )
+          return false;
+        return !task.dueTime || new Date(task.dueTime) >= new Date();
+      }),
+    [tasks]
+  );
+  const uncompletedTasksNum = (tasks.length ?? 0) - (completedTasks ?? 0);
 
   const pieData: TaskData[] = [
     { id: "Completed", label: "Completed", value: completedTasks },

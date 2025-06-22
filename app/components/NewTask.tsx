@@ -208,9 +208,7 @@ const NewTask = ({ projectId, tasksList, setTasksList }: NewTaskProps) => {
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
-            toast.error(
-              "Yikes! We couldn't create the task. It seems to be playing hard to get!"
-            );
+            toast.error(data.error);
             return;
           }
 

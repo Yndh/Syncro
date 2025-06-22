@@ -95,8 +95,8 @@ export default async function Home() {
             </div>
             <h2>Create & Collaborate, Limitlessly.</h2>
             <p>
-              Launch up to x projects as you need and invite your entire team -
-              no per-user fees, ever.
+              Launch up to {process.env.MAX_PROJECTS} projects as you need and
+              invite your entire team - no per-user fees, ever.
             </p>
           </div>
           <div className="card">
