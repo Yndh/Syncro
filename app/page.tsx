@@ -34,7 +34,7 @@ export default async function Home() {
           </li>
         </ul>
 
-        <Link href="/signIn">
+        <Link href="/app">
           <button className="login">Sign in</button>
         </Link>
       </div>

@@ -73,7 +73,7 @@ export const TaskColumn = ({
         id={`status${status}Checkbox`}
         className="statusCheckbox"
       />
-      <label className="chevron" htmlFor={`expired${status}Checkbox`}>
+      <label className="chevron" htmlFor={`status${status}Checkbox`}>
         <FontAwesomeIcon icon={faChevronUp} />
       </label>
 
