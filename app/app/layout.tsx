@@ -1,5 +1,3 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import Sidebar from "../components/sidebar";
 import ContextMenu from "../components/ContextMenu";
 import { ContextMenuProvider } from "../providers/ContextMenuProvider";
@@ -48,13 +46,10 @@ export default async function Home({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
-  if (!session) redirect("/signIn");
-
   return (
     <div className="app__container">
       <div className="gradient-overlay"></div>
-      <SessionProvider session={session}>
+      <SessionProvider>
         <ProjectsProvider>
           <TasksProvider>
             <ModalProvider>

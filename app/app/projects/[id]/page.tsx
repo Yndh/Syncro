@@ -30,6 +30,7 @@ import { useContextMenu } from "@/app/providers/ContextMenuProvider";
 import Link from "next/link";
 import Image from "next/image";
 import { Skeleton } from "@/app/components/Skeleton";
+import { useSession } from "next-auth/react";
 
 interface ProjectParams {
   params: {
@@ -64,6 +65,13 @@ const ProjectPage = ({ params }: ProjectParams) => {
   const { setContextMenu } = useContextMenu();
   const { fetchProjects } = useProjects();
   const router = useRouter();
+  const { data: session } = useSession({
+    required: true,
+    onUnauthenticated() {
+      toast.warning("Please sign in");
+      router.replace("/signIn");
+    },
+  });
 
   const [project, setProject] = useState<Project | undefined>(undefined);
   const [membershipId, setMembershipId] = useState<number | undefined>(

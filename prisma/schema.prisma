@@ -13,15 +13,14 @@ model User {
   email              String              @unique
   emailVerified      DateTime?
   image              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
   accounts           Account[]
-  sessions           Session[]
-  projectMembership  ProjectMembership[]
-  projectInvitations ProjectInvitation[]
-  tasksAssigned      Task[]              @relation(name: "TaskAssignments")
   notes              Notes[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  projectInvitations ProjectInvitation[]
+  projectMembership  ProjectMembership[]
+  sessions           Session[]
+  tasksAssigned      Task[]              @relation("TaskAssignments")
 }
 
 model Account {
@@ -36,11 +35,9 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
 }
@@ -49,10 +46,9 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model VerificationToken {
@@ -68,75 +64,75 @@ model Project {
   name               String
   description        String?
   status             ProjectStatus       @default(IN_PROGRESS)
-  tasks              Task[]
-  notes              Notes[]
-  members            ProjectMembership[]
-  projectInvitations ProjectInvitation[]
   dueDate            DateTime?
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
+  notes              Notes[]
+  projectInvitations ProjectInvitation[]
+  members            ProjectMembership[]
+  tasks              Task[]
 }
 
 model ProjectMembership {
   id        Int         @id @default(autoincrement())
-  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId String
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   role      ProjectRole @default(MEMBER)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ProjectInvitation {
   id          Int       @id @default(autoincrement())
-  linkId      String    @unique
-  maxUses     Int? // null is infinity
-  uses        Int       @default(0)
-  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId   String
-  expires     DateTime?
-  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  createdById String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  linkId      String    @unique
+  maxUses     Int?
+  uses        Int       @default(0)
+  createdById String
+  expires     DateTime?
+  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Task {
   id          Int         @id @default(autoincrement())
   title       String
   description String?
-  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId   String
   priority    Priority    @default(MEDIUM)
-  taskStatus  TaskStatus  @default(TO_DO)
   dueTime     DateTime?
-  stages      TaskStage[]
-  assignedTo  User[]      @relation(name: "TaskAssignments")
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  taskStatus  TaskStatus  @default(TO_DO)
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stages      TaskStage[]
+  assignedTo  User[]      @relation("TaskAssignments")
 }
 
 model TaskStage {
   id          Int      @id @default(autoincrement())
   title       String
   isCompleted Boolean  @default(false)
-  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   taskId      Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }
 
 model Notes {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId   String
-  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 enum ProjectRole {
@@ -154,7 +150,7 @@ enum ProjectStatus {
 
 enum TaskStatus {
   TO_DO
-  ONGOING
+  ON_GOING
   REVIEWING
   DONE
 }

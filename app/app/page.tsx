@@ -17,6 +17,8 @@ import { useTasks } from "../providers/UserTasksProvider";
 import { useProjects } from "../providers/ProjectsProvider";
 import { toast } from "react-toastify";
 import { useTheme } from "../providers/ThemeProvider";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface TaskData {
   id: "Completed" | "Uncompleted";
@@ -38,6 +40,15 @@ const priorityOrder = [
 ];
 
 const App = () => {
+  const router = useRouter();
+  const { data: session } = useSession({
+    required: true,
+    onUnauthenticated() {
+      toast.warning("Please sign in");
+      router.replace("/signIn");
+    },
+  });
+
   const { tasks, setTasks } = useTasks();
   const { projects, setProjects } = useProjects();
   const { theme } = useTheme();
@@ -53,7 +64,6 @@ const App = () => {
             toast.error(
               "Uh-oh! We couldn't fetch your user data. Please try again later!"
             );
-            location.reload();
             return;
           }
           if (data.tasks) {

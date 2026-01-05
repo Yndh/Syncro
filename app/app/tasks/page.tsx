@@ -2,10 +2,20 @@
 
 import ToDo from "@/app/components/todo";
 import { useTasks } from "@/app/providers/UserTasksProvider";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 
 const UserTasks = () => {
+  const router = useRouter();
+  const { data: session } = useSession({
+    required: true,
+    onUnauthenticated() {
+      toast.warning("Please sign in");
+      router.replace("/signIn");
+    },
+  });
   const { tasks, setTasks } = useTasks();
 
   const fetchData = useCallback(async () => {
