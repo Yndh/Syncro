@@ -16,7 +16,7 @@ interface UpdateTaskReqBody {
   description: string;
   assignedMembers: string[];
   dueDate: Date;
-  taskStatus: "TO_DO" | "ONGOING" | "REVIEWING" | "DONE";
+  taskStatus: "TO_DO" | "ON_GOING" | "REVIEWING" | "DONE";
   priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   stages: { id?: number; title?: string; isCompleted?: boolean }[];
 }
